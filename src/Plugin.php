@@ -27,6 +27,7 @@ class Plugin extends BasePlugin {
 	public function hooks(){
 		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
+		$this->loader->add_ajax_action("create_filters_table",$this,"ajax_create_filters_table");
 	}
 
 	/**
@@ -41,7 +42,7 @@ class Plugin extends BasePlugin {
 				'i10n' => [
 					'name' => "wbwpf",
 					'params' => [
-						'ajax_url' => admin_url("admin-ajax.php")
+						'ajax_url' => admin_url('admin-ajax.php')
 					]
 				]
 			]
@@ -77,6 +78,13 @@ class Plugin extends BasePlugin {
 				'textdomain' => $this->get_textdomain()
 			]);
 		});
+	}
+
+	/**
+	 * Ajax callback to create the filters table
+	 */
+	public function ajax_create_filters_table(){
+		xdebug_break();
 	}
 
 	/**
