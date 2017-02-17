@@ -17,6 +17,7 @@ class Plugin extends BasePlugin {
 	 * This is the name of the table that cointains all products id with their filterable values
 	 */
 	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
+	const SETTINGS_OPTION_NAME = "wpwpf_settings";
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -87,6 +88,41 @@ class Plugin extends BasePlugin {
 	}
 
 	/**
+	 * Get the default settings
+	 *
+	 * @return array
+	 */
+	public function get_plugin_default_settings(){
+		return [
+			'taxonomies' => ['product_cat'],
+			'special_fields' => ['price'] //We need a filter that output a "range" in this case
+		];
+	}
+
+	/**
+	 * Save the plugin settings
+	 *
+	 * @param $settings
+	 */
+	public function save_plugin_settings($settings){
+		$defaults = $this->get_plugin_default_settings();
+		$settings = wp_parse_args($settings,$defaults);
+		update_option(Plugin::SETTINGS_OPTION_NAME,$settings);
+	}
+
+	/**
+	 * Get the plugin settings
+	 *
+	 * @return array
+	 */
+	public function get_plugin_settings(){
+		$defaults = $this->get_plugin_default_settings();
+		$settings = get_option(Plugin::SETTINGS_OPTION_NAME);
+		$settings = wp_parse_args($settings,$defaults);
+		return $settings;
+	}
+
+	/**
 	 * Ajax callback to create the filters table
 	 */
 	public function ajax_create_products_index_table(){
@@ -96,7 +132,13 @@ class Plugin extends BasePlugin {
 		$limit = $params['limit'];
 
 		if($offset == 0){ //We just started, so create the table
-			$this->create_products_index_table($table_params);
+			$r = $this->create_products_index_table($table_params);
+			if(!$r){
+				wp_send_json_error([
+					'status' => 'failed',
+					'message' => __("Unable to create or update the product index table", $this->get_textdomain())
+				]);
+			}
 		}
 
 		//Then begin to fill the table
@@ -134,11 +176,17 @@ class Plugin extends BasePlugin {
 	public function create_products_index_table(array $params){
 		global $wpdb;
 
-		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
+		$r = false;
+
+		if(DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
+			//Create table
 			$wpdb->query("DROP TABLE ".$wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
 		}
 
 		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
+			//Save the params
+			$this->save_plugin_settings($params);
+
 			$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 			$charset_collate = $wpdb->get_charset_collate();
 
@@ -148,21 +196,23 @@ class Plugin extends BasePlugin {
 
 			if(isset($params['taxonomies'])){
 				foreach($params['taxonomies'] as $tax_name){
-					$sql.= "$tax_name VARCHAR(255) NOT NULL";
+					$sql.= "\n$tax_name VARCHAR(255) NOT NULL";
 				}
 			}
 
 			if(isset($params['metas'])){
 				foreach($params['metas'] as $meta_name){
-					$sql.= "$meta_name VARCHAR(255) NOT NULL";
+					$sql.= "\n$meta_name VARCHAR(255) NOT NULL";
 				}
 			}
 
 			$sql.= ") $charset_collate;";
 
 			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			dbDelta( $sql );
+			$r = dbDelta( $sql );
 		}
+
+		return $r;
 	}
 
 	/**
@@ -175,8 +225,10 @@ class Plugin extends BasePlugin {
 			global $wpdb;
 			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
 		}
+		$settings = $this->get_plugin_settings();
 		foreach ($ids as $product_id){
 			$product = wc_get_product($product_id);
+
 			//Do operations...
 		}
 	}
@@ -194,5 +246,6 @@ class Plugin extends BasePlugin {
 		 * - Viene eseguita la query
 		 * - Vengono restituiti gli ID dei post
 		 */
+
 	}
 }
