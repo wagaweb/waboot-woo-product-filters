@@ -21,7 +21,7 @@ class Dashboard{
         $form.on("submit",(e) => {
             e.preventDefault();
             //Collect data
-            let data = {
+            let table_params = {
                     taxonomies: [],
                     metas: []
                 },
@@ -30,26 +30,27 @@ class Dashboard{
             if($taxonomies_input.length > 0){
                 for(let input of $taxonomies_input){
                     let $input = $(input);
-                    data.taxonomies.push($input.val())
+                    table_params.taxonomies.push($input.val())
                 }
             }
             if($metas_input.length > 0){
                 for(let input of $metas_input){
                     let $input = $(input);
-                    data.metas.push($input.val());
+                    table_params.metas.push($input.val());
                 }
             }
             debugger;
-            this.handle_custom_table_creation(data);
+            this.handle_custom_table_creation(table_params);
         });
     }
 
-    handle_custom_table_creation(data){
-        $.extend(data,{
+    handle_custom_table_creation(table_params){
+        let data = {
             current_percentage: 0,
             limit: 1,
-            offset: 0
-        });
+            offset: 0,
+            table_params: table_params
+        };
 
         let do_req = (data) => {
             $.ajax({
@@ -60,11 +61,11 @@ class Dashboard{
                 },
                 method: "POST"
             })
-                .then(function(data,textStatus,jqX){
+                .then(function(result,textStatus,jqX){
                     debugger;
-                    switch(data.status){
+                    switch(result.data.status){
                         case "run":
-                            return do_req();
+                            return do_req(result.data);
                             break;
                         case "complete":
                             return "complete";

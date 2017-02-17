@@ -88,13 +88,9 @@ class Plugin extends BasePlugin {
 	 */
 	public function ajax_create_filters_table(){
 		$params = $_POST['params'];
-		$table_params = [
-			'taxonomies' => isset($params['taxonomies']) ? $params['taxonomies'] : [],
-			'metas' => isset($params['metas']) ? $params['metas'] : [],
-		];
+		$table_params = $params['table_params'];
 		$offset = $params['offset'];
 		$limit = $params['limit'];
-		$current_percentage = $params['current_percentage'];
 
 		if($offset == 0){ //We just started, so create the table
 			$this->create_filters_table($table_params);
@@ -114,15 +110,17 @@ class Plugin extends BasePlugin {
 			$this->fill_filters_table($ids);
 			wp_send_json_success([
 				'offset' => $limit+$offset,
-				'found_products' => count($ids),
-				'current_percentage' => $current_percentage,
+				'limit' => $limit,
+				'found_products' => $found_products,
+				'current_percentage' => ceil( ($limit+$offset)*(100/$found_products) ),
+				'table_params' => $table_params,
 				'status' => 'run'
 			]);
 		}else{
 			wp_send_json_success([
 				'status' => 'complete',
 				'current_percentage' => 100,
-				'found_products' => count($ids),
+				'found_products' => $found_products,
 			]);
 		}
 	}
