@@ -4,6 +4,7 @@ namespace WBWPF;
 use WBF\components\assets\AssetsManager;
 use WBF\components\mvc\HTMLView;
 use WBF\components\pluginsframework\BasePlugin;
+use WBF\components\utils\DB;
 
 /**
  * The core plugin class.
@@ -12,6 +13,8 @@ use WBF\components\pluginsframework\BasePlugin;
  * @subpackage WBSample/includes
  */
 class Plugin extends BasePlugin {
+	const CUSTOM_FILTERS_TABLE = "wbwpf_products_index";
+
 	/**
 	 * Define the core functionality of the plugin.
 	 */
@@ -84,14 +87,97 @@ class Plugin extends BasePlugin {
 	 * Ajax callback to create the filters table
 	 */
 	public function ajax_create_filters_table(){
-		xdebug_break();
+		$params = $_POST['params'];
+		$table_params = [
+			'taxonomies' => isset($params['taxonomies']) ? $params['taxonomies'] : [],
+			'metas' => isset($params['metas']) ? $params['metas'] : [],
+		];
+		$offset = $params['offset'];
+		$limit = $params['limit'];
+		$current_percentage = $params['current_percentage'];
+
+		if($offset == 0){ //We just started, so create the table
+			$this->create_filters_table($table_params);
+		}
+
+		//Then begin to fill the table
+		global $wpdb;
+		if(!isset($params['found_products'])){
+			$found_products = $wpdb->get_var("SELECT count(ID) FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
+		}else{
+			$found_products = $params['found_products'];
+		}
+
+		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
+
+		if(is_array($ids) && !empty($ids)){
+			$this->fill_filters_table($ids);
+			wp_send_json_success([
+				'offset' => $limit+$offset,
+				'found_products' => count($ids),
+				'current_percentage' => $current_percentage,
+				'status' => 'run'
+			]);
+		}else{
+			wp_send_json_success([
+				'status' => 'complete',
+				'current_percentage' => 100,
+				'found_products' => count($ids),
+			]);
+		}
 	}
 
 	/**
 	 * Creates the filters table
 	 */
-	public function create_filters_table(){
+	public function create_filters_table(array $params){
+		global $wpdb;
 
+		if(!DB::table_exists(Plugin::CUSTOM_FILTERS_TABLE)){
+			$wpdb->query("DROP TABLE ".$wpdb->prefix.Plugin::CUSTOM_FILTERS_TABLE);
+		}
+
+		if(!DB::table_exists(Plugin::CUSTOM_FILTERS_TABLE)){
+			$table_name = $wpdb->prefix.Plugin::CUSTOM_FILTERS_TABLE;
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE $table_name (
+			relation_id bigint(20) NOT NULL AUTO_INCREMENT
+			product_id bigint(20) NOT NULL";
+
+			if(isset($params['taxonomies'])){
+				foreach($params['taxonomies'] as $tax_name){
+					$sql.= "$tax_name VARCHAR(255) NOT NULL";
+				}
+			}
+
+			if(isset($params['metas'])){
+				foreach($params['metas'] as $meta_name){
+					$sql.= "$meta_name VARCHAR(255) NOT NULL";
+				}
+			}
+
+			$sql.= ") $charset_collate;";
+
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			dbDelta( $sql );
+		}
+	}
+
+	/**
+	 * Fill filters table with data
+	 *
+	 * @param array $ids if EMPTY, then the function will get all the products before filling, otherwise it fills only the selected ids
+	 */
+	public function fill_filters_table($ids = []){
+		if(empty($ids)){
+			global $wpdb;
+			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
+		}
+		foreach ($ids as $product_id){
+			$product = wc_get_product($product_id);
+			//Do operations...
+		}
 	}
 
 	/**

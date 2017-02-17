@@ -47,8 +47,8 @@ class Dashboard{
     handle_custom_table_creation(data){
         $.extend(data,{
             current_percentage: 0,
-            limit: 0,
-            offset: 1
+            limit: 1,
+            offset: 0
         });
 
         let do_req = (data) => {
@@ -62,7 +62,15 @@ class Dashboard{
             })
                 .then(function(data,textStatus,jqX){
                     debugger;
-                    return do_req();
+                    switch(data.status){
+                        case "run":
+                            return do_req();
+                            break;
+                        case "complete":
+                            return "complete";
+                            break;
+                    }
+
                 })
                 .fail(function(jqXHR,textStatus,errorThrown){
                     debugger;
