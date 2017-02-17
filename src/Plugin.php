@@ -91,7 +91,7 @@ class Plugin extends BasePlugin {
 	/**
 	 * Get which class to use to parse which data type
 	 */
-	public function get_type_to_filters_relation(){
+	public function get_dataType_to_filtersClass_relation(){
 		return [
 			'taxonomies' => __NAMESPACE__."\\filters\\Checkbox",
 			'metas' => __NAMESPACE__."\\filters\\Checkbox",
@@ -106,9 +106,26 @@ class Plugin extends BasePlugin {
 	 */
 	public function get_plugin_default_settings(){
 		return [
-			'taxonomies' => ['product_cat'],
-			'special_fields' => ['price'] //We need a filter that output a "range" in this case
+			'data_types_to_index' => [
+				[
+					'type' => "taxonomies",
+					'values' => ['product_cat']
+				],
+				[
+					'type' => "price"
+				]
+			]
 		];
+	}
+
+	/**
+	 * Return which data types is needed to index
+	 *
+	 * @return mixed
+	 */
+	public function get_data_types_to_index(){
+		$settings = $this->get_plugin_settings();
+		return $settings['data_types_to_index'];
 	}
 
 	/**
@@ -131,7 +148,8 @@ class Plugin extends BasePlugin {
 		$defaults = $this->get_plugin_default_settings();
 		$settings = get_option(Plugin::SETTINGS_OPTION_NAME);
 		$settings = wp_parse_args($settings,$defaults);
-		return $settings;
+		//return $settings;
+		return $defaults;
 	}
 
 	/**
@@ -248,21 +266,26 @@ class Plugin extends BasePlugin {
 			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
 		}
 
-		$settings = $this->get_plugin_settings();
-		$fields_relation = $this->get_type_to_filters_relation();
+		$fields_relation = $this->get_dataType_to_filtersClass_relation();
 
 		foreach ($ids as $product_id){
 			$new_row = [
 				'product_id' => $product_id
 			];
-			foreach ($settings as $dataType => $data){
-				foreach ($data as $data_name){
-					if(isset($fields_relation[$dataType]) && class_exists($fields_relation[$dataType])){
-						$parser = new $fields_relation[$dataType]($dataType);
-						if($parser instanceof Filter){
-							$new_row[$data_name] = $parser->get_data_of($product_id,$data_name);
+			foreach ($this->get_data_types_to_index() as $dataType){
+				$type = $dataType['type'];
+				$data = isset($dataType['values']) ? $dataType['values'] : false;
+				if(is_array($data)){
+					foreach ($data as $data_name){
+						if(isset($fields_relation[$type]) && class_exists($fields_relation[$type])){
+							$parser = new $fields_relation[$type]($type);
+							if($parser instanceof Filter){
+								$new_row[$data_name] = $parser->get_data_of($product_id,$data_name);
+							}
 						}
 					}
+				}else{
+					//The case of price?
 				}
 			}
 			//Insert the value
