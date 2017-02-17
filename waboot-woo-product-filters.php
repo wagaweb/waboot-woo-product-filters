@@ -25,7 +25,7 @@ if ( ! defined( 'WPINC' ) ) {
 
 // Custom PS4 autoloader
 spl_autoload_register( function($class){
-	$prefix = "WBSample\\";
+	$prefix = "WBWPF\\";
 	$plugin_path = plugin_dir_path( __FILE__ );
 	$base_dir = $plugin_path."src/";
 	// does the class use the namespace prefix?

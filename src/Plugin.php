@@ -5,6 +5,7 @@ use WBF\components\assets\AssetsManager;
 use WBF\components\mvc\HTMLView;
 use WBF\components\pluginsframework\BasePlugin;
 use WBF\components\utils\DB;
+use WBWPF\filters\Filter;
 
 /**
  * The core plugin class.
@@ -85,6 +86,17 @@ class Plugin extends BasePlugin {
 				'textdomain' => $this->get_textdomain()
 			]);
 		});
+	}
+
+	/**
+	 * Get which class to use to parse which data type
+	 */
+	public function get_type_to_filters_relation(){
+		return [
+			'taxonomies' => __NAMESPACE__."\\filters\\Checkbox",
+			'metas' => __NAMESPACE__."\\filters\\Checkbox",
+			'price' => __NAMESPACE__."\\filters\\Range",
+		];
 	}
 
 	/**
@@ -181,30 +193,40 @@ class Plugin extends BasePlugin {
 		if(DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
 			//Create table
 			$wpdb->query("DROP TABLE ".$wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
+			$dropped = true;
+		}else{
+			$dropped = false;
 		}
 
-		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
+		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE) || $dropped){
 			//Save the params
 			$this->save_plugin_settings($params);
 
 			$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 			$charset_collate = $wpdb->get_charset_collate();
 
-			$sql = "CREATE TABLE $table_name (
-			relation_id bigint(20) NOT NULL AUTO_INCREMENT
-			product_id bigint(20) NOT NULL";
+			$sql = "CREATE TABLE $table_name (\n";
+
+			$fields = [
+				"relation_id bigint(20) NOT NULL AUTO_INCREMENT",
+				"product_id bigint(20) NOT NULL"
+			];
 
 			if(isset($params['taxonomies'])){
 				foreach($params['taxonomies'] as $tax_name){
-					$sql.= "\n$tax_name VARCHAR(255) NOT NULL";
+					$fields[] = "$tax_name VARCHAR(255) NOT NULL";
 				}
 			}
 
 			if(isset($params['metas'])){
 				foreach($params['metas'] as $meta_name){
-					$sql.= "\n$meta_name VARCHAR(255) NOT NULL";
+					$fields[] = "$meta_name VARCHAR(255) NOT NULL";
 				}
 			}
+
+			$fields[] = "PRIMARY KEY (relation_id)";
+
+			$sql.= implode(",\n",$fields);
 
 			$sql.= ") $charset_collate;";
 
@@ -221,15 +243,30 @@ class Plugin extends BasePlugin {
 	 * @param array $ids if EMPTY, then the function will get all the products before filling, otherwise it fills only the selected ids
 	 */
 	public function fill_products_index_table($ids = []){
+		global $wpdb;
 		if(empty($ids)){
-			global $wpdb;
 			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
 		}
-		$settings = $this->get_plugin_settings();
-		foreach ($ids as $product_id){
-			$product = wc_get_product($product_id);
 
-			//Do operations...
+		$settings = $this->get_plugin_settings();
+		$fields_relation = $this->get_type_to_filters_relation();
+
+		foreach ($ids as $product_id){
+			$new_row = [
+				'product_id' => $product_id
+			];
+			foreach ($settings as $dataType => $data){
+				foreach ($data as $data_name){
+					if(isset($fields_relation[$dataType]) && class_exists($fields_relation[$dataType])){
+						$parser = new $fields_relation[$dataType]($dataType);
+						if($parser instanceof Filter){
+							$new_row[$data_name] = $parser->get_data_of($product_id,$data_name);
+						}
+					}
+				}
+			}
+			//Insert the value
+			$r = $wpdb->insert($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row);
 		}
 	}
 
