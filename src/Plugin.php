@@ -13,7 +13,10 @@ use WBF\components\utils\DB;
  * @subpackage WBSample/includes
  */
 class Plugin extends BasePlugin {
-	const CUSTOM_FILTERS_TABLE = "wbwpf_products_index";
+	/*
+	 * This is the name of the table that cointains all products id with their filterable values
+	 */
+	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -30,7 +33,7 @@ class Plugin extends BasePlugin {
 	public function hooks(){
 		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
-		$this->loader->add_ajax_action("create_filters_table",$this,"ajax_create_filters_table");
+		$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
 	}
 
 	/**
@@ -86,14 +89,14 @@ class Plugin extends BasePlugin {
 	/**
 	 * Ajax callback to create the filters table
 	 */
-	public function ajax_create_filters_table(){
+	public function ajax_create_products_index_table(){
 		$params = $_POST['params'];
 		$table_params = $params['table_params'];
 		$offset = $params['offset'];
 		$limit = $params['limit'];
 
 		if($offset == 0){ //We just started, so create the table
-			$this->create_filters_table($table_params);
+			$this->create_products_index_table($table_params);
 		}
 
 		//Then begin to fill the table
@@ -107,7 +110,7 @@ class Plugin extends BasePlugin {
 		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
 
 		if(is_array($ids) && !empty($ids)){
-			$this->fill_filters_table($ids);
+			$this->fill_products_index_table($ids);
 			wp_send_json_success([
 				'offset' => $limit+$offset,
 				'limit' => $limit,
@@ -128,15 +131,15 @@ class Plugin extends BasePlugin {
 	/**
 	 * Creates the filters table
 	 */
-	public function create_filters_table(array $params){
+	public function create_products_index_table(array $params){
 		global $wpdb;
 
-		if(!DB::table_exists(Plugin::CUSTOM_FILTERS_TABLE)){
-			$wpdb->query("DROP TABLE ".$wpdb->prefix.Plugin::CUSTOM_FILTERS_TABLE);
+		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
+			$wpdb->query("DROP TABLE ".$wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
 		}
 
-		if(!DB::table_exists(Plugin::CUSTOM_FILTERS_TABLE)){
-			$table_name = $wpdb->prefix.Plugin::CUSTOM_FILTERS_TABLE;
+		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
+			$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 			$charset_collate = $wpdb->get_charset_collate();
 
 			$sql = "CREATE TABLE $table_name (
@@ -167,7 +170,7 @@ class Plugin extends BasePlugin {
 	 *
 	 * @param array $ids if EMPTY, then the function will get all the products before filling, otherwise it fills only the selected ids
 	 */
-	public function fill_filters_table($ids = []){
+	public function fill_products_index_table($ids = []){
 		if(empty($ids)){
 			global $wpdb;
 			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
@@ -182,6 +185,14 @@ class Plugin extends BasePlugin {
 	 * Returns a JSON of products for the frontend
 	 */
 	public function get_filtered_products_callback(){
-
+		/*
+		 * Idea:
+		 * - I vari "filtri" sono dei middleware che modificano l'oggetto query.
+		 * - Quindi si crea un nuovo oggetto query tramite Query_Factory, passandogli tutti i filtri necessari
+		 * - Questi filtri modificano la query
+		 * - Viene restituito un oggetto query finale
+		 * - Viene eseguita la query
+		 * - Vengono restituiti gli ID dei post
+		 */
 	}
 }
