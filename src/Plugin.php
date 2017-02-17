@@ -1,6 +1,7 @@
 <?php
 
 namespace WBWPF;
+use WBF\components\assets\AssetsManager;
 use WBF\components\mvc\HTMLView;
 use WBF\components\pluginsframework\BasePlugin;
 
@@ -24,7 +25,29 @@ class Plugin extends BasePlugin {
 	 * Define plugins hooks
 	 */
 	public function hooks(){
+		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
+	}
+
+	/**
+	 * Enqueue admin assets
+	 */
+	public function admin_assets(){
+		$assets = [
+			'wbwpf-admin' => [
+				'uri' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_uri()."/assets/dist/js/dashboard.pkg.js" : $this->get_uri()."/assets/dist/js/dashboard.min.js",
+				'path' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_dir()."/assets/dist/js/dashboard.pkg.js" : $this->get_dir()."/assets/dist/js/dashboard.min.js",
+				'type' => 'js',
+				'i10n' => [
+					'name' => "wbwpf",
+					'params' => [
+						'ajax_url' => admin_url("admin-ajax.php")
+					]
+				]
+			]
+		];
+
+		(new AssetsManager($assets))->enqueue();
 	}
 
 	/**

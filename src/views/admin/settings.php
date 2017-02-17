@@ -23,7 +23,7 @@
 		<div class="meta_list">
 			<?php foreach ($metas as $meta_name) : ?>
 				<label>
-					<input type="checkbox" name="wbwpf_use_tax[]" value="<?php echo $meta_name; ?>"><?php echo $meta_name; ?>
+					<input type="checkbox" name="wbwpf_use_meta[]" value="<?php echo $meta_name; ?>"><?php echo $meta_name; ?>
 				</label>
 			<?php endforeach; ?>
 		</div>

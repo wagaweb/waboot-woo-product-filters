@@ -51,6 +51,19 @@ spl_autoload_register( function($class){
 require_once 'src/includes/wbf-plugin-check-functions.php';
 includes\include_wbf_autoloader();
 
+if( version_compare(phpversion(),"5.6.0","<") ){
+	if(is_admin()){
+		add_action( 'admin_notices', function(){
+			?>
+            <div class="error">
+                <p><?php _e( basename(__FILE__). ' requires PHP >= 5.6, got '.phpversion() ); ?></p>
+            </div>
+			<?php
+		});
+	}
+	return;
+}
+
 if(class_exists("\\WBF\\components\\pluginsframework\\BasePlugin")){
 	require_once 'src/Plugin.php';
 	$plugin = new Plugin();

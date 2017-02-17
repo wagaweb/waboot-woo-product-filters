@@ -58,7 +58,7 @@ gulp.task('browserify', function(){
         insertGlobals : true,
         debug: true
     })
-        .transform("babelify", {presets: ["es2015"]}).bundle()
+        .transform("babelify", {presets: ["latest"]}).bundle()
         .pipe(source('dashboard.pkg.js'))
         .pipe(buffer()) //This might be not required, it works even if commented
         .pipe(gulp.dest('./assets/dist/js'));
@@ -67,7 +67,7 @@ gulp.task('browserify', function(){
         insertGlobals : true,
         debug: true
     })
-        .transform("babelify", {presets: ["es2015"]}).bundle()
+        .transform("babelify", {presets: ["latest"]}).bundle()
         .pipe(source('frontend.pkg.js'))
         .pipe(buffer()) //This might be not required, it works even if commented
         .pipe(gulp.dest('./assets/dist/js'));
@@ -82,14 +82,14 @@ gulp.task('compile_js', ['browserify'] ,function(){
     var dashboard = gulp.src(paths.admin_pkgjs)
         .pipe(sourcemaps.init())
         .pipe(uglify())
-        .pipe(rename(plugin_slug+'.min.js'))
+        .pipe(rename('dashboard.min.js'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./assets/dist/js'));
 
     var frontend = gulp.src(paths.front_pkgjs)
         .pipe(sourcemaps.init())
         .pipe(uglify())
-        .pipe(rename(plugin_slug+'.min.js'))
+        .pipe(rename('frontend.min.js'))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest('./assets/dist/js'));
 
