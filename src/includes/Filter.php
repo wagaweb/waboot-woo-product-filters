@@ -39,6 +39,7 @@ class Filter{
 	 */
 	function display(){
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
-		return "";
+		$this->uiType->set_values($values);
+		return $this->uiType->display();
 	}
 }
