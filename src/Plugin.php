@@ -105,6 +105,7 @@ class Plugin extends BasePlugin {
 			'meta' => __NAMESPACE__."\\datatypes\\Meta",
 			'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy"
 		];
+		$datatypes = apply_filters("wbwpf/datatypes/available",$datatypes);
 		return $datatypes;
 	}
 
@@ -133,19 +134,11 @@ class Plugin extends BasePlugin {
 	 * @return array
 	 */
 	public function get_plugin_default_settings(){
-		return [
+		$defaults = [
 			'filters' => []
 		];
-	}
-
-	/**
-	 * Return which data types is needed to index
-	 *
-	 * @return mixed
-	 */
-	public function get_data_types_to_index(){
-		$settings = $this->get_plugin_settings();
-		return $settings['data_types_to_index'];
+		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
+		return $defaults;
 	}
 
 	/**
@@ -286,7 +279,7 @@ class Plugin extends BasePlugin {
 			];
 			foreach ($filters_settings as $datatype_slug => $values){
 				foreach ($values as $value){
-					$new_row[$value] = $datatypes[$datatype_slug]->getValueOf($product_id,$value);
+					$new_row[$value] = $datatypes[$datatype_slug]->getValueOf($product_id,$value); //get the value for that data type of the current product
 				}
 			}
 			//Insert the value
