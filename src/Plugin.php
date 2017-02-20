@@ -306,6 +306,34 @@ class Plugin extends BasePlugin {
 		 * - Viene eseguita la query
 		 * - Vengono restituiti gli ID dei post
 		 */
+		$search_params = isset($_POST['search_params']) ? $_POST['search_params'] : [];
+		$current_page = isset($search_params['page']) ? intval($search_params['page']) : 1;
+		$limit = apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) );
+		$offset = $limit * $current_page;
 
+		if(empty($search_params)){
+			wp_send_json_error();
+		}else{
+			if($current_page == 1){
+				$posts = [
+					[
+						'ID' => 1,
+						'title' => "Hello World!"
+					]
+				];
+				wp_send_json_success($posts);
+			}elseif($current_page == 2){
+				$posts = [
+					[
+						'ID' => 1,
+						'title' => "Hello World 2!"
+					]
+				];
+				wp_send_json_success($posts);
+			}else{
+				$posts = [];
+				wp_send_json_success($posts);
+			}
+		}
 	}
 }
