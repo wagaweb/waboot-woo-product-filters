@@ -14,4 +14,21 @@ class Filter{
 	 * @var DataType
 	 */
 	var $datatype;
+	/**
+	 * @var string the filter slug (eg: "product_cat")
+	 */
+	var $slug;
+
+	/**
+	 * Filter constructor.
+	 *
+	 * @param $slug
+	 * @param DataType $datatype
+	 * @param UIType $uitype
+	 */
+	function __construct($slug,DataType $datatype,UIType $uitype) {
+		$this->slug = $slug;
+		$this->datatype = $datatype;
+		$this->uitype = $uitype;
+	}
 }

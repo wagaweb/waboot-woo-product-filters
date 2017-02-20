@@ -110,6 +110,18 @@ class Plugin extends BasePlugin {
 	}
 
 	/**
+	 * Get which class to use to display which ui type
+	 */
+	public function get_available_uiTypes(){
+		$uitypes = [
+			'checkbox' => __NAMESPACE__."\\uitypes\\Checkbox",
+			'range' => __NAMESPACE__."\\uitypes\\Range"
+		];
+		$uitypes = apply_filters("wbwpf/uitypes/available",$uitypes);
+		return $uitypes;
+	}
+
+	/**
 	 * Get a list of data type object in an associative array with slugs as keys
 	 *
 	 * @return array
