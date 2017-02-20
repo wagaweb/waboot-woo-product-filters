@@ -72,10 +72,7 @@ class Plugin extends BasePlugin {
 
 			$datatypes_tree = [];
 
-			$datatypes = [
-				'meta' => __NAMESPACE__."\\datatypes\\Meta",
-				'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy"
-			];
+			$datatypes = $this->get_available_dataTypes();
 
 			foreach ($datatypes as $name => $classname){
 				if(class_exists($classname)){
@@ -103,12 +100,31 @@ class Plugin extends BasePlugin {
 	/**
 	 * Get which class to use to parse which data type
 	 */
-	public function get_dataType_to_filtersClass_relation(){
-		return [
-			'taxonomies' => __NAMESPACE__."\\filters\\Checkbox",
-			'metas' => __NAMESPACE__."\\filters\\Checkbox",
-			'price' => __NAMESPACE__."\\filters\\Range",
+	public function get_available_dataTypes(){
+		$datatypes = [
+			'meta' => __NAMESPACE__."\\datatypes\\Meta",
+			'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy"
 		];
+		return $datatypes;
+	}
+
+	/**
+	 * Get a list of data type object in an associative array with slugs as keys
+	 *
+	 * @return array
+	 */
+	public function get_available_dataTypes_by_slug(){
+		$dt = $this->get_available_dataTypes();
+		$slugs = [];
+		foreach ($dt as $classname){
+			if(class_exists($classname)){
+				$o = new $classname();
+				if($o instanceof DataType){
+					$slugs[$o->slug] = $o;
+				}
+			}
+		}
+		return $slugs;
 	}
 
 	/**
@@ -118,15 +134,7 @@ class Plugin extends BasePlugin {
 	 */
 	public function get_plugin_default_settings(){
 		return [
-			'data_types_to_index' => [
-				[
-					'type' => "taxonomies",
-					'values' => ['product_cat']
-				],
-				[
-					'type' => "price"
-				]
-			]
+			'filters' => []
 		];
 	}
 
@@ -146,8 +154,8 @@ class Plugin extends BasePlugin {
 	 * @param $settings
 	 */
 	public function save_plugin_settings($settings){
-		$defaults = $this->get_plugin_default_settings();
-		$settings = wp_parse_args($settings,$defaults);
+		$actual = $this->get_plugin_settings();
+		$settings = wp_parse_args($settings,$actual);
 		update_option(Plugin::SETTINGS_OPTION_NAME,$settings);
 	}
 
@@ -160,8 +168,7 @@ class Plugin extends BasePlugin {
 		$defaults = $this->get_plugin_default_settings();
 		$settings = get_option(Plugin::SETTINGS_OPTION_NAME);
 		$settings = wp_parse_args($settings,$defaults);
-		//return $settings;
-		return $defaults;
+		return $settings;
 	}
 
 	/**
@@ -174,6 +181,7 @@ class Plugin extends BasePlugin {
 		$limit = $params['limit'];
 
 		if($offset == 0){ //We just started, so create the table
+			$this->save_plugin_settings(['filters' => $table_params]);
 			$r = $this->create_products_index_table($table_params);
 			if(!$r){
 				wp_send_json_error([
@@ -229,9 +237,6 @@ class Plugin extends BasePlugin {
 		}
 
 		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE) || $dropped){
-			//Save the params
-			$this->save_plugin_settings($params);
-
 			$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 			$charset_collate = $wpdb->get_charset_collate();
 
@@ -242,15 +247,9 @@ class Plugin extends BasePlugin {
 				"product_id bigint(20) NOT NULL"
 			];
 
-			if(isset($params['taxonomies'])){
-				foreach($params['taxonomies'] as $tax_name){
-					$fields[] = "$tax_name VARCHAR(255) NOT NULL";
-				}
-			}
-
-			if(isset($params['metas'])){
-				foreach($params['metas'] as $meta_name){
-					$fields[] = "$meta_name VARCHAR(255) NOT NULL";
+			foreach ($params as $datatype_slug => $data_key){
+				foreach ($data_key as $k => $v){
+					$fields[] = "$v VARCHAR(255) NOT NULL";
 				}
 			}
 
@@ -278,26 +277,16 @@ class Plugin extends BasePlugin {
 			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
 		}
 
-		$fields_relation = $this->get_dataType_to_filtersClass_relation();
+		$datatypes = $this->get_available_dataTypes_by_slug();
+		$filters_settings = $this->get_plugin_settings()['filters'];
 
 		foreach ($ids as $product_id){
 			$new_row = [
 				'product_id' => $product_id
 			];
-			foreach ($this->get_data_types_to_index() as $dataType){
-				$type = $dataType['type'];
-				$data = isset($dataType['values']) ? $dataType['values'] : false;
-				if(is_array($data)){
-					foreach ($data as $data_name){
-						if(isset($fields_relation[$type]) && class_exists($fields_relation[$type])){
-							$parser = new $fields_relation[$type]($type);
-							if($parser instanceof Filter){
-								$new_row[$data_name] = $parser->get_data_of($product_id,$data_name);
-							}
-						}
-					}
-				}else{
-					//The case of price?
+			foreach ($filters_settings as $datatype_slug => $values){
+				foreach ($values as $value){
+					$new_row[$value] = $datatypes[$datatype_slug]->getValueOf($product_id,$value);
 				}
 			}
 			//Insert the value

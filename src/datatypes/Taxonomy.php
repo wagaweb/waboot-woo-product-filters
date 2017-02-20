@@ -19,4 +19,14 @@ class Taxonomy extends DataType{
 		}
 		return $taxonomies;
 	}
+
+	public function getValueOf( $product_id, $key ) {
+		$terms = [];
+		$raw_terms = wp_get_post_terms($product_id,$key);
+		if(is_array($raw_terms) && !empty($raw_terms)){
+			$terms = wp_list_pluck($raw_terms,"slug");
+		}
+		$terms = implode(",",$terms);
+		return $terms;
+	}
 }

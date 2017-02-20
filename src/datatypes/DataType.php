@@ -23,4 +23,15 @@ abstract class DataType{
 	public function getData(){
 		return [];
 	}
+	/**
+	 * Return the value for $product_id for data type called $key (eg: the value of "product_cat" for a specified product)
+	 *
+	 * @param $product_id
+	 * @param $key
+	 *
+	 * @return mixed
+	 */
+	public function getValueOf($product_id,$key){
+		return "";
+	}
 }

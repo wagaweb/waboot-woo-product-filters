@@ -23,22 +23,16 @@ class Dashboard{
         $form.on("submit",(e) => {
             e.preventDefault();
             //Collect data
-            let table_params = {
-                    taxonomies: [],
-                    metas: []
-                },
-                $taxonomies_input = $("[name='wbwpf_use_tax[]']").filter(":checked"),
-                $metas_input = $("[name='wbwpf_use_meta[]']").filter(":checked");
-            if($taxonomies_input.length > 0){
-                for(let input of $taxonomies_input){
+            let table_params = {},
+                $dataTypes_input = $("[data-datatype]").filter(":checked");
+            if($dataTypes_input.length > 0){
+                for(let input of $dataTypes_input){
                     let $input = $(input);
-                    table_params.taxonomies.push($input.val())
-                }
-            }
-            if($metas_input.length > 0){
-                for(let input of $metas_input){
-                    let $input = $(input);
-                    table_params.metas.push($input.val());
+                    if(typeof table_params[""+$input.data("datatype")+""] === "undefined"){
+                        debugger;
+                        table_params[""+$input.data("datatype")+""] = [];
+                    }
+                    table_params[$input.data("datatype")].push($input.val());
                 }
             }
             //Send ajax requests
