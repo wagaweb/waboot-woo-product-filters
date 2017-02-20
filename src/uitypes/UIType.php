@@ -1,10 +1,10 @@
 <?php
 
-namespace WBWPF\filters;
+namespace WBWPF\uitypes;
 
 use League\Flysystem\Exception;
 
-abstract class Filter{
+abstract class UIType{
 	/**
 	 * @var string the data type this filter operate on (eg: metas, taxonomies, custom fields...)
 	 */

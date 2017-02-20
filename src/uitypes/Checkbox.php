@@ -1,8 +1,8 @@
 <?php
 
-namespace WBWPF\filters;
+namespace WBWPF\uitypes;
 
 /*
  * Manage and output a checkbox-type filter
  */
-class Checkbox extends Filter{}
+class Checkbox extends UIType {}

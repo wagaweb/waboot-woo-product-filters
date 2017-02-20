@@ -1,8 +1,8 @@
 <?php
 
-namespace WBWPF\filters;
+namespace WBWPF\uitypes;
 
 /*
  * Manage and output a range-type filter
  */
-class Range extends Filter {}
+class Range extends UIType {}

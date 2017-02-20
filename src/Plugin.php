@@ -5,6 +5,7 @@ use WBF\components\assets\AssetsManager;
 use WBF\components\mvc\HTMLView;
 use WBF\components\pluginsframework\BasePlugin;
 use WBF\components\utils\DB;
+use WBWPF\datatypes\DataType;
 use WBWPF\filters\Filter;
 
 /**
@@ -35,7 +36,9 @@ class Plugin extends BasePlugin {
 	public function hooks(){
 		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
-		$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
+		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
+		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
+		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
 	}
 
 	/**
@@ -67,22 +70,31 @@ class Plugin extends BasePlugin {
 			global $wpdb;
 			$v = new HTMLView($this->src_path."/views/admin/settings.php",$this,false);
 
-			//Gets all taxonomies
-			$raw_taxonomies = get_taxonomies([],"objects");
-			foreach ($raw_taxonomies as $tax){
-				$taxonomies[$tax->name] = $tax->labels->name;
-			}
+			$datatypes_tree = [];
 
-			//Gets all metas
-			$metas = $wpdb->get_col("SELECT meta_key FROM $wpdb->postmeta as postmeta JOIN $wpdb->posts as posts ON postmeta.post_id = posts.ID WHERE post_type = 'product'");
-			$metas = array_unique($metas);
+			$datatypes = [
+				'meta' => __NAMESPACE__."\\datatypes\\Meta",
+				'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy"
+			];
+
+			foreach ($datatypes as $name => $classname){
+				if(class_exists($classname)){
+					$o = new $classname();
+					if($o instanceof DataType){
+						$datatypes_tree[] = [
+							'label' => $o->label,
+							'slug' => $o->slug,
+							'description' => $o->admin_description,
+							'data' => $o->getData()
+						];
+					}
+				}
+			}
 
 			$v->for_dashboard()->display([
 				'page_title' => __("Filters settings",$this->get_textdomain()),
-				'taxonomies' => $taxonomies,
-				'metas' => $metas,
-				'has_taxonomies' => isset($taxonomies) && is_array($taxonomies) && !empty($taxonomies),
-				'has_metas' => isset($metas) && is_array($metas) && !empty($metas),
+				'data' => $datatypes_tree,
+				'has_data' => isset($datatypes_tree) && is_array($datatypes_tree) && !empty($datatypes_tree),
 				'textdomain' => $this->get_textdomain()
 			]);
 		});
