@@ -9,11 +9,11 @@ class Filter{
 	/**
 	 * @var UIType
 	 */
-	var $uitype;
+	var $uiType;
 	/**
 	 * @var DataType
 	 */
-	var $datatype;
+	var $dataType;
 	/**
 	 * @var string the filter slug (eg: "product_cat")
 	 */
@@ -23,12 +23,22 @@ class Filter{
 	 * Filter constructor.
 	 *
 	 * @param $slug
-	 * @param DataType $datatype
-	 * @param UIType $uitype
+	 * @param DataType $dataType
+	 * @param UIType $uiType
 	 */
-	function __construct($slug,DataType $datatype,UIType $uitype) {
+	function __construct($slug,DataType $dataType,UIType $uiType) {
 		$this->slug = $slug;
-		$this->datatype = $datatype;
-		$this->uitype = $uitype;
+		$this->dataType = $dataType;
+		$this->uiType = $uiType;
+	}
+
+	/**
+	 * Display the filter
+	 *
+	 * @return string
+	 */
+	function display(){
+		$values = $this->dataType->getAvailableValuesFor($this->slug);
+		return "";
 	}
 }

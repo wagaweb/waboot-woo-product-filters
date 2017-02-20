@@ -2,6 +2,8 @@
 
 namespace WBWPF\datatypes;
 
+use WBWPF\Plugin;
+
 abstract class DataType{
 	/**
 	 * @var string
@@ -33,5 +35,19 @@ abstract class DataType{
 	 */
 	public function getValueOf($product_id,$key){
 		return "";
+	}
+
+	/**
+	 * Get all possible value of current data type for the key called $key. By default it uses the indexed values on the custom table.
+	 *
+	 * @param $key
+	 *
+	 * @return array
+	 */
+	public function getAvailableValuesFor($key){
+		global $wpdb;
+		$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
+		$values = $wpdb->get_col("SELECT DISTINCT $key FROM $table_name");
+		return $values;
 	}
 }
