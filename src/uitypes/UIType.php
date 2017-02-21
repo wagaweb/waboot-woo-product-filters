@@ -33,7 +33,11 @@ abstract class UIType{
 		if(!$input_name){
 			if(!$this->input_name) throw new \Exception("Unable to assign a name to the UIType.");
 			$input_name = $this->input_name;
+		}else{
+			$this->input_name = $input_name;
 		}
+		$this->input_name = "wbwpf_".$this->input_name;
+
 		return implode(",",$this->values);
 	}
 }

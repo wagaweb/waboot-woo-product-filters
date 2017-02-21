@@ -39,6 +39,7 @@ class Plugin extends BasePlugin {
 		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
+		$this->loader->add_action("woocommerce_product_query",$this,"alter_product_query",10,2);
 	}
 
 	/**
@@ -60,6 +61,17 @@ class Plugin extends BasePlugin {
 		];
 
 		(new AssetsManager($assets))->enqueue();
+	}
+
+	/**
+	 * Alter the woocommerce product query
+	 *
+	 * @param $query
+	 * @param $wc_query
+	 */
+	public function alter_product_query($query,$wc_query){
+		if(!isset($_POST['wbwpf_search_by_filters'])) return;
+		xdebug_break();
 	}
 
 	/**
