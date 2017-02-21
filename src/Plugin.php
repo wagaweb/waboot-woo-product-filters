@@ -326,6 +326,9 @@ class Plugin extends BasePlugin {
 				foreach ($values as $value){
 					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
 					if(is_array($product_values) && !empty($product_values)){
+						/*
+						 * We have multiple values for this data type (eg: multiple product_cat terms), so we need to create multiple, incomplete rows
+						 */
 						array_walk($product_values,function($el) use(&$rows,$product_id,$value,$new_row){
 							$rows[] = [
 								'product_id' => $product_id,
@@ -336,8 +339,11 @@ class Plugin extends BasePlugin {
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
-						$new_row[$value] = "";
+						$new_row[$value] = ""; //todo: change to null?
 					}else{
+						/*
+						 * We have have a single value for this data type. So it's ok to inject it into the main row. We want only one row that contains all single-valued data types for one product
+						 */
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
