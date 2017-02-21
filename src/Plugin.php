@@ -254,7 +254,7 @@ class Plugin extends BasePlugin {
 
 			foreach ($params as $datatype_slug => $data_key){
 				foreach ($data_key as $k => $v){
-					$fields[] = "$v VARCHAR(255) NOT NULL";
+					$fields[] = "$v VARCHAR(255)";
 				}
 			}
 
@@ -284,16 +284,61 @@ class Plugin extends BasePlugin {
 
 		$datatypes = $this->get_available_dataTypes_by_slug();
 		$filters_settings = $this->get_plugin_settings()['filters'];
+		$rows = [];
 
-		foreach ($ids as $product_id){
+		/*
+		 * We are testing two method of indexing: multiple row per product (avoiding cols with comma separated item) and single row per product (otherwise)
+		 */
+
+		/*
+		 * This cycle create one row per product, with some cols with multiple values separated by comma
+		 */
+		/*foreach ($ids as $product_id){
 			$new_row = [
 				'product_id' => $product_id
 			];
 			foreach ($filters_settings as $datatype_slug => $values){
 				foreach ($values as $value){
-					$new_row[$value] = $datatypes[$datatype_slug]->getValueOf($product_id,$value); //get the value for that data type of the current product
+					$new_row[$value] = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_FORMAT_COMMA_SEPARATED); //get the value for that data type of the current product
 				}
 			}
+			$rows[] = $new_row;
+		}*/
+
+		/*
+		 * These cycle will create many rows per product, so there is no column with multiple values
+		 */
+		foreach ($ids as $product_id){
+			$new_row = [];
+			foreach ($filters_settings as $datatype_slug => $values){
+				foreach ($values as $value){
+					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
+					if(is_array($product_values) && !empty($product_values)){
+						array_walk($product_values,function($el) use(&$rows,$product_id,$value,$new_row){
+							$rows[] = [
+								'product_id' => $product_id,
+								$value => $el
+							];
+						});
+					}elseif(is_array($product_values) && empty($product_values)){
+						if(!isset($new_row['product_id'])){
+							$new_row['product_id'] = $product_id;
+						}
+						$new_row[$value] = "";
+					}else{
+						if(!isset($new_row['product_id'])){
+							$new_row['product_id'] = $product_id;
+						}
+						$new_row[$value] = $product_values;
+					}
+				}
+			}
+			if(!empty($new_row)){
+				$rows[] = $new_row;
+			}
+		}
+
+		foreach ($rows as $new_row){
 			//Insert the value
 			$r = $wpdb->insert($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row);
 		}

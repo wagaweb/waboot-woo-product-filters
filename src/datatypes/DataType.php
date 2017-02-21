@@ -5,6 +5,8 @@ namespace WBWPF\datatypes;
 use WBWPF\Plugin;
 
 abstract class DataType{
+	const VALUES_FOR_FORMAT_COMMA_SEPARATED = 0;
+	const VALUES_FOR_VALUES_FORMAT_ARRAY = 1;
 	/**
 	 * @var string
 	 */
@@ -33,7 +35,7 @@ abstract class DataType{
 	 *
 	 * @return mixed
 	 */
-	public function getValueOf($product_id,$key){
+	public function getValueOf($product_id,$key,$format = self::VALUES_FOR_VALUES_FORMAT_ARRAY){
 		return "";
 	}
 
@@ -48,6 +50,7 @@ abstract class DataType{
 		global $wpdb;
 		$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 		$values = $wpdb->get_col("SELECT DISTINCT $key FROM $table_name");
+		$values = array_filter($values); //Remove null values
 		return $values;
 	}
 }

@@ -1,53 +1,61 @@
 <?php
 
-/**
- * Display filters
- *
- * @param $args
- */
-function wbwpf_show_filters($args){
-	//Testing:
-	$args = [
-		'price' => [
-			'type' => "range",
-			'dataType' => 'price'
-		],
-		'product_cat' => [
-			'type' => "checkbox", //Come visualizzarli
-			'dataType' => 'taxonomy' //Come prende i valori
-		],
-	];
 
-	$plugin = \WBF\components\pluginsframework\BasePlugin::get_instances_of("waboot-woo-product-filters");
-	if(!$plugin instanceof \WBWPF\Plugin) return;
+if(!function_exists("wbwpf_show_filters")):
+	/**
+	 * Display filters
+	 *
+	 * @param array $args the params for displaying the filters
+	 */
+	function wbwpf_show_filters($args){
+		//Testing:
+		$args = [
+			'price' => [
+				'type' => "range",
+				'dataType' => 'price'
+			],
+			'product_cat' => [
+				'type' => "checkbox", //Come visualizzarli
+				'dataType' => 'taxonomies' //Come prende i valori
+			],
+		];
 
-	$dataTypes = $plugin->get_available_dataTypes();
-	$uiTypes = $plugin->get_available_uiTypes();
+		$plugin = \WBF\components\pluginsframework\BasePlugin::get_instances_of("waboot-woo-product-filters");
+		if(!isset($plugin['core'])) return;
+		$plugin = $plugin['core'];
+		if(!$plugin instanceof \WBWPF\Plugin) return;
 
-	$filters = [];
+		$dataTypes = $plugin->get_available_dataTypes();
+		$uiTypes = $plugin->get_available_uiTypes();
 
-	foreach ($args as $filter_slug => $filter_params){
-		if(!isset($filter_params['dataType']) || !isset($filter_params['type'])) continue;
+		$filters = [];
 
-		$dataType_slug = $filter_params['dataType'];
-		$uiType_slug = $filter_params['type'];
+		foreach ($args as $filter_slug => $filter_params){
+			if(!isset($filter_params['dataType']) || !isset($filter_params['type'])) continue;
 
-		if(!isset($dataTypes[$dataType_slug])) continue;
-		$dataTypeClassName = $dataTypes[$dataType_slug];
+			$dataType_slug = $filter_params['dataType'];
+			$uiType_slug = $filter_params['type'];
 
-		if(!isset($uiTypes[$uiType_slug])) continue;
-		$uiTypeClassName = $uiTypes[$uiType_slug];
+			if(!isset($dataTypes[$dataType_slug])) continue;
+			$dataTypeClassName = $dataTypes[$dataType_slug];
 
-		$datatype = new $dataTypeClassName();
-		$uitype = new $uiTypeClassName();
+			if(!isset($uiTypes[$uiType_slug])) continue;
+			$uiTypeClassName = $uiTypes[$uiType_slug];
 
-		$f = new \WBWPF\includes\Filter($filter_slug,$datatype,$uitype);
+			$datatype = new $dataTypeClassName();
+			$uitype = new $uiTypeClassName();
+			$uitype->input_name = $filter_slug;
 
-		$filters[] = $f;
+			$f = new \WBWPF\includes\Filter($filter_slug,$datatype,$uitype);
+
+			$filters[] = $f;
+		}
+
+		$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);
+		$v->display([
+			'filters' => $filters,
+			'has_filters' => is_array($filters) && !empty($filters),
+			'textdomain' => $plugin->get_textdomain()
+		]);
 	}
-
-	$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);
-	$v->display([
-		'filters' => $filters
-	]);
-}
+endif;

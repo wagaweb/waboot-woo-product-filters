@@ -65,6 +65,7 @@ if( version_compare(phpversion(),"5.6.0","<") ){
 }
 
 if(class_exists("\\WBF\\components\\pluginsframework\\BasePlugin")){
+	require_once 'src/includes/template-tags.php';
 	require_once 'src/Plugin.php';
 	$plugin = new Plugin();
 	$plugin->run();

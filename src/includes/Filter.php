@@ -35,11 +35,12 @@ class Filter{
 	/**
 	 * Display the filter
 	 *
-	 * @return string
+	 * @return void
 	 */
 	function display(){
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
 		$this->uiType->set_values($values);
-		return $this->uiType->display();
+		$output = $this->uiType->generate_output();
+		echo $output;
 	}
 }

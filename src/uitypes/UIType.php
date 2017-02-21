@@ -4,6 +4,10 @@ namespace WBWPF\uitypes;
 
 abstract class UIType{
 	/**
+	 * @var string
+	 */
+	var $input_name;
+	/**
 	 * @var array
 	 */
 	var $values = [];
@@ -18,11 +22,18 @@ abstract class UIType{
 	}
 
 	/**
-	 * Display the HTML for the filter
+	 * Generate the HTML output
+	 *
+	 * @param bool $input_name
 	 *
 	 * @return string
+	 * @throws \Exception
 	 */
-	public function display(){
+	public function generate_output($input_name = false){
+		if(!$input_name){
+			if(!$this->input_name) throw new \Exception("Unable to assign a name to the UIType.");
+			$input_name = $this->input_name;
+		}
 		return implode(",",$this->values);
 	}
 }
