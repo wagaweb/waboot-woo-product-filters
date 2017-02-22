@@ -57,7 +57,9 @@ class Plugin extends BasePlugin {
 		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
+		$this->loader->add_action("query_vars",$this,"add_query_vars",1);
 		$this->loader->add_action("woocommerce_product_query",$this,"alter_product_query",10,2);
+		$this->loader->add_filter("woocommerce_pagination_args",$this,"alter_woocommerce_pagination_args",10,1);
 	}
 
 	/**
@@ -82,23 +84,55 @@ class Plugin extends BasePlugin {
 	}
 
 	/**
+	 * Adds query vars
+	 *
+	 * @param $vars
+	 *
+	 * @return array
+	 */
+	public function add_query_vars($vars){
+		$vars[] = "wbwpf_query";
+		return $vars;
+	}
+
+	/**
 	 * Alter the woocommerce product query
 	 *
 	 * @param $query
 	 * @param $wc_query
 	 */
 	public function alter_product_query($query,$wc_query){
-		if(!isset($_POST['wbwpf_search_by_filters'])) return;
 		if(!$query instanceof \WP_Query) return;
 
-		$filter_query = Query_Factory::build_from_post_params();
-		$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
-
-		if(is_array($ids) && count($ids) > 0){
-			$query->set('post__in',$ids);
-		}else{
-			$query->set('post__in',[0]);
+		if(isset($_GET['wbwpf_query'])){
+			xdebug_break();
 		}
+
+		if(isset($_POST['wbwpf_search_by_filters'])){
+			$filter_query = Query_Factory::build_from_post_params();
+			$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
+
+			if(is_array($ids) && count($ids) > 0){
+				$query->set('post__in',$ids);
+			}else{
+				$query->set('post__in',[0]);
+			}
+		}
+	}
+
+	/**
+	 * Adds out query string to woocommerce pagination
+	 *
+	 * @param $args
+	 *
+	 * @return mixed
+	 */
+	public function alter_woocommerce_pagination_args($args){
+		if(isset($_POST['wbwpf_search_by_filters'])){
+			$filter_string = Filter_Factory::stringify_from_post_params();
+			$args['add_fragment'] = "?wbwpf_query=$filter_string";
+		}
+		return $args;
 	}
 
 	/**

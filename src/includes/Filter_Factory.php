@@ -78,4 +78,53 @@ class Filter_Factory{
 
 		return $filters;
 	}
+
+	/**
+	 * Build a string that represent active filters and their values
+	 *
+	 * @param $active_filters
+	 * @param $filter_values
+	 *
+	 * @return string
+	 */
+	public static function stringify_from_params($active_filters,$filter_values){
+		$out =  "";
+		$i = 0;
+		foreach($active_filters as $filter_slug => $filter_params){
+			if($i > 0){
+				$out .= "-";
+			}
+			$out = $filter_slug."|".$filter_params['type']."|".$filter_params['dataType']."|";
+			if(is_array($filter_values[$filter_slug])){
+				$out .= implode(",",$filter_values[$filter_slug]);
+			}else{
+				$out .= $filter_values[$filter_slug];
+			}
+			$i++;
+		}
+		return $out;
+	}
+
+	/**
+	 * Build a string that represent active filters and their values (starting from $_POST)
+	 *
+	 * @return string
+	 */
+	public static function stringify_from_post_params(){
+		$active_filters = $_POST['wbwpf_active_filters'];
+		$filter_current_values = call_user_func(function(){
+			$posted_params = $_POST;
+			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters"];
+			$current_values = [];
+			foreach ($posted_params as $param => $param_values){
+				if(!in_array($param,$ignorelist)){
+					$param = preg_replace("/wbwpf_/","",$param);
+					$current_values[$param] = $param_values;
+				}
+			}
+			return $current_values;
+		});
+
+		return self::stringify_from_params($active_filters,$filter_current_values);
+	}
 }
