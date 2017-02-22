@@ -59,6 +59,9 @@ class Plugin extends BasePlugin {
 		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
 
+		$this->loader->add_action("wp_ajax_wbwpf_get_products",$this,"get_filtered_products_callback");
+		$this->loader->add_action("wp_ajax_nopriv_wbwpf_get_products",$this,"get_filtered_products_callback");
+
 		$this->loader->add_action("query_vars",$this,"add_query_vars",1);
 		$this->loader->add_action("woocommerce_product_query",$this,"alter_product_query",10,2);
 		$this->loader->add_filter("woocommerce_pagination_args",$this,"alter_woocommerce_pagination_args",10,1);
@@ -461,7 +464,24 @@ class Plugin extends BasePlugin {
 					[
 						'ID' => 1,
 						'title' => "Hello World!"
+					],
+					[
+						'ID' => 1,
+						'title' => "Hello World!"
+					],
+					[
+						'ID' => 1,
+						'title' => "Hello World!"
+					],
+					[
+						'ID' => 1,
+						'title' => "Hello World!"
 					]
+				];
+				$data = [
+					'total_count' => 5,
+					'current_page' => $current_page,
+					'posts' => $posts
 				];
 				wp_send_json_success($posts);
 			}elseif($current_page == 2){
@@ -470,6 +490,11 @@ class Plugin extends BasePlugin {
 						'ID' => 1,
 						'title' => "Hello World 2!"
 					]
+				];
+				$data = [
+					'total_count' => 5,
+					'current_page' => $current_page,
+					'posts' => $posts
 				];
 				wp_send_json_success($posts);
 			}else{
