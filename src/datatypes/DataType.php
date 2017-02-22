@@ -2,11 +2,16 @@
 
 namespace WBWPF\datatypes;
 
+use WBF\components\pluginsframework\BasePlugin;
 use WBWPF\Plugin;
 
 abstract class DataType{
 	const VALUES_FOR_FORMAT_COMMA_SEPARATED = 0;
 	const VALUES_FOR_VALUES_FORMAT_ARRAY = 1;
+	/**
+	 * @var int|string
+	 */
+	var $type_slug;
 	/**
 	 * @var string
 	 */
@@ -19,6 +24,23 @@ abstract class DataType{
 	 * @var string
 	 */
 	var $admin_description = "";
+
+	public function __construct() {
+		$plugin = BasePlugin::get_instances_of("waboot-woo-product-filters");
+		if(!isset($plugin['core'])) throw new \Exception("Unable to find the plugin during DataType initialization");
+		$plugin = $plugin['core'];
+		if(!$plugin instanceof Plugin) throw new \Exception("Unable to find the plugin during DataType initialization");
+
+		$dataTypes = $plugin->get_available_dataTypes();
+
+		foreach ($dataTypes as $type_slug => $classname){
+			if($classname == static::class){
+				$this->type_slug = $type_slug;
+				break;
+			}
+		}
+	}
+
 	/**
 	 * Return valid values for the data type
 	 *
@@ -27,16 +49,24 @@ abstract class DataType{
 	public function getData(){
 		return [];
 	}
+
 	/**
 	 * Return the value for $product_id for data type called $key (eg: the value of "product_cat" for a specified product)
 	 *
 	 * @param $product_id
 	 * @param $key
+	 * @param int $format
 	 *
 	 * @return mixed
 	 */
 	public function getValueOf($product_id,$key,$format = self::VALUES_FOR_VALUES_FORMAT_ARRAY){
-		return "";
+		if($format == self::VALUES_FOR_VALUES_FORMAT_ARRAY){
+			return [];
+		}elseif($format == self::VALUES_FOR_FORMAT_COMMA_SEPARATED){
+			return "";
+		}else{
+			return false;
+		}
 	}
 
 	/**

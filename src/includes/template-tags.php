@@ -44,7 +44,6 @@ if(!function_exists("wbwpf_show_filters")):
 
 			$datatype = new $dataTypeClassName();
 			$uitype = new $uiTypeClassName();
-			$uitype->input_name = $filter_slug;
 
 			$f = new \WBWPF\includes\Filter($filter_slug,$datatype,$uitype);
 

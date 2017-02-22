@@ -6,6 +6,8 @@ class Taxonomy extends DataType{
 	var $slug = "tax";
 
 	function __construct() {
+		parent::__construct();
+
 		$this->label = __("Taxonomies","waboot-woo-product-filters");
 		$this->admin_description = __("Select one or more taxonomies","waboot-woo-product-filters");
 	}

@@ -39,8 +39,15 @@ class Filter{
 	 */
 	function display(){
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
+		$this->uiType->set_name($this->slug);
 		$this->uiType->set_values($values);
 		$output = $this->uiType->generate_output();
+
+		//Adds hidden input to output
+		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][slug]' value='{$this->slug}'>";
+		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][uitype]' value='{$this->uiType->type_slug}'>";
+		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][datatype]' value='{$this->dataType->type_slug}'>";
+
 		echo $output;
 	}
 }
