@@ -80,6 +80,51 @@ class Filter_Factory{
 	}
 
 	/**
+	 * Build an array of filters from a string format
+	 *
+	 * @param string $params
+	 *
+	 * @return array
+	 */
+	public static function build_from_stringified_params($params){
+		$r = self::unwrap_stringified($params);
+
+		$active_filters = $r['filters'];
+		$current_values = $r['values'];
+
+		return self::build_from_params($active_filters,$current_values);
+	}
+
+	/**
+	 * Unwrap a stringified format
+	 *
+	 * @param $params
+	 *
+	 * @return array
+	 */
+	public static function unwrap_stringified($params){
+		$stringified_filters = explode("-",$params);
+
+		$active_filters = [];
+		$current_values = [];
+
+		foreach ($stringified_filters as $filter_string){
+			$filter_string_values = explode("|",$filter_string);
+			$active_filters[$filter_string_values[0]] = [
+				'slug' => $filter_string_values[0],
+				'type' => $filter_string_values[1],
+				'dataType' => $filter_string_values[2]
+			];
+			$current_values[$filter_string_values[0]] = explode(",",$filter_string_values[3]);
+		}
+
+		return [
+			'filters' => $active_filters,
+			'values' => $current_values
+		];
+	}
+
+	/**
 	 * Build a string that represent active filters and their values
 	 *
 	 * @param $active_filters

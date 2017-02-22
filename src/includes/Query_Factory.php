@@ -48,6 +48,24 @@ class Query_Factory{
 	}
 
 	/**
+	 * Build a Filter_Query from $_GET params (it looks for a specific-predefined get params)
+	 *
+	 * @return Filter_Query
+	 */
+	public static function build_from_get_params(){
+		$params = $_GET['wbwpf_query'];
+
+		$r = Filter_Factory::unwrap_stringified($params);
+
+		$active_filters = $r['filters'];
+		$filter_current_values = $r['values'];
+
+		$filter_query = self::build_from_params($active_filters,$filter_current_values);
+
+		return $filter_query;
+	}
+
+	/**
 	 * Setup a Filter_Query starting from current $_POST params (it looks for specific-predefined post params)
 	 *
 	 * @return Filter_Query

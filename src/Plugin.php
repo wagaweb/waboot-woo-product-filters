@@ -105,13 +105,13 @@ class Plugin extends BasePlugin {
 		if(!$query instanceof \WP_Query) return;
 
 		if(isset($_GET['wbwpf_query'])){
-			xdebug_break();
+			$filter_query = Query_Factory::build_from_get_params();
+		}elseif(isset($_POST['wbwpf_search_by_filters'])){
+			$filter_query = Query_Factory::build_from_post_params();
 		}
 
-		if(isset($_POST['wbwpf_search_by_filters'])){
-			$filter_query = Query_Factory::build_from_post_params();
+		if(isset($filter_query)){
 			$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
-
 			if(is_array($ids) && count($ids) > 0){
 				$query->set('post__in',$ids);
 			}else{
