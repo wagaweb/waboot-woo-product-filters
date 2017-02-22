@@ -10,13 +10,13 @@ if(!function_exists("wbwpf_show_filters")):
 	function wbwpf_show_filters($args){
 		//Testing:
 		$args = [
-			'price' => [
-				'type' => "range",
-				'dataType' => 'price'
-			],
 			'product_cat' => [
 				'type' => "checkbox", //Come visualizzarli
 				'dataType' => 'taxonomies' //Come prende i valori
+			],
+			'product_tag' => [
+				'type' => "checkbox",
+				'dataType' => 'taxonomies'
 			],
 		];
 
