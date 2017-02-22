@@ -21,3 +21,12 @@
         </p>
 	<?php endif; ?>
 </form>
+<div id="progress-wrapper" style="margin: 10px 0;"></div>
+<script type="text/template" id="progress-tpl">
+    <div class="progress-meter">
+        Indexing <%= total %> products...
+    </div>
+    <div class="progress-bar-wrapper" style="width: 100%">
+        <div class="progress-bar" style="text-align: center; width: <%= current_percentage %>%; background-color: #00a8c6;"><%= current_percentage %>%</div>
+    </div>
+</script>

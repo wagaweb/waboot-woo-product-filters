@@ -1,4 +1,5 @@
 import $ from "jquery";
+import _ from 'lodash';
 
 class Dashboard{
     constructor(){
@@ -18,10 +19,13 @@ class Dashboard{
      * Handle the form for the creation of index table
      */
     handle_index_table_form(){
-        let $form = $("#custom-table-parameters");
+        let $form = $("#custom-table-parameters"),
+            $form_submit_button = $form.find(".button-primary");
 
         $form.on("submit",(e) => {
             e.preventDefault();
+            //Disable button
+            $form_submit_button.attr("disabled",true);
             //Collect data
             let table_params = {},
                 $dataTypes_input = $("[data-datatype]").filter(":checked");
@@ -29,7 +33,6 @@ class Dashboard{
                 for(let input of $dataTypes_input){
                     let $input = $(input);
                     if(typeof table_params[""+$input.data("datatype")+""] === "undefined"){
-                        debugger;
                         table_params[""+$input.data("datatype")+""] = [];
                     }
                     table_params[$input.data("datatype")].push($input.val());
@@ -51,7 +54,11 @@ class Dashboard{
             limit: 1,
             offset: 0,
             table_params: table_params
-        };
+        },
+            $form = $("#custom-table-parameters"),
+            $form_submit_button = $form.find(".button-primary"),
+            $progress_wrapper = $("#progress-wrapper"),
+            progress_tpl = _.template($("#progress-tpl").html());
 
         /*
          * Recursively call ajax endpoint
@@ -66,19 +73,24 @@ class Dashboard{
                 method: "POST"
             })
                 .then(function(result,textStatus,jqX){
-                    debugger;
+                    let progress_html = progress_tpl({
+                        'total': result.data.found_products,
+                        'current_percentage': result.data.current_percentage
+                    });
                     switch(result.data.status){
                         case "run":
+                            $progress_wrapper.html(progress_html);
                             return do_req(result.data);
                             break;
                         case "complete":
+                            $progress_wrapper.html(progress_html);
+                            $form_submit_button.attr("disabled",false);
                             return "complete";
                             break;
                     }
 
                 })
                 .fail(function(jqXHR,textStatus,errorThrown){
-                    debugger;
                     return "failed";
                 });
         };
