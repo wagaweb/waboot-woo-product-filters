@@ -54,9 +54,11 @@ class Plugin extends BasePlugin {
 	public function hooks(){
 		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
+
 		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
 		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
+
 		$this->loader->add_action("query_vars",$this,"add_query_vars",1);
 		$this->loader->add_action("woocommerce_product_query",$this,"alter_product_query",10,2);
 		$this->loader->add_filter("woocommerce_pagination_args",$this,"alter_woocommerce_pagination_args",10,1);
@@ -64,6 +66,8 @@ class Plugin extends BasePlugin {
 
 	/**
 	 * Enqueue admin assets
+	 *
+	 * @hooked 'admin_enqueue_scripts'
 	 */
 	public function admin_assets(){
 		$assets = [
@@ -86,6 +90,8 @@ class Plugin extends BasePlugin {
 	/**
 	 * Adds query vars
 	 *
+	 * @hooked 'query_vars'
+	 *
 	 * @param $vars
 	 *
 	 * @return array
@@ -97,6 +103,8 @@ class Plugin extends BasePlugin {
 
 	/**
 	 * Alter the woocommerce product query
+	 *
+	 * @hooked 'woocommerce_product_query'
 	 *
 	 * @param $query
 	 * @param $wc_query
@@ -123,6 +131,8 @@ class Plugin extends BasePlugin {
 	/**
 	 * Adds out query string to woocommerce pagination
 	 *
+	 * @hooked 'woocommerce_pagination_args'
+	 *
 	 * @param $args
 	 *
 	 * @return mixed
@@ -137,6 +147,8 @@ class Plugin extends BasePlugin {
 
 	/**
 	 * Displays the admin page
+	 *
+	 * @hooked 'admin_menu'
 	 */
 	public function display_admin_page(){
 		add_submenu_page("woocommerce",__("Filters settings",$this->get_textdomain()),__("Filters settings",$this->get_textdomain()),"manage_woocommerce","wbwpf_settings",function(){
