@@ -40,9 +40,11 @@ class Filter_Factory{
 	 *
 	 * @param $params
 	 *
+	 * @param array|bool|FALSE $filter_values if provided, the filters will be assigned with these values
+	 *
 	 * @return array
 	 */
-	public static function build_from_params($params){
+	public static function build_from_params($params,$filter_values = false){
 		$plugin = Plugin::get_instance_from_global();
 		$dataTypes = $plugin->get_available_dataTypes();
 		$uiTypes = $plugin->get_available_uiTypes();
@@ -66,6 +68,10 @@ class Filter_Factory{
 
 			$f = new Filter($filter_slug,$datatype,$uitype);
 			$f->uiType->set_name($filter_slug);
+
+			if(is_array($filter_values) && isset($filter_values[$filter_slug])){
+				$f->set_value($filter_values[$filter_slug]);
+			}
 
 			$filters[] = $f;
 		}

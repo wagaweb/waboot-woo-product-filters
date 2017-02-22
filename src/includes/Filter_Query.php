@@ -26,15 +26,16 @@ class Filter_Query{
 	 * @return $this
 	 */
 	public function build(){
-		$query = $this->select_statement;
-		$query.= $this->from_statement;
+		$query = "SELECT ".$this->select_statement;
+		$query.= " FROM ".$this->from_statement;
 		if(is_array($this->where_statements) && !empty($this->where_statements)){
+			$query .= " WHERE ";
 			$i = 0;
 			foreach ($this->where_statements as $statement){
 				if($i > 0){
 					$query .= " AND ";
 				}
-				$query .= $statement;
+				$query .= "(".$statement.")";
 				$i++;
 			}
 		}

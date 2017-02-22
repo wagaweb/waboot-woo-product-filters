@@ -91,9 +91,24 @@ class Plugin extends BasePlugin {
 
 		$active_filters = $_POST['wbwpf_active_filters'];
 
-		$filters = Filter_Factory::build_from_params($active_filters);
+		$filter_current_values = call_user_func(function(){
+			$posted_params = $_POST;
+			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters"];
+			$current_values = [];
+			foreach ($posted_params as $param => $param_values){
+				if(!in_array($param,$ignorelist)){
+					$param = preg_replace("/wbwpf_/","",$param);
+					$current_values[$param] = $param_values;
+				}
+			}
+			return $current_values;
+		});
 
-		//$filter_query = Query_Factory::build($filters);
+		$filters = Filter_Factory::build_from_params($active_filters,$filter_current_values);
+
+		$filter_query = Query_Factory::build($filters);
+
+		//xdebug_break();
 	}
 
 	/**

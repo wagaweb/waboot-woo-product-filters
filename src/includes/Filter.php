@@ -18,6 +18,10 @@ class Filter{
 	 * @var string the filter slug (eg: "product_cat")
 	 */
 	var $slug;
+	/**
+	 * @var array the current selected values of the filter
+	 */
+	var $current_values;
 
 	/**
 	 * Filter constructor.
@@ -30,6 +34,29 @@ class Filter{
 		$this->slug = $slug;
 		$this->dataType = $dataType;
 		$this->uiType = $uiType;
+	}
+
+	/**
+	 * Complete the $query (passed by reference)
+	 *
+	 * @param Filter_Query $query
+	 */
+	function parse_query(Filter_Query &$query){
+		$statement = implode(" OR $this->slug = ",$this->current_values);
+		$statement = "$this->slug = ".$statement;
+		$query->where_statements[] = $statement;
+	}
+
+	/**
+	 * Set the current value
+	 *
+	 * @param mixed $value
+	 */
+	function set_value($value){
+		if(!is_array($value)){
+			$value = [$value];
+		}
+		$this->current_values = $value;
 	}
 
 	/**

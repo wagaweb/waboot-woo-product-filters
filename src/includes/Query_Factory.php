@@ -2,7 +2,7 @@
 
 namespace WBWPF\includes;
 
-use WBWPF\filters\Filter;
+use WBWPF\Plugin;
 
 class Query_Factory{
 	/**
@@ -13,7 +13,13 @@ class Query_Factory{
 	 * @return Filter_Query
 	 */
 	public static function build($filters){
+		global $wpdb;
+
 		$query = new Filter_Query();
+
+		$query->select_statement = "product_id";
+		$query->from_statement = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
+
 		if(!empty($filters)){
 			foreach ($filters as $filter){
 				if($filter instanceof Filter){
@@ -21,6 +27,9 @@ class Query_Factory{
 				}
 			}
 		}
+
+		$query->build();
+
 		return $query;
 	}
 }
