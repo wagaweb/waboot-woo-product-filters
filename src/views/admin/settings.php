@@ -11,7 +11,8 @@
             <div class="<?php echo $d['slug'] ?>_list">
 				<?php foreach ($d['data'] as $name => $label): ?>
                     <label>
-                        <input type="checkbox" name="wbwpf_use_<?php echo $d['slug'] ?>[]" value="<?php echo $name; ?>" data-datatype="<?php echo $d['slug'] ?>"><?php echo $label; ?>
+                        <?php $checked = isset($current_settings['filters'][$d['slug']]) && in_array($name,$current_settings['filters'][$d['slug']]); ?>
+                        <input <?php if($checked): ?>checked<?php endif; ?> type="checkbox" name="wbwpf_use_<?php echo $d['slug'] ?>[]" value="<?php echo $name; ?>" data-datatype="<?php echo $d['slug'] ?>"><?php echo $label; ?>
                     </label>
 				<?php endforeach; ?>
             </div>

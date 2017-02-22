@@ -180,6 +180,7 @@ class Plugin extends BasePlugin {
 				'page_title' => __("Filters settings",$this->get_textdomain()),
 				'data' => $datatypes_tree,
 				'has_data' => isset($datatypes_tree) && is_array($datatypes_tree) && !empty($datatypes_tree),
+				'current_settings' => $this->get_plugin_settings(),
 				'textdomain' => $this->get_textdomain()
 			]);
 		});
