@@ -45,8 +45,8 @@ class Filter{
 
 		//Adds hidden input to output
 		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][slug]' value='{$this->slug}'>";
-		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][uitype]' value='{$this->uiType->type_slug}'>";
-		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][datatype]' value='{$this->dataType->type_slug}'>";
+		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][type]' value='{$this->uiType->type_slug}'>";
+		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][dataType]' value='{$this->dataType->type_slug}'>";
 
 		echo $output;
 	}

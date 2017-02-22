@@ -26,13 +26,8 @@ abstract class DataType{
 	var $admin_description = "";
 
 	public function __construct() {
-		$plugin = BasePlugin::get_instances_of("waboot-woo-product-filters");
-		if(!isset($plugin['core'])) throw new \Exception("Unable to find the plugin during DataType initialization");
-		$plugin = $plugin['core'];
-		if(!$plugin instanceof Plugin) throw new \Exception("Unable to find the plugin during DataType initialization");
-
+		$plugin = Plugin::get_instance_from_global();
 		$dataTypes = $plugin->get_available_dataTypes();
-
 		foreach ($dataTypes as $type_slug => $classname){
 			if($classname == static::class){
 				$this->type_slug = $type_slug;

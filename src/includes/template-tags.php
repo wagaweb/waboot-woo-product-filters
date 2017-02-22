@@ -20,13 +20,7 @@ if(!function_exists("wbwpf_show_filters")):
 			],
 		];
 
-		$plugin = \WBF\components\pluginsframework\BasePlugin::get_instances_of("waboot-woo-product-filters");
-		if(!isset($plugin['core'])) return;
-		$plugin = $plugin['core'];
-		if(!$plugin instanceof \WBWPF\Plugin) return;
-
-		$dataTypes = $plugin->get_available_dataTypes();
-		$uiTypes = $plugin->get_available_uiTypes();
+		$plugin = \WBWPF\Plugin::get_instance_from_global();
 
 		$filters = [];
 
@@ -36,18 +30,11 @@ if(!function_exists("wbwpf_show_filters")):
 			$dataType_slug = $filter_params['dataType'];
 			$uiType_slug = $filter_params['type'];
 
-			if(!isset($dataTypes[$dataType_slug])) continue;
-			$dataTypeClassName = $dataTypes[$dataType_slug];
+			$f = \WBWPF\includes\Filter_Factory::build($filter_slug,$dataType_slug,$uiType_slug);
 
-			if(!isset($uiTypes[$uiType_slug])) continue;
-			$uiTypeClassName = $uiTypes[$uiType_slug];
-
-			$datatype = new $dataTypeClassName();
-			$uitype = new $uiTypeClassName();
-
-			$f = new \WBWPF\includes\Filter($filter_slug,$datatype,$uitype);
-
-			$filters[] = $f;
+			if($f){
+				$filters[] = $f;
+			}
 		}
 
 		$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);

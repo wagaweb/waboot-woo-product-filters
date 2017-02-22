@@ -7,6 +7,8 @@ use WBF\components\pluginsframework\BasePlugin;
 use WBF\components\utils\DB;
 use WBWPF\datatypes\DataType;
 use WBWPF\filters\Filter;
+use WBWPF\includes\Filter_Factory;
+use WBWPF\includes\Query_Factory;
 
 /**
  * The core plugin class.
@@ -28,6 +30,21 @@ class Plugin extends BasePlugin {
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
 
 		$this->hooks();
+	}
+
+	/**
+	 * Return the plugin instance
+	 *
+	 * @return Plugin
+	 * @throws \Exception
+	 */
+	public static function get_instance_from_global(){
+		$plugin = BasePlugin::get_instances_of("waboot-woo-product-filters");
+		if(!isset($plugin['core'])) throw new \Exception("Unable to find the plugin during get_instance_from_global()");
+		$plugin = $plugin['core'];
+		if(!$plugin instanceof Plugin) throw new \Exception("get_instance_from_global() found an invalid plugin instance");
+
+		return $plugin;
 	}
 
 	/**
@@ -71,7 +88,12 @@ class Plugin extends BasePlugin {
 	 */
 	public function alter_product_query($query,$wc_query){
 		if(!isset($_POST['wbwpf_search_by_filters'])) return;
-		xdebug_break();
+
+		$active_filters = $_POST['wbwpf_active_filters'];
+
+		$filters = Filter_Factory::build_from_params($active_filters);
+
+		//$filter_query = Query_Factory::build($filters);
 	}
 
 	/**

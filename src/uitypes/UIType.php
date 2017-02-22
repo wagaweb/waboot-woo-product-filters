@@ -24,13 +24,8 @@ abstract class UIType{
 	var $values = [];
 
 	public function __construct() {
-		$plugin = BasePlugin::get_instances_of("waboot-woo-product-filters");
-		if(!isset($plugin['core'])) throw new \Exception("Unable to find the plugin during UIType initialization");
-		$plugin = $plugin['core'];
-		if(!$plugin instanceof Plugin) throw new \Exception("Unable to find the plugin during UIType initialization");
-
+		$plugin = Plugin::get_instance_from_global();
 		$uiTypes = $plugin->get_available_uiTypes();
-
 		foreach ($uiTypes as $type_slug => $classname){
 			if($classname == static::class){
 				$this->type_slug = $type_slug;
