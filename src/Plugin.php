@@ -297,11 +297,15 @@ class Plugin extends BasePlugin {
 
 		if(is_array($ids) && !empty($ids)){
 			$this->fill_products_index_table($ids);
+
+			$current_percentage = ceil( ($limit+$offset)*(100/$found_products) );
+			if($current_percentage > 100) $current_percentage = 100;
+
 			wp_send_json_success([
 				'offset' => $limit+$offset,
 				'limit' => $limit,
 				'found_products' => $found_products,
-				'current_percentage' => ceil( ($limit+$offset)*(100/$found_products) ),
+				'current_percentage' => $current_percentage,
 				'table_params' => $table_params,
 				'status' => 'run'
 			]);

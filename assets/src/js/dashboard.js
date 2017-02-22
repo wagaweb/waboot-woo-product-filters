@@ -51,7 +51,7 @@ class Dashboard{
     handle_index_table_creation(table_params){
         let data = {
             current_percentage: 0,
-            limit: 1,
+            limit: 10,
             offset: 0,
             table_params: table_params
         },
