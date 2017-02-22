@@ -68,12 +68,19 @@ class Filter{
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
 		$this->uiType->set_name($this->slug);
 		$this->uiType->set_values($values);
-		$output = $this->uiType->generate_output();
+
+		$output = "<div class=wbwpf-filter-wrapper data-filter='$this->slug'>";
+
+		$output .= "<h3>$this->slug</h3>";
+
+		$output .= $this->uiType->generate_output();
 
 		//Adds hidden input to output
 		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][slug]' value='{$this->slug}'>";
 		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][type]' value='{$this->uiType->type_slug}'>";
 		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][dataType]' value='{$this->dataType->type_slug}'>";
+
+		$output .= "</div>";
 
 		echo $output;
 	}
