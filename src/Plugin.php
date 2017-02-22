@@ -8,6 +8,7 @@ use WBF\components\utils\DB;
 use WBWPF\datatypes\DataType;
 use WBWPF\filters\Filter;
 use WBWPF\includes\Filter_Factory;
+use WBWPF\includes\Filter_Query;
 use WBWPF\includes\Query_Factory;
 
 /**
@@ -88,27 +89,16 @@ class Plugin extends BasePlugin {
 	 */
 	public function alter_product_query($query,$wc_query){
 		if(!isset($_POST['wbwpf_search_by_filters'])) return;
+		if(!$query instanceof \WP_Query) return;
 
-		$active_filters = $_POST['wbwpf_active_filters'];
+		$filter_query = Query_Factory::build_from_post_params();
+		$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
 
-		$filter_current_values = call_user_func(function(){
-			$posted_params = $_POST;
-			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters"];
-			$current_values = [];
-			foreach ($posted_params as $param => $param_values){
-				if(!in_array($param,$ignorelist)){
-					$param = preg_replace("/wbwpf_/","",$param);
-					$current_values[$param] = $param_values;
-				}
-			}
-			return $current_values;
-		});
-
-		$filters = Filter_Factory::build_from_params($active_filters,$filter_current_values);
-
-		$filter_query = Query_Factory::build($filters);
-
-		//xdebug_break();
+		if(is_array($ids) && count($ids) > 0){
+			$query->set('post__in',$ids);
+		}else{
+			$query->set('post__in',[0]);
+		}
 	}
 
 	/**

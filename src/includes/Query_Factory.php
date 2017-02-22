@@ -32,4 +32,44 @@ class Query_Factory{
 
 		return $query;
 	}
+
+	/**
+	 * Build a Filter_Query from params
+	 *
+	 * @param array $active_filters
+	 * @param array $current_values
+	 *
+	 * @return Filter_Query
+	 */
+	public static function build_from_params($active_filters,$current_values){
+		$filters = Filter_Factory::build_from_params($active_filters,$current_values);
+		$filter_query = self::build($filters);
+		return $filter_query;
+	}
+
+	/**
+	 * Setup a Filter_Query starting from current $_POST params (it looks for specific-predefined post params)
+	 *
+	 * @return Filter_Query
+	 */
+	public static function build_from_post_params(){
+		$active_filters = $_POST['wbwpf_active_filters'];
+
+		$filter_current_values = call_user_func(function(){
+			$posted_params = $_POST;
+			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters"];
+			$current_values = [];
+			foreach ($posted_params as $param => $param_values){
+				if(!in_array($param,$ignorelist)){
+					$param = preg_replace("/wbwpf_/","",$param);
+					$current_values[$param] = $param_values;
+				}
+			}
+			return $current_values;
+		});
+
+		$filter_query = self::build_from_params($active_filters,$filter_current_values);
+
+		return $filter_query;
+	}
 }

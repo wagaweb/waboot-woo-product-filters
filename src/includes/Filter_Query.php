@@ -3,6 +3,8 @@
 namespace WBWPF\includes;
 
 class Filter_Query{
+	const RESULT_FORMAT_IDS = 0;
+	const RESULT_FORMAT_OBJECTS = 1;
 	/**
 	 * @var
 	 */
@@ -19,6 +21,10 @@ class Filter_Query{
 	 * @var
 	 */
 	var $query;
+	/**
+	 * @var array
+	 */
+	var $found_products;
 
 	/**
 	 * Assemble the query
@@ -46,16 +52,43 @@ class Filter_Query{
 	/**
 	 * Performs the query and return the result
 	 *
-	 * @return array|null|object
+	 * @param int $result_format
+	 *
+	 * @return Filter_Query
 	 * @throws \Exception
 	 */
-	public function perform(){
+	public function perform($result_format = self::RESULT_FORMAT_OBJECTS){
 		if($this->has_query()){
 			global $wpdb;
-			$r = $wpdb->get_results($this->query);
-			return $r;
+			if($result_format == self::RESULT_FORMAT_OBJECTS){
+				$r = $wpdb->get_results($this->query);
+			}elseif($result_format == self::RESULT_FORMAT_IDS){
+				$r = $wpdb->get_col($this->query);
+				$r = array_unique($r);
+			}
+			$this->found_products = $r;
+			return $this;
 		}else{
 			throw new \Exception("Invalid or not existent query");
+		}
+	}
+
+	/**
+	 * Get the query result
+	 *
+	 * @param int $result_format
+	 *
+	 * @return array
+	 * @throws \Exception
+	 */
+	public function get_results($result_format = self::RESULT_FORMAT_OBJECTS){
+		if(!isset($this->found_products)){
+			$this->perform($result_format);
+		}
+		if(is_array($this->found_products)){
+			return $this->found_products;
+		}else{
+			throw new \Exception("Filter_Query was unable to retrieve any products");
 		}
 	}
 
