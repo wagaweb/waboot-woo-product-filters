@@ -33,6 +33,11 @@ if(!function_exists("wbwpf_show_filters")):
 			$f = \WBWPF\includes\Filter_Factory::build($filter_slug,$dataType_slug,$uiType_slug);
 
 			if($f){
+				if(isset($filter_params['label'])){
+					$f->set_label($filter_params['label']);
+				}else{
+					$f->set_label();
+				}
 				$filters[] = $f;
 			}
 		}

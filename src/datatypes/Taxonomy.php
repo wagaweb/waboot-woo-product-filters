@@ -5,6 +5,9 @@ namespace WBWPF\datatypes;
 class Taxonomy extends DataType{
 	var $slug = "tax";
 
+	/**
+	 * Taxonomy constructor
+	 */
 	function __construct() {
 		parent::__construct();
 
@@ -12,6 +15,9 @@ class Taxonomy extends DataType{
 		$this->admin_description = __("Select one or more taxonomies","waboot-woo-product-filters");
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getData() {
 		$taxonomies = [];
 		//Gets all taxonomies
@@ -20,6 +26,19 @@ class Taxonomy extends DataType{
 			$taxonomies[$tax->name] = $tax->labels->name;
 		}
 		return $taxonomies;
+	}
+
+	/**
+	 * @param $key
+	 *
+	 * @return string
+	 */
+	public function getPublicLabelOf( $key ) {
+		global $wpdb;
+		$taxonomy = get_taxonomy($key);
+		$label = $taxonomy->label;
+		$label = apply_filters("wbwpf/datatype/label",$label,$this);
+		return $label;
 	}
 
 	/**

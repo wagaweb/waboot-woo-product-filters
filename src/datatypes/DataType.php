@@ -46,6 +46,15 @@ abstract class DataType{
 	}
 
 	/**
+	 * Given a $key, retrieve the public label for that key (eg: "product_cat" => Product Categories)
+	 *
+	 * @return string
+	 */
+	public function getPublicLabelOf($key){
+		return $key;
+	}
+
+	/**
 	 * Return the value for $product_id for data type called $key (eg: the value of "product_cat" for a specified product)
 	 *
 	 * @param $product_id

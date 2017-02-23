@@ -2,6 +2,7 @@
 
 namespace WBWPF\includes;
 
+use WBF\components\mvc\HTMLView;
 use WBWPF\datatypes\DataType;
 use WBWPF\uitypes\UIType;
 
@@ -18,6 +19,10 @@ class Filter{
 	 * @var string the filter slug (eg: "product_cat")
 	 */
 	var $slug;
+	/**
+	 * @var string the label of the filter
+	 */
+	var $label;
 	/**
 	 * @var array the current selected values of the filter
 	 */
@@ -48,6 +53,20 @@ class Filter{
 	}
 
 	/**
+	 * Set the filter label
+	 *
+	 * @param string|bool|FALSE $label
+	 *
+	 * @return void
+	 */
+	function set_label($label = false){
+		if(!$label){
+			$label = $this->dataType->getPublicLabelOf($this->slug);
+		}
+		$this->label = $label;
+	}
+
+	/**
 	 * Set the current value
 	 *
 	 * @param mixed $value
@@ -68,20 +87,16 @@ class Filter{
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
 		$this->uiType->set_name($this->slug);
 		$this->uiType->set_values($values);
+		if(!isset($this->label)) $this->set_label();
 
-		$output = "<div class=wbwpf-filter-wrapper data-filter='$this->slug'>";
+		$v = new HTMLView("src/views/single-filter.php","waboot-woo-product-filters");
 
-		$output .= "<h3>$this->slug</h3>";
-
-		$output .= $this->uiType->generate_output();
-
-		//Adds hidden input to output
-		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][slug]' value='{$this->slug}'>";
-		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][type]' value='{$this->uiType->type_slug}'>";
-		$output .= "<input type='hidden' name='wbwpf_active_filters[{$this->slug}][dataType]' value='{$this->dataType->type_slug}'>";
-
-		$output .= "</div>";
-
-		echo $output;
+		$v->display([
+			'slug' => $this->slug,
+			'label' => $this->label,
+			'uiType' => $this->uiType->type_slug,
+			'dataType' => $this->dataType->type_slug,
+			'content' => $this->uiType->generate_output()
+		]);
 	}
 }

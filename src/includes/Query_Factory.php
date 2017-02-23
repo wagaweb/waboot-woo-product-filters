@@ -78,7 +78,7 @@ class Query_Factory{
 			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters"];
 			$current_values = [];
 			foreach ($posted_params as $param => $param_values){
-				if(!in_array($param,$ignorelist)){
+				if(!in_array($param,$ignorelist) && preg_match("/wbwpf_/",$param)){
 					$param = preg_replace("/wbwpf_/","",$param);
 					$current_values[$param] = $param_values;
 				}

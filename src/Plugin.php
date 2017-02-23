@@ -420,7 +420,7 @@ class Plugin extends BasePlugin {
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
-						$new_row[$value] = ""; //todo: change to null?
+						$new_row[$value] = null; //todo: change to null or ""?
 					}else{
 						/*
 						 * We have have a single value for this data type. So it's ok to inject it into the main row. We want only one row that contains all single-valued data types for one product
