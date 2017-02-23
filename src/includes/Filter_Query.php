@@ -20,6 +20,10 @@ class Filter_Query{
 	/**
 	 * @var
 	 */
+	var $sub_queries;
+	/**
+	 * @var
+	 */
 	var $query;
 	/**
 	 * @var array
@@ -27,7 +31,7 @@ class Filter_Query{
 	var $found_products;
 
 	/**
-	 * Assemble the query
+	 * Assemble the query using the where statements. This is the first method we are testing.
 	 *
 	 * @return $this
 	 */
@@ -50,6 +54,30 @@ class Filter_Query{
 	}
 
 	/**
+	 * Assemble the query using the sub_queries property. This is the second method we are testing.
+	 */
+	public function build_from_sub_queries(){
+		$partials = [];
+		if(!empty($this->sub_queries)){
+			foreach ($this->sub_queries as $query){
+				$query->build();
+				$partials[] = $query->query;
+			}
+		}
+		$final_query = implode(" UNION ALL ",$partials);
+		$this->query = $final_query;
+	}
+
+	/**
+	 * Adds a sub query
+	 *
+	 * @param Filter_Query $query
+	 */
+	public function add_sub_query(Filter_Query $query){
+		$this->sub_queries[] = $query;
+	}
+
+	/**
 	 * Performs the query and return the result
 	 *
 	 * @param int $result_format
@@ -60,17 +88,47 @@ class Filter_Query{
 	public function perform($result_format = self::RESULT_FORMAT_OBJECTS){
 		if($this->has_query()){
 			global $wpdb;
-			if($result_format == self::RESULT_FORMAT_OBJECTS){
-				$r = $wpdb->get_results($this->query);
-			}elseif($result_format == self::RESULT_FORMAT_IDS){
+			if($result_format == self::RESULT_FORMAT_IDS){
 				$r = $wpdb->get_col($this->query);
-				$r = array_unique($r);
+			}else{
+				$r = $wpdb->get_results($this->query);
 			}
+			$r = $this->parse_results($r,$result_format);
 			$this->found_products = $r;
 			return $this;
 		}else{
 			throw new \Exception("Invalid or not existent query");
 		}
+	}
+
+	/**
+	 * Applies some actions to the result before store it
+	 *
+	 * @param array $result the result to parse
+	 *
+	 * @return array
+	 */
+	private function parse_results($result, $format = self::RESULT_FORMAT_OBJECTS){
+		if($format == self::RESULT_FORMAT_IDS){
+			/*
+			 * If we have a database structured with complete rows, we can do this:
+			 */
+			//$result = array_unique($result);
+
+			/*
+			 * If we have a database structured with incomplete rows, we have to do this, to simulate an "AND".
+			 * We create "AND" by using "UNION ALL" to subsequent select (see: build_from_sub_queries() )
+			 */
+			$counts = array_count_values($result);
+			$duplicates = array_filter($counts,function($item){ return $item > 1; });
+			$duplicates = array_keys($duplicates);
+			$result = $duplicates;
+
+			/*
+			 * We are testing two database structures, see: Plugin::fill_products_index_table()
+			 */
+		}
+		return $result;
 	}
 
 	/**

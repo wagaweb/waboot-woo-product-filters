@@ -12,7 +12,7 @@ class Query_Factory{
 	 *
 	 * @return Filter_Query
 	 */
-	public static function build($filters){
+	public static function build($filters = []){
 		global $wpdb;
 
 		$query = new Filter_Query();
@@ -26,9 +26,21 @@ class Query_Factory{
 					$filter->parse_query($query);
 				}
 			}
-		}
 
-		$query->build();
+			/*
+			 * We are testing two database structures, see Plugin::fill_products_index_table()
+			 */
+
+			/*
+			 * This is for the first: (we do not use sub queries)
+			 */
+			//$query->build();
+
+			/*
+			 * This is for the second:
+			 */
+			$query->build_from_sub_queries();
+		}
 
 		return $query;
 	}

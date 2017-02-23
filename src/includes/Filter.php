@@ -50,7 +50,11 @@ class Filter{
 		if(is_array($this->current_values) && !empty($this->current_values)){
 			$statement = implode(" OR $this->slug = ",$this->current_values);
 			$statement = "$this->slug = ".$statement;
-			$query->where_statements[] = $statement;
+
+			//$query->where_statements[] = $statement;
+			$new_query = Query_Factory::build();
+			$new_query->where_statements[] = $statement;
+			$query->add_sub_query($new_query);
 		}
 	}
 
