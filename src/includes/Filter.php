@@ -47,9 +47,11 @@ class Filter{
 	 * @param Filter_Query $query
 	 */
 	function parse_query(Filter_Query &$query){
-		$statement = implode(" OR $this->slug = ",$this->current_values);
-		$statement = "$this->slug = ".$statement;
-		$query->where_statements[] = $statement;
+		if(is_array($this->current_values) && !empty($this->current_values)){
+			$statement = implode(" OR $this->slug = ",$this->current_values);
+			$statement = "$this->slug = ".$statement;
+			$query->where_statements[] = $statement;
+		}
 	}
 
 	/**
