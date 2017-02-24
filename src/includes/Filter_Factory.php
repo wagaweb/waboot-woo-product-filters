@@ -80,6 +80,50 @@ class Filter_Factory{
 	}
 
 	/**
+	 * Build a Filters array from standardized get params
+	 *
+	 * @return array
+	 */
+	public static function build_from_get_params(){
+		if(!isset($_GET['wbwpf_query'])) return [];
+
+		$params = $_GET['wbwpf_query'];
+
+		$r = Filter_Factory::unwrap_stringified($params);
+
+		$active_filters = $r['filters'];
+		$filter_current_values = $r['values'];
+
+		return self::build_from_params($active_filters,$filter_current_values);
+	}
+
+	/**
+	 * Build a Filters array from standardized post params
+	 *
+	 * @return array
+	 */
+	public static function build_from_post_params(){
+		if(!isset($_POST['wbwpf_active_filters'])) return [];
+
+		$active_filters = $_POST['wbwpf_active_filters'];
+
+		$filter_current_values = call_user_func(function(){
+			$posted_params = $_POST;
+			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters"];
+			$current_values = [];
+			foreach ($posted_params as $param => $param_values){
+				if(!in_array($param,$ignorelist) && preg_match("/wbwpf_/",$param)){
+					$param = preg_replace("/wbwpf_/","",$param);
+					$current_values[$param] = $param_values;
+				}
+			}
+			return $current_values;
+		});
+
+		return self::build_from_params($active_filters,$filter_current_values);
+	}
+
+	/**
 	 * Build an array of filters from a string format
 	 *
 	 * @param string $params

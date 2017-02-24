@@ -2,14 +2,18 @@
 
 namespace WBWPF\datatypes;
 
+use WBWPF\includes\Filter;
+
 class Taxonomy extends DataType{
 	var $slug = "tax";
 
 	/**
 	 * Taxonomy constructor
+	 *
+	 * @param Filter|null $parent_filter
 	 */
-	function __construct() {
-		parent::__construct();
+	function __construct(Filter &$parent_filter = null) {
+		parent::__construct($parent_filter);
 
 		$this->label = __("Taxonomies","waboot-woo-product-filters");
 		$this->admin_description = __("Select one or more taxonomies","waboot-woo-product-filters");
@@ -30,10 +34,11 @@ class Taxonomy extends DataType{
 
 	/**
 	 * @param $key
+	 * @param Filter|null $parent_filter
 	 *
 	 * @return string
 	 */
-	public function getPublicLabelOf( $key ) {
+	public function getPublicLabelOf( $key, Filter $parent_filter = null ) {
 		global $wpdb;
 		$taxonomy = get_taxonomy($key);
 		$label = $taxonomy->label;
@@ -42,15 +47,40 @@ class Taxonomy extends DataType{
 	}
 
 	/**
+	 * @param $key
+	 * @param Filter|null $parent_filter
+	 *
+	 * @return string
+	 */
+	public function getPublicItemLabelOf( $key, Filter $parent_filter = null ){
+		$term = parent::getPublicItemLabelOf($key);
+
+		if(!isset($parent_filter) && isset($this->parent_filter)){
+			$parent_filter = $this->parent_filter;
+		}
+
+		if(!isset($parent_filter)) return $term;
+
+		$term = get_term_by("id",$key,$parent_filter->slug);
+
+		if($term instanceof \WP_Term){
+			$term = $term->name;
+		}
+
+		return $term;
+	}
+
+	/**
 	 * Get the value for $key of $product_id. We retrieve terms id.
 	 *
 	 * @param $product_id
 	 * @param $key
 	 * @param int $format
+	 * @param Filter|null $parent_filter
 	 *
 	 * @return array|string
 	 */
-	public function getValueOf( $product_id, $key, $format = self::VALUES_FOR_FORMAT_COMMA_SEPARATED ) {
+	public function getValueOf( $product_id, $key, $format = self::VALUES_FOR_FORMAT_COMMA_SEPARATED, Filter $parent_filter = null ) {
 		$terms = [];
 		$raw_terms = wp_get_post_terms($product_id,$key);
 		if(is_array($raw_terms) && !empty($raw_terms)){
@@ -67,7 +97,13 @@ class Taxonomy extends DataType{
 		return $terms;
 	}
 
-	public function getAvailableValuesFor( $key ) {
+	/**
+	 * @param $key
+	 * @param Filter|null $parent_filter
+	 *
+	 * @return array|mixed
+	 */
+	public function getAvailableValuesFor( $key, Filter $parent_filter = null ) {
 		$values = [];
 
 		$raw_values = parent::getAvailableValuesFor( $key );

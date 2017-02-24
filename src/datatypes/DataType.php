@@ -3,11 +3,16 @@
 namespace WBWPF\datatypes;
 
 use WBF\components\pluginsframework\BasePlugin;
+use WBWPF\includes\Filter;
 use WBWPF\Plugin;
 
 abstract class DataType{
 	const VALUES_FOR_FORMAT_COMMA_SEPARATED = 0;
 	const VALUES_FOR_VALUES_FORMAT_ARRAY = 1;
+	/**
+	 * @var Filter
+	 */
+	var $parent_filter;
 	/**
 	 * @var int|string
 	 */
@@ -25,7 +30,12 @@ abstract class DataType{
 	 */
 	var $admin_description = "";
 
-	public function __construct() {
+	/**
+	 * DataType constructor.
+	 *
+	 * @param Filter|null $parent_filter
+	 */
+	public function __construct(Filter &$parent_filter = null) {
 		$plugin = Plugin::get_instance_from_global();
 		$dataTypes = $plugin->get_available_dataTypes();
 		foreach ($dataTypes as $type_slug => $classname){
@@ -34,6 +44,15 @@ abstract class DataType{
 				break;
 			}
 		}
+
+		if(isset($parent_filter)) $this->parent_filter = $parent_filter;
+	}
+
+	/**
+	 * @param Filter $parent_filter
+	 */
+	public function setParentFilter(Filter &$parent_filter){
+		$this->parent_filter = $parent_filter;
 	}
 
 	/**
@@ -48,9 +67,25 @@ abstract class DataType{
 	/**
 	 * Given a $key, retrieve the public label for that key (eg: "product_cat" => Product Categories)
 	 *
+	 * @param $key
+	 * @param Filter|null $parent_filter
+	 *
 	 * @return string
 	 */
-	public function getPublicLabelOf($key){
+	public function getPublicLabelOf($key, Filter $parent_filter = null){
+		return $key;
+	}
+
+	/**
+	 * Given a item $key, retrieve the public label for that item (eg: term with id "23" of "product_cat" => Clothing)
+	 *
+	 * @param $key
+	 *
+	 * @param Filter|null $parent_filter
+	 *
+	 * @return string
+	 */
+	public function getPublicItemLabelOf($key, Filter $parent_filter = null){
 		return $key;
 	}
 
@@ -60,10 +95,11 @@ abstract class DataType{
 	 * @param $product_id
 	 * @param $key
 	 * @param int $format
+	 * @param Filter|null $parent_filter
 	 *
 	 * @return mixed
 	 */
-	public function getValueOf($product_id,$key,$format = self::VALUES_FOR_VALUES_FORMAT_ARRAY){
+	public function getValueOf($product_id,$key,$format = self::VALUES_FOR_VALUES_FORMAT_ARRAY, Filter $parent_filter = null){
 		if($format == self::VALUES_FOR_VALUES_FORMAT_ARRAY){
 			return [];
 		}elseif($format == self::VALUES_FOR_FORMAT_COMMA_SEPARATED){
@@ -77,10 +113,11 @@ abstract class DataType{
 	 * Get all possible value of current data type for the key called $key. By default it uses the indexed values on the custom table.
 	 *
 	 * @param $key
+	 * @param Filter|null $parent_filter
 	 *
 	 * @return array
 	 */
-	public function getAvailableValuesFor($key){
+	public function getAvailableValuesFor($key, Filter $parent_filter = null){
 		global $wpdb;
 		$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 		$values = $wpdb->get_col("SELECT DISTINCT $key FROM $table_name");
