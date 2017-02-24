@@ -115,20 +115,22 @@ class Plugin extends BasePlugin {
 	public function alter_product_query($query,$wc_query){
 		if(!$query instanceof \WP_Query) return;
 
-		if(isset($_GET['wbwpf_query'])){
-			$filter_query = Query_Factory::build_from_get_params();
-		}elseif(isset($_POST['wbwpf_search_by_filters'])){
-			$filter_query = Query_Factory::build_from_post_params();
-		}
-
-		if(isset($filter_query)){
-			$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
-			if(is_array($ids) && count($ids) > 0){
-				$query->set('post__in',$ids);
-			}else{
-				$query->set('post__in',[0]);
+		try{
+			if(isset($_GET['wbwpf_query'])){
+				$filter_query = Query_Factory::build_from_get_params();
+			}elseif(isset($_POST['wbwpf_search_by_filters'])){
+				$filter_query = Query_Factory::build_from_post_params();
 			}
-		}
+
+			if(isset($filter_query)){
+				$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
+				if(is_array($ids) && count($ids) > 0){
+					$query->set('post__in',$ids);
+				}else{
+					$query->set('post__in',[0]);
+				}
+			}
+		}catch (\Exception $e){}
 	}
 
 	/**
