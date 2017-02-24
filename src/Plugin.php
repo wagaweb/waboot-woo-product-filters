@@ -4,6 +4,7 @@ namespace WBWPF;
 use WBF\components\assets\AssetsManager;
 use WBF\components\mvc\HTMLView;
 use WBF\components\pluginsframework\BasePlugin;
+use WBF\components\pluginsframework\TemplatePlugin;
 use WBF\components\utils\DB;
 use WBWPF\datatypes\DataType;
 use WBWPF\filters\Filter;
@@ -17,7 +18,7 @@ use WBWPF\includes\Query_Factory;
  * @package    WBSample
  * @subpackage WBSample/includes
  */
-class Plugin extends BasePlugin {
+class Plugin extends TemplatePlugin {
 	/*
 	 * This is the name of the table that cointains all products id with their filterable values
 	 */
@@ -29,6 +30,8 @@ class Plugin extends BasePlugin {
 	 */
 	public function __construct() {
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
+
+		$this->add_wc_template("loop/orderby.php");
 
 		$this->hooks();
 	}
@@ -116,7 +119,7 @@ class Plugin extends BasePlugin {
 		if(!$query instanceof \WP_Query) return;
 
 		try{
-			if(isset($_GET['wbwpf_query'])){
+			if(isset($_GET['wbwpf_query']) || isset($_GET['wbwpf_search_by_filters'])){
 				$filter_query = Query_Factory::build_from_get_params();
 			}elseif(isset($_POST['wbwpf_search_by_filters'])){
 				$filter_query = Query_Factory::build_from_post_params();

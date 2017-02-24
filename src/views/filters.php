@@ -1,5 +1,5 @@
 <div class="wbwpf-filters" data-filters>
-    <form method="post" action="<?php echo wc_get_page_permalink("shop"); ?>" data-filters-form>
+    <form method="get" action="<?php echo wc_get_page_permalink("shop"); ?>" data-filters-form>
 	<?php if($has_filters): ?>
         <?php foreach ($filters as $filter): ?>
             <?php $filter->display(); ?>
