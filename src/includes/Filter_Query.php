@@ -119,10 +119,15 @@ class Filter_Query{
 			 * If we have a database structured with incomplete rows, we have to do this, to simulate an "AND".
 			 * We create "AND" by using "UNION ALL" to subsequent select (see: build_from_sub_queries() )
 			 */
-			$counts = array_count_values($result);
-			$duplicates = array_filter($counts,function($item){ return $item > 1; });
-			$duplicates = array_keys($duplicates);
-			$result = $duplicates;
+			if(count($this->sub_queries) > 1){
+				//Fake an AND condition:
+				$counts = array_count_values($result);
+				$duplicates = array_filter($counts,function($item){ return $item > 1; });
+				$duplicates = array_keys($duplicates);
+				$result = $duplicates;
+			}else{
+				$result = array_unique($result);
+			}
 
 			/*
 			 * We are testing two database structures, see: Plugin::fill_products_index_table()

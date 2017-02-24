@@ -164,7 +164,11 @@ class Filter_Factory{
 				'type' => $filter_string_values[1],
 				'dataType' => $filter_string_values[2]
 			];
-			$current_values[$filter_string_values[0]] = explode(",",$filter_string_values[3]);
+			if($filter_string_values[3] == ""){
+				$current_values[$filter_string_values[0]] = null; //todo: move it to another place?
+			}else{
+				$current_values[$filter_string_values[0]] = explode(",",$filter_string_values[3]);
+			}
 		}
 
 		return [
