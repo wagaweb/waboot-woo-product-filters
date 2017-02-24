@@ -40,6 +40,10 @@ class Filter_Factory{
 			if(isset($_GET['wbwpf_query'])){
 				$r = self::unwrap_stringified($_GET['wbwpf_query']);
 			}elseif(isset($_GET['wbwpf_active_filters']) || isset($_POST['wbwpf_active_filters'])){
+				/*
+				 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
+				 * We are testing the two...
+				 */
 				$r = self::parse_get_or_post_params();
 			}
 			if(isset($r) && isset($r['values']) && isset($r['values'][$filterSlug])){
@@ -91,6 +95,10 @@ class Filter_Factory{
 	public static function build_from_get_params(){
 		if(!isset($_GET['wbwpf_query']) && !isset($_GET['wbwpf_active_filters'])) return [];
 
+		/*
+		 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
+		 * We are testing the two...
+		 */
 		if(isset($_GET['wbwpf_query'])){
 			$params = $_GET['wbwpf_query'];
 			$r = self::unwrap_stringified($params);
