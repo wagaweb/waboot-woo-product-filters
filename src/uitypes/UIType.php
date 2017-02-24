@@ -27,6 +27,10 @@ abstract class UIType{
 	 * @var array
 	 */
 	var $values = [];
+	/**
+	 * @var array
+	 */
+	var $selected_values = [];
 
 	/**
 	 * UIType constructor.

@@ -12,10 +12,11 @@ class Filter_Factory{
 	 * @param $filterSlug
 	 * @param $dataType_slug
 	 * @param $uiType_slug
+	 * @param string|array|null $values
 	 *
 	 * @return bool|Filter
 	 */
-	public static function build($filterSlug,$dataType_slug,$uiType_slug){
+	public static function build($filterSlug,$dataType_slug,$uiType_slug,$values = null){
 		$plugin = Plugin::get_instance_from_global();
 		$dataTypes = $plugin->get_available_dataTypes();
 		$uiTypes = $plugin->get_available_uiTypes();
@@ -32,6 +33,22 @@ class Filter_Factory{
 		$f = new Filter($filterSlug,$dataType,$uiType);
 		$f->uiType->set_name($filterSlug);
 
+		if(isset($values)){
+			$f->set_value($values);
+		}else{
+			//Guess the value from $_POST or $_GET
+			if(isset($_GET['wbwpf_query'])){
+				$r = Filter_Factory::unwrap_stringified($_GET['wbwpf_query']);
+			}elseif(isset($_POST['wbwpf_active_filters'])){
+				$s = Filter_Factory::stringify_from_post_params();
+				$r = Filter_Factory::unwrap_stringified($s);
+			}
+			if(isset($r) && isset($r['values']) && isset($r['values'][$filterSlug])){
+				$values = $r['values'][$filterSlug];
+				$f->set_value($values);
+			}
+		}
+
 		return $f;
 	}
 
@@ -45,10 +62,6 @@ class Filter_Factory{
 	 * @return array
 	 */
 	public static function build_from_params($params,$filter_values = false){
-		$plugin = Plugin::get_instance_from_global();
-		$dataTypes = $plugin->get_available_dataTypes();
-		$uiTypes = $plugin->get_available_uiTypes();
-
 		$filters = [];
 
 		foreach ($params as $filter_slug => $filter_params){
@@ -57,23 +70,15 @@ class Filter_Factory{
 			$dataType_slug = $filter_params['dataType'];
 			$uiType_slug = $filter_params['type'];
 
-			if(!isset($dataTypes[$dataType_slug])) continue;
-			$dataTypeClassName = $dataTypes[$dataType_slug];
-
-			if(!isset($uiTypes[$uiType_slug])) continue;
-			$uiTypeClassName = $uiTypes[$uiType_slug];
-
-			$datatype = new $dataTypeClassName();
-			$uitype = new $uiTypeClassName();
-
-			$f = new Filter($filter_slug,$datatype,$uitype);
-			$f->uiType->set_name($filter_slug);
-
 			if(is_array($filter_values) && isset($filter_values[$filter_slug])){
-				$f->set_value($filter_values[$filter_slug]);
+				$f = self::build($filter_slug,$dataType_slug,$uiType_slug,$filter_values[$filter_slug]); //Build and assign value
+			}else{
+				$f = self::build($filter_slug,$dataType_slug,$uiType_slug); //Build without assigning value
 			}
 
-			$filters[] = $f;
+			if($f instanceof Filter){
+				$filters[] = $f;
+			}
 		}
 
 		return $filters;
@@ -183,11 +188,13 @@ class Filter_Factory{
 			if($i > 0){
 				$out .= "-";
 			}
-			$out = $filter_slug."|".$filter_params['type']."|".$filter_params['dataType']."|";
-			if(is_array($filter_values[$filter_slug])){
-				$out .= implode(",",$filter_values[$filter_slug]);
-			}else{
-				$out .= $filter_values[$filter_slug];
+			$out .= $filter_slug."|".$filter_params['type']."|".$filter_params['dataType']."|";
+			if(isset($filter_values[$filter_slug])){
+				if(is_array($filter_values[$filter_slug])){
+					$out .= implode(",",$filter_values[$filter_slug]);
+				}else{
+					$out .= $filter_values[$filter_slug];
+				}
 			}
 			$i++;
 		}

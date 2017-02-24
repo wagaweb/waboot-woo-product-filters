@@ -8,6 +8,8 @@ namespace WBWPF\uitypes;
 use WBF\components\mvc\HTMLView;
 
 class Checkbox extends UIType {
+	var $selected_values = [];
+
 	/**
 	 * Generate the output HTML
 	 *
@@ -20,6 +22,7 @@ class Checkbox extends UIType {
 		$v = new HTMLView("src/views/uitypes/checkbox.php","waboot-woo-product-filters");
 		$output = $v->get([
 			"values" => $this->values,
+			"selected_values" => $this->selected_values,
 			"input_name" => $this->input_name
 		]);
 		return $output;

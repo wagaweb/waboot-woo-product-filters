@@ -95,14 +95,20 @@ class Filter{
 		$this->uiType->set_values($values);
 		if(!isset($this->label)) $this->set_label();
 
+		if(isset($this->current_values)){
+			$this->uiType->selected_values = $this->current_values;
+		}
+
 		$v = new HTMLView("src/views/single-filter.php","waboot-woo-product-filters");
 
-		$v->display([
+		$display_args = [
 			'slug' => $this->slug,
 			'label' => $this->label,
 			'uiType' => $this->uiType->type_slug,
 			'dataType' => $this->dataType->type_slug,
 			'content' => $this->uiType->generate_output()
-		]);
+		];
+
+		$v->display($display_args);
 	}
 }
