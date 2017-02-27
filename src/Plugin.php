@@ -7,7 +7,9 @@ use WBF\components\pluginsframework\BasePlugin;
 use WBF\components\pluginsframework\TemplatePlugin;
 use WBF\components\utils\DB;
 use WBWPF\datatypes\DataType;
+use WBWPF\db_backends\MYSQL;
 use WBWPF\filters\Filter;
+use WBWPF\includes\DB_Manager;
 use WBWPF\includes\Filter_Factory;
 use WBWPF\includes\Filter_Query;
 use WBWPF\includes\Query_Factory;
@@ -24,12 +26,18 @@ class Plugin extends TemplatePlugin {
 	 */
 	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
 	const SETTINGS_OPTION_NAME = "wpwpf_settings";
+	/**
+	 * @var DB_Manager
+	 */
+	var $DB;
 
 	/**
 	 * Define the core functionality of the plugin.
 	 */
 	public function __construct() {
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
+
+		$this->DB = new DB_Manager(new MYSQL());
 
 		$this->add_wc_template("loop/orderby.php");
 
@@ -327,45 +335,7 @@ class Plugin extends TemplatePlugin {
 	 * Creates the filters table
 	 */
 	public function create_products_index_table(array $params){
-		global $wpdb;
-
-		$r = false;
-
-		if(DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE)){
-			//Create table
-			$wpdb->query("DROP TABLE ".$wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
-			$dropped = true;
-		}else{
-			$dropped = false;
-		}
-
-		if(!DB::table_exists(Plugin::CUSTOM_PRODUCT_INDEX_TABLE) || $dropped){
-			$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (\n";
-
-			$fields = [
-				"relation_id bigint(20) NOT NULL AUTO_INCREMENT",
-				"product_id bigint(20) NOT NULL"
-			];
-
-			foreach ($params as $datatype_slug => $data_key){
-				foreach ($data_key as $k => $v){
-					$fields[] = "$v VARCHAR(255)";
-				}
-			}
-
-			$fields[] = "PRIMARY KEY (relation_id)";
-
-			$sql.= implode(",\n",$fields);
-
-			$sql.= ") $charset_collate;";
-
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			$r = dbDelta( $sql );
-		}
-
+		$r = $this->DB->Backend->create_index_table(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$params);
 		return $r;
 	}
 
@@ -444,8 +414,24 @@ class Plugin extends TemplatePlugin {
 
 		foreach ($rows as $new_row){
 			//Insert the value
-			$r = $wpdb->insert($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row);
+			$r = $this->DB->Backend->insert(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row);
 		}
+	}
+
+	/**
+	 * Get the IDS of products with a specified col value
+	 *
+	 * @param $col_name
+	 * @param $col_value
+	 *
+	 * @return array
+	 */
+	public function get_products_by_col($col_name,$col_value){
+		global $wpdb;
+
+		$r = $wpdb->get_col("SELECT product_id FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE $col_name = '$col_value'");
+
+		return $r;
 	}
 
 	/**
