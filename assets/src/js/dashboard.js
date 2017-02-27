@@ -30,13 +30,20 @@ class Dashboard{
             let table_params = {},
                 $dataTypes_input = $("[data-datatype]").filter(":checked");
             if($dataTypes_input.length > 0){
-                for(let input of $dataTypes_input){
+                $.each($dataTypes_input, function (index,input) {
                     let $input = $(input);
                     if(typeof table_params[""+$input.data("datatype")+""] === "undefined"){
                         table_params[""+$input.data("datatype")+""] = [];
                     }
                     table_params[$input.data("datatype")].push($input.val());
-                }
+                });
+/*                for(let input of $dataTypes_input){
+                    let $input = $(input);
+                    if(typeof table_params[""+$input.data("datatype")+""] === "undefined"){
+                        table_params[""+$input.data("datatype")+""] = [];
+                    }
+                    table_params[$input.data("datatype")].push($input.val());
+                }*/
             }
             //Send ajax requests
             this.handle_index_table_creation(table_params);
