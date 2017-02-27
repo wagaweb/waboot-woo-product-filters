@@ -2,6 +2,8 @@
 
 namespace WBWPF\datatypes;
 
+use WBWPF\includes\Filter;
+
 class Meta extends DataType {
 	var $slug = "meta";
 
@@ -21,7 +23,7 @@ class Meta extends DataType {
 		return $metas;
 	}
 
-	public function getValueOf($product_id,$key, $format = self::VALUES_FOR_VALUES_FORMAT_ARRAY){
+	public function getValueOf($product_id,$key, $format = self::VALUES_FOR_VALUES_FORMAT_ARRAY, Filter $parent_filter = null){
 		return get_post_meta($product_id,$key,true);
 	}
 }
