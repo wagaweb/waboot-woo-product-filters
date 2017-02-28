@@ -60,6 +60,17 @@ class Query_Factory{
 	}
 
 	/**
+	 * Build a Filter_Query from any available params. At the moment we use this builder mainly.
+	 *
+	 * @return Filter_Query
+	 */
+	public static function build_from_available_params(){
+		$filters = Filter_Factory::build_from_available_params();
+		$filter_query = self::build($filters);
+		return $filter_query;
+	}
+
+	/**
 	 * Build a Filter_Query from $_GET params (it looks for a specific-predefined get params)
 	 *
 	 * @return Filter_Query
