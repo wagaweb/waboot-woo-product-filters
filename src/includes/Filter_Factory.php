@@ -38,7 +38,7 @@ class Filter_Factory{
 		}else{
 			//Guess the value from $_POST or $_GET
 			if(isset($_GET['wbwpf_query'])){
-				$r = self::unwrap_stringified($_GET['wbwpf_query']);
+				$r = self::parse_stringified_params($_GET['wbwpf_query']);
 			}elseif(isset($_GET['wbwpf_active_filters']) || isset($_POST['wbwpf_active_filters'])){
 				/*
 				 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
@@ -166,7 +166,7 @@ class Filter_Factory{
 		//The wbwpf_query param can further filter the generated detected filters array (namely, we remove from $result_filters the filters not present in wbwpf_query):
 		if(isset($_GET['wbwpf_query'])){
 			$wrapped_params = $_GET['wbwpf_query'];
-			$unwrapped_filters = self::unwrap_stringified($wrapped_params);
+			$unwrapped_filters = self::parse_stringified_params($wrapped_params);
 			foreach ($result_filters['filters'] as $filter_slug => $filter_params){
 				if(!isset($unwrapped_filters['filters'][$filter_slug])){
 					unset($result_filters['filters'][$filter_slug]);
@@ -205,7 +205,7 @@ class Filter_Factory{
 		 */
 		if(isset($_GET['wbwpf_query'])){
 			$params = $_GET['wbwpf_query'];
-			$r = self::unwrap_stringified($params);
+			$r = self::parse_stringified_params($params);
 		}else{
 			$r = self::parse_get_or_post_params();
 		}
@@ -257,6 +257,22 @@ class Filter_Factory{
 
 			return [];
 		}
+	}
+
+	/**
+	 * Build an array of filters from a string format
+	 *
+	 * @param string $params
+	 *
+	 * @return array
+	 */
+	public static function build_from_stringified_params($params){
+		$r = self::parse_stringified_params($params);
+
+		$active_filters = $r['filters'];
+		$current_values = $r['values'];
+
+		return self::build_from_params($active_filters,$current_values);
 	}
 
 	/**
@@ -376,22 +392,6 @@ class Filter_Factory{
 	}
 
 	/**
-	 * Build an array of filters from a string format
-	 *
-	 * @param string $params
-	 *
-	 * @return array
-	 */
-	public static function build_from_stringified_params($params){
-		$r = self::unwrap_stringified($params);
-
-		$active_filters = $r['filters'];
-		$current_values = $r['values'];
-
-		return self::build_from_params($active_filters,$current_values);
-	}
-
-	/**
 	 * Unwrap a stringified format. The returned array will look like this:
 	 *
 	 * [
@@ -411,7 +411,7 @@ class Filter_Factory{
 	 *
 	 * @return array
 	 */
-	public static function unwrap_stringified($params){
+	public static function parse_stringified_params($params){
 		$stringified_filters = explode("-",$params);
 
 		$active_filters = [];
