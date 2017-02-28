@@ -118,7 +118,7 @@ class Filter{
 	/**
 	 * Check if this filters can be displayed or has to remain hidden
 	 */
-	private function is_current_filter(){
+	public function is_current_filter(){
 		$is_current_filter = false;
 
 		if(is_product_taxonomy()){

@@ -65,6 +65,7 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 			$i = 0;
 			foreach ($filters as $f){
 				if(!is_array($f->current_values)) continue;
+				if($f->is_current_filter()) continue;
 				foreach ($f->current_values as $current_value){
 
 					$single_filter_params = [
