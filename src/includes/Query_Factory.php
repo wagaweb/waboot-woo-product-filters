@@ -80,4 +80,26 @@ class Query_Factory{
 		$filter_query = self::build($filters);
 		return $filter_query;
 	}
+
+	/**
+	 * Setup a Filter_Query starting from a WP_Query object
+	 *
+	 * @param \WP_Query|null $query
+	 *
+	 * @return bool|Filter_Query
+	 */
+	public static function build_from_wp_query(\WP_Query $query = null){
+		if(!isset($query)){
+			global $wp_query;
+			$query = $wp_query;
+		}
+
+		$filters = Filter_Factory::build_from_wp_query($query);
+		if(!empty($filters)){
+			$filter_query = self::build($filters);
+			return $filter_query;
+		}else{
+			return false;
+		}
+	}
 }

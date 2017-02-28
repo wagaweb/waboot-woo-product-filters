@@ -131,9 +131,11 @@ class Plugin extends TemplatePlugin {
 				$filter_query = Query_Factory::build_from_get_params();
 			}elseif(isset($_POST['wbwpf_search_by_filters'])){
 				$filter_query = Query_Factory::build_from_post_params();
+			}else{
+				$filter_query = Query_Factory::build_from_wp_query($query);
 			}
 
-			if(isset($filter_query)){
+			if(isset($filter_query) && $filter_query instanceof Filter_Query){
 				$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
 				if(is_array($ids) && count($ids) > 0){
 					$query->set('post__in',$ids);
