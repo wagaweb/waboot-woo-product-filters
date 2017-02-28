@@ -126,6 +126,10 @@ class Plugin extends TemplatePlugin {
 	public function alter_product_query($query,$wc_query){
 		if(!$query instanceof \WP_Query) return;
 
+		$can_alter_query = apply_filters("wbwpf/can_alter_query",true,$query,$wc_query,$this); //It is possible to prevent the plugin to alter the query by this filter
+
+		if(!$can_alter_query) return;
+
 		try{
 			if(isset($_GET['wbwpf_query']) || isset($_GET['wbwpf_search_by_filters'])){
 				$filter_query = Query_Factory::build_from_get_params();
