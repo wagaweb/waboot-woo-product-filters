@@ -129,19 +129,23 @@ class Filter_Factory{
 
 		$detected_filters = array_filter($detected_filters); //Remove FALSE or NULL values
 
-		//todo: can we optimize this cycle?
+		//todo: can we FURTHER optimize this cycle?
 		foreach ($detected_filters as $filters){
 			if(isset($filters['filters'])){
 				foreach ($filters['filters'] as $filter_slug => $filter_params){
+					//Get types
 					if(!isset($result_filters['filters'][$filter_slug])){
 						$result_filters['filters'][$filter_slug] = $filter_params;
 					}
-				}
-			}
-			if(isset($filters['values'])){
-				foreach ($filters['values'] as $filter_slug => $filter_values){
-					if(!isset($result_filters['values'][$filter_slug])){
-						$result_filters['values'][$filter_slug] = $filter_values;
+					//Get values
+					if(isset($filters['values'][$filter_slug])){
+						$filter_values = $filters['values'][$filter_slug];
+						if(!isset($result_filters['values'][$filter_slug])){
+							$result_filters['values'][$filter_slug] = $filter_values;
+						}else{
+							$result_filters['values'][$filter_slug] = array_merge($result_filters['values'][$filter_slug],$filter_values);
+							$result_filters['values'][$filter_slug] = array_unique($result_filters['values'][$filter_slug]);
+						}
 					}
 				}
 			}
