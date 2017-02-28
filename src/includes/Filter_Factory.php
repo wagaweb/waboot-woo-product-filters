@@ -219,6 +219,11 @@ class Filter_Factory{
 		$filter_current_values = [];
 
 		$queried_object = $query->get_queried_object();
+
+		/*
+		 * todo: how many case we have to check?
+		 */
+
 		if($queried_object instanceof \WP_Term){
 			if(in_array($queried_object->taxonomy,$settings['filters']['tax'])){ //Proceed if the user as indexed the taxonomy
 				$active_filters = [
