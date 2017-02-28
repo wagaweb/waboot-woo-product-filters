@@ -205,7 +205,8 @@ class Plugin extends TemplatePlugin {
 	public function get_available_dataTypes(){
 		$datatypes = [
 			'meta' => __NAMESPACE__."\\datatypes\\Meta",
-			'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy"
+			'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy",
+			'attributes' => __NAMESPACE__."\\datatypes\\Attribute"
 		];
 		$datatypes = apply_filters("wbwpf/datatypes/available",$datatypes);
 		return $datatypes;

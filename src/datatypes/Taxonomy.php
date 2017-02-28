@@ -27,6 +27,7 @@ class Taxonomy extends DataType{
 		//Gets all taxonomies
 		$raw_taxonomies = get_taxonomies([],"objects");
 		foreach ($raw_taxonomies as $tax){
+			if(taxonomy_is_product_attribute($tax->name)) continue; //Skip product attributes
 			$taxonomies[$tax->name] = $tax->labels->name;
 		}
 		return $taxonomies;
