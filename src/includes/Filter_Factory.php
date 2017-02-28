@@ -121,9 +121,25 @@ class Filter_Factory{
 		}
 		$detected_filters[] = self::parse_get_or_post_params();
 
-		//Now we have to merge the detected filters
-
 		$detected_filters = array_filter($detected_filters); //Remove FALSE or NULL values
+
+		/*
+		 * Now we have to merge the detected filters. We need to build an array like this:
+		 *
+		 * [
+		 *      'filters' => [
+		 *          'product_cat' => [
+		 *              'slug' => ....
+		 *              'type' => ....
+		 *              'dataType => ....
+		 *           ]
+		 *      ]
+		 *      'values' => [
+		 *          'product_cat' => [...]
+		 *      ]
+		 * ]
+		 *
+		 */
 
 		//todo: can we FURTHER optimize this cycle?
 		foreach ($detected_filters as $filters){
@@ -147,8 +163,7 @@ class Filter_Factory{
 			}
 		}
 
-
-		//The wbwpf_query param can further filter the detected filter (namely, we remove from $result_filters the filters not present in wbpf_query):
+		//The wbwpf_query param can further filter the generated detected filters array (namely, we remove from $result_filters the filters not present in wbwpf_query):
 		if(isset($_GET['wbwpf_query'])){
 			$wrapped_params = $_GET['wbwpf_query'];
 			$unwrapped_filters = self::unwrap_stringified($wrapped_params);
