@@ -131,13 +131,7 @@ class Plugin extends TemplatePlugin {
 		if(!$can_alter_query) return;
 
 		try{
-			if(isset($_GET['wbwpf_query']) || isset($_GET['wbwpf_search_by_filters'])){
-				$filter_query = Query_Factory::build_from_get_params();
-			}elseif(isset($_POST['wbwpf_search_by_filters'])){
-				$filter_query = Query_Factory::build_from_post_params();
-			}else{
-				$filter_query = Query_Factory::build_from_wp_query($query);
-			}
+			$filter_query = Query_Factory::build_from_available_params();
 
 			if(isset($filter_query) && $filter_query instanceof Filter_Query){
 				$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);

@@ -106,22 +106,52 @@ class Filter_Factory{
 	}
 
 	/**
-	 * Build a Filters array from available params
+	 * Build a Filters array from available params. At the moment we use this builder mainly.
 	 *
 	 * @return array
 	 */
 	public static function build_from_available_params(){
-		$filters = self::build_from_get_params(); //try from get
-		if(!is_array($filters) || empty($filters)){
-			$filters = self::build_from_post_params(); //try from post
+		global $wp_query;
+
+		$result_filters = [];
+		$detected_filters = [];
+
+		if($wp_query instanceof \WP_Query){
+			$detected_filters[] = self::parse_wp_query_params($wp_query); //Get from WP_Query (so we detect active filter in taxonomy archive pages)
 		}
-		if(!is_array($filters) || empty($filters)){
-			global $wp_query;
-			$filters = self::build_from_wp_query($wp_query); //try from query
+		$detected_filters[] = self::parse_get_or_post_params();
+		if(isset($_GET['wbwpf_query'])){
+			$wrapped_params = $_GET['wbwpf_query'];
+			$detected_filters[] = self::unwrap_stringified($wrapped_params);
 		}
 
-		if(is_array($filters) && !empty($filters)){
-			return $filters;
+		//Now we have to merge the detected filters
+
+		$detected_filters = array_filter($detected_filters); //Remove FALSE or NULL values
+
+		//todo: can we optimize this cycle?
+		foreach ($detected_filters as $filters){
+			if(isset($filters['filters'])){
+				foreach ($filters['filters'] as $filter_slug => $filter_params){
+					if(!isset($result_filters['filters'][$filter_slug])){
+						$result_filters['filters'][$filter_slug] = $filter_params;
+					}
+				}
+			}
+			if(isset($filters['values'])){
+				foreach ($filters['values'] as $filter_slug => $filter_values){
+					if(!isset($result_filters['values'][$filter_slug])){
+						$result_filters['values'][$filter_slug] = $filter_values;
+					}
+				}
+			}
+		}
+
+		if(is_array($result_filters) && !empty($result_filters)){
+			//Finally build them into an array of Filters
+			$active_filters = $result_filters['filters'];
+			$filter_current_values = $result_filters['values'];
+			return self::build_from_params($active_filters,$filter_current_values);
 		}else{
 			return [];
 		}
@@ -196,7 +226,20 @@ class Filter_Factory{
 	}
 
 	/**
-	 * Get filters and their values from WP_Query
+	 * Get filters and their values from WP_Query. The returned array will look like this:
+	 *
+	 * [
+	 *      'filters' => [
+	 *          'product_cat' => [
+	 *              'slug' => ....
+	 *              'type' => ....
+	 *              'dataType => ....
+	 *           ]
+	 *      ]
+	 *      'values' => [
+	 *          'product_cat' => [...]
+	 *      ]
+	 * ]
 	 *
 	 * @param \WP_Query|null $query
 	 *
@@ -246,7 +289,20 @@ class Filter_Factory{
 	}
 
 	/**
-	 * Get filters and their values from $_POST or $_GET. Return FALSE on error.
+	 * Get filters and their values from $_POST or $_GET. Return FALSE on error. The returned array will look like this:
+	 *
+	 * [
+	 *      'filters' => [
+	 *          'product_cat' => [
+	 *              'slug' => ....
+	 *              'type' => ....
+	 *              'dataType => ....
+	 *           ]
+	 *      ]
+	 *      'values' => [
+	 *          'product_cat' => [...]
+	 *      ]
+	 * ]
 	 *
 	 * return bool|array
 	 */
@@ -302,7 +358,20 @@ class Filter_Factory{
 	}
 
 	/**
-	 * Unwrap a stringified format
+	 * Unwrap a stringified format. The returned array will look like this:
+	 *
+	 * [
+	 *      'filters' => [
+	 *          'product_cat' => [
+	 *              'slug' => ....
+	 *              'type' => ....
+	 *              'dataType => ....
+	 *           ]
+	 *      ]
+	 *      'values' => [
+	 *          'product_cat' => [...]
+	 *      ]
+	 * ]
 	 *
 	 * @param $params
 	 *
