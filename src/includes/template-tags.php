@@ -45,6 +45,7 @@ if(!function_exists("wbwpf_show_filters")):
 		$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);
 		$v->display([
 			'filters' => $filters,
+			'form_action_url' => is_product_taxonomy() ? "" : wc_get_page_permalink("shop"),
 			'has_filters' => is_array($filters) && !empty($filters),
 			'textdomain' => $plugin->get_textdomain()
 		]);
