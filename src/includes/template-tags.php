@@ -59,12 +59,14 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 	function wbwpf_filters_breadcrumb(){
 		$filters = \WBWPF\includes\Filter_Factory::build_from_available_params();
 		if(is_array($filters) && !empty($filters)){
+			$posted_filters = \WBWPF\includes\Filter_Factory::parse_filters_array($filters);
 			$plugin = \WBWPF\Plugin::get_instance_from_global();
 			$breadcrumb = [];
 			$i = 0;
 			foreach ($filters as $f){
 				if(!is_array($f->current_values)) continue;
 				foreach ($f->current_values as $current_value){
+
 					$single_filter_params = [
 						$f->slug => [
 							'type' => $f->uiType->type_slug,
@@ -74,13 +76,27 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 					$single_filter_values = [
 						$f->slug => $current_value
 					];
-					$strigified = \WBWPF\includes\Filter_Factory::stringify_from_params($single_filter_params,$single_filter_values);
+					$single_query_string = \WBWPF\includes\Filter_Factory::stringify_from_params($single_filter_params,$single_filter_values);
+
+					$cloned_posted_filters = $posted_filters;
+					if(isset($cloned_posted_filters['values']) && isset($cloned_posted_filters['values'][$f->slug])){
+						foreach ($cloned_posted_filters['values'][$f->slug] as $k => $v){
+							if($v == $current_value) unset($cloned_posted_filters['values'][$f->slug][$k]);
+							if(empty($cloned_posted_filters['values'][$f->slug])) unset($cloned_posted_filters['values'][$f->slug]);
+						}
+					}
+					$current_query_string_without_self = \WBWPF\includes\Filter_Factory::stringify_from_params($cloned_posted_filters['filters'],$cloned_posted_filters['values']);
+
 					$breadcrumb[$i] = [
 						'label' => $f->dataType->getPublicItemLabelOf($current_value,$f),
-						'single_query_string' => $strigified,
-						'cumulated_query_string' => $i > 0 ? $breadcrumb[$i-1]['cumulated_query_string']."-".$strigified : $strigified
+						'single_query_string' => $single_query_string,
+						'current_query_string_without_self' => $current_query_string_without_self,
+						'cumulated_query_string' => $i > 0 ? $breadcrumb[$i-1]['cumulated_query_string']."-".$single_query_string : $single_query_string
 					];
+
 					$breadcrumb[$i]['link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['cumulated_query_string']]);
+					$breadcrumb[$i]['delete_link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['current_query_string_without_self']]);
+
 					$i++;
 				}
 			}
