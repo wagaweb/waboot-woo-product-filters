@@ -59,12 +59,22 @@ class Filter_Query{
 	public function build_from_sub_queries(){
 		$partials = [];
 		if(!empty($this->sub_queries)){
-			foreach ($this->sub_queries as $query){
+			foreach ($this->sub_queries as $k => $query){
 				$query->build();
-				$partials[] = $query->query;
+				$partials[] = "(".$query->query.") t$k USING(product_id)";
 			}
 		}
-		$final_query = implode(" UNION ALL ",$partials);
+
+		/*
+		 * We are testing two database structures, see: Plugin::fill_products_index_table().
+		 * With the structures with the incomplete rows (some rows with NULL values) we have to fake an AND condition by using subsequent inner joins: http://stackoverflow.com/questions/3899614/mysql-intersect-results
+		 */
+
+		$final_query = "SELECT ".$this->select_statement;
+		$final_query.= " FROM ".$this->from_statement;
+		$final_query.= " INNER JOIN ";
+		$final_query .= implode(" INNER JOIN ",$partials);
+
 		$this->query = $final_query;
 	}
 
@@ -110,28 +120,7 @@ class Filter_Query{
 	 */
 	private function parse_results($result, $format = self::RESULT_FORMAT_OBJECTS){
 		if($format == self::RESULT_FORMAT_IDS){
-			/*
-			 * If we have a database structured with complete rows, we can do this:
-			 */
-			//$result = array_unique($result);
-
-			/*
-			 * If we have a database structured with incomplete rows, we have to do this, to simulate an "AND".
-			 * We create "AND" by using "UNION ALL" to subsequent select (see: build_from_sub_queries() )
-			 */
-			if(count($this->sub_queries) > 1){
-				//Fake an AND condition:
-				$counts = array_count_values($result);
-				$duplicates = array_filter($counts,function($item){ return $item > 1; });
-				$duplicates = array_keys($duplicates);
-				$result = $duplicates;
-			}else{
-				$result = array_unique($result);
-			}
-
-			/*
-			 * We are testing two database structures, see: Plugin::fill_products_index_table()
-			 */
+			$result = array_unique($result);
 		}
 		return $result;
 	}

@@ -91,8 +91,12 @@ class Filter{
 	 */
 	function display(){
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
+		$values = apply_filters("wbwpf/filter/available_values",$values,$this);
+
 		$this->uiType->set_name($this->slug);
+
 		$this->uiType->set_values($values);
+
 		if(!isset($this->label)) $this->set_label();
 
 		if(isset($this->current_values)){

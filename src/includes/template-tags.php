@@ -6,19 +6,24 @@ if(!function_exists("wbwpf_show_filters")):
 	 * Display filters
 	 *
 	 * @param array $args the params for displaying the filters
+	 *
+	 * @example for $args:
+	 *
+	 * [
+	 *      'product_cat' => [
+	 *          'type' => "checkbox" //How to display the values
+	 *          'dataType' => "taxonomies" //How to manage the values
+	 *      ],
+	 *      'product_tag' => [
+	 *          'type' => "checkbox"
+	 *          'dataType' => "taxonomies"
+	 *      ]
+	 *      ...
+	 * ]
+	 *
 	 */
 	function wbwpf_show_filters($args){
-		//Testing:
-		$args = [
-			'product_cat' => [
-				'type' => "checkbox", //Come visualizzarli
-				'dataType' => 'taxonomies' //Come prende i valori
-			],
-			'product_tag' => [
-				'type' => "checkbox",
-				'dataType' => 'taxonomies'
-			],
-		];
+		if(empty($args)) return;
 
 		$plugin = \WBWPF\Plugin::get_instance_from_global();
 
