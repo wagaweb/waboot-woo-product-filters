@@ -150,8 +150,12 @@ class Filter_Factory{
 		if(is_array($result_filters) && !empty($result_filters)){
 			//Finally build them into an array of Filters
 			$active_filters = $result_filters['filters'];
-			$filter_current_values = $result_filters['values'];
-			return self::build_from_params($active_filters,$filter_current_values);
+			if(isset($result_filters['values'])){
+				$filter_current_values = $result_filters['values'];
+				return self::build_from_params($active_filters,$filter_current_values);
+			}else{
+				return self::build_from_params($active_filters);
+			}
 		}else{
 			return [];
 		}
