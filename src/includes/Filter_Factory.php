@@ -120,10 +120,6 @@ class Filter_Factory{
 			$detected_filters[] = self::parse_wp_query_params($wp_query); //Get from WP_Query (so we detect active filter in taxonomy archive pages)
 		}
 		$detected_filters[] = self::parse_get_or_post_params();
-		if(isset($_GET['wbwpf_query'])){
-			$wrapped_params = $_GET['wbwpf_query'];
-			$detected_filters[] = self::unwrap_stringified($wrapped_params);
-		}
 
 		//Now we have to merge the detected filters
 
@@ -146,6 +142,21 @@ class Filter_Factory{
 							$result_filters['values'][$filter_slug] = array_merge($result_filters['values'][$filter_slug],$filter_values);
 							$result_filters['values'][$filter_slug] = array_unique($result_filters['values'][$filter_slug]);
 						}
+					}
+				}
+			}
+		}
+
+
+		//The wbwpf_query param can further filter the detected filter (namely, we remove from $result_filters the filters not present in wbpf_query):
+		if(isset($_GET['wbwpf_query'])){
+			$wrapped_params = $_GET['wbwpf_query'];
+			$unwrapped_filters = self::unwrap_stringified($wrapped_params);
+			foreach ($result_filters['filters'] as $filter_slug => $filter_params){
+				if(!isset($unwrapped_filters['filters'][$filter_slug])){
+					unset($result_filters['filters'][$filter_slug]);
+					if(isset($result_filters['values'][$filter_slug])){
+						unset($result_filters['values'][$filter_slug]);
 					}
 				}
 			}
