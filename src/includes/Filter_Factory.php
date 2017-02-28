@@ -45,6 +45,8 @@ class Filter_Factory{
 				 * We are testing the two...
 				 */
 				$r = self::parse_get_or_post_params();
+			}else{
+				$r = self::parse_wp_query_params();
 			}
 			if(isset($r) && isset($r['values']) && isset($r['values'][$filterSlug])){
 				$values = $r['values'][$filterSlug];
@@ -61,6 +63,22 @@ class Filter_Factory{
 	 * @param $params
 	 *
 	 * @param array|bool|FALSE $filter_values if provided, the filters will be assigned with these values
+	 *
+	 * @example:
+	 *
+	 * $filter_params = [
+	 *      'product_cat' => [
+	 *          'slug' => 'product_cat',
+	 *          'type  => 'checkbox',
+	 *          'dataType => 'taxonomy'
+ 	 *      ]
+	 *      ...
+	 * ]
+	 *
+	 * $filter_values = [
+	 *      'product_cat' => [12,13]
+	 *      ...
+	 * ]
 	 *
 	 * @return array
 	 */
@@ -85,6 +103,28 @@ class Filter_Factory{
 		}
 
 		return $filters;
+	}
+
+	/**
+	 * Build a Filters array from available params
+	 *
+	 * @return array
+	 */
+	public static function build_from_available_params(){
+		$filters = self::build_from_get_params(); //try from get
+		if(!is_array($filters) || empty($filters)){
+			$filters = self::build_from_post_params(); //try from post
+		}
+		if(!is_array($filters) || empty($filters)){
+			global $wp_query;
+			$filters = self::build_from_wp_query($wp_query); //try from query
+		}
+
+		if(is_array($filters) && !empty($filters)){
+			return $filters;
+		}else{
+			return [];
+		}
 	}
 
 	/**
@@ -132,6 +172,77 @@ class Filter_Factory{
 		}
 
 		return [];
+	}
+
+	/**
+	 * Build a Filters array from WP_Query params
+	 *
+	 * @return array
+	 */
+	public static function build_from_wp_query(\WP_Query $query){
+		if(!is_product_taxonomy()){
+			return []; //We are in main shop page, we do not need to apply any filters
+		}else{
+			$r = self::parse_wp_query_params();
+
+			if($r){
+				$active_filters = $r['filters'];
+				$filter_current_values = $r['values'];
+				return self::build_from_params($active_filters,$filter_current_values);
+			}
+
+			return [];
+		}
+	}
+
+	/**
+	 * Get filters and their values from WP_Query
+	 *
+	 * @param \WP_Query|null $query
+	 *
+	 * @return bool|array
+	 */
+	public static function parse_wp_query_params(\WP_Query $query = null){
+		if(!isset($query)){
+			global $wp_query;
+			$query = $wp_query;
+		}
+
+		if(!$query instanceof \WP_Query) return false;
+
+		$plugin = \WBWPF\Plugin::get_instance_from_global();
+		$dataTypes = $plugin->get_available_dataTypes();
+		$uiTypes = $plugin->get_available_uiTypes();
+		$settings = $plugin->get_plugin_settings();
+
+		$active_filters = [];
+		$filter_current_values = [];
+
+		$queried_object = $query->get_queried_object();
+
+		/*
+		 * todo: how many case we have to check?
+		 */
+
+		if($queried_object instanceof \WP_Term){
+			if(in_array($queried_object->taxonomy,$settings['filters']['tax'])){ //Proceed if the user as indexed the taxonomy
+				$active_filters = [
+					$queried_object->taxonomy => [
+						'slug' => $queried_object->taxonomy,
+						'type' => 'checkbox', //todo: some way to not insert this manually?
+						'dataType' => 'taxonomies'
+					]
+				];
+				$filter_current_values = [
+					$queried_object->taxonomy => [$queried_object->term_id]
+				];
+			}
+		}
+
+		return [
+			'filters' => $active_filters,
+			'values' => $filter_current_values
+		];
 	}
 
 	/**

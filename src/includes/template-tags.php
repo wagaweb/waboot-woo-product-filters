@@ -56,10 +56,7 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 	 * Display filters breadcrumb
 	 */
 	function wbwpf_filters_breadcrumb(){
-		$filters = \WBWPF\includes\Filter_Factory::build_from_get_params(); //try from get
-		if(!is_array($filters) || empty($filters)){
-			$filters = \WBWPF\includes\Filter_Factory::build_from_post_params(); //try from post
-		}
+		$filters = \WBWPF\includes\Filter_Factory::build_from_available_params();
 		if(is_array($filters) && !empty($filters)){
 			$plugin = \WBWPF\Plugin::get_instance_from_global();
 			$breadcrumb = [];

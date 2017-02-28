@@ -106,9 +106,28 @@ class Filter{
 			'label' => $this->label,
 			'uiType' => $this->uiType->type_slug,
 			'dataType' => $this->dataType->type_slug,
-			'content' => $this->uiType->generate_output()
+			'content' => $this->uiType->generate_output(),
+			'display_hidden' => $this->is_current_filter() ? true : false
 		];
 
+		$display_args = apply_filters("wbwpf/filter/display_args",$display_args,$this);
+
 		$v->display($display_args);
+	}
+
+	/**
+	 * Check if this filters can be displayed or has to remain hidden
+	 */
+	private function is_current_filter(){
+		$is_current_filter = false;
+
+		if(is_product_taxonomy()){
+			$q = get_queried_object();
+			if($q->taxonomy == $this->slug){
+				$is_current_filter = true; //We are in a taxonomy archive that is the current filter taxonomy
+			}
+		}
+
+		return $is_current_filter;
 	}
 }
