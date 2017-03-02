@@ -23,51 +23,27 @@ interface Backend{
 
 	/**
 	 * @param $table_name
-	 * @param $conditions
+	 * @param $prop_name
+	 * @param $prop_value
 	 *
-	 * @return mixed
+	 * @return array
 	 */
-	public function get($table_name,$conditions);
+	public function get_products_id_by_property($table_name,$prop_name,$prop_value);
 
 	/**
 	 * @param $table_name
-	 * @param $var_name
-	 * @param $conditions
+	 * @param $id
+	 * @param $data
 	 *
 	 * @return mixed
 	 */
-	public function get_var($table_name,$var_name,$conditions);
+	public function insert_product_data($table_name,$id,$data);
 
 	/**
 	 * @param $table_name
-	 * @param $col_name
-	 * @param $conditions
+	 * @param $id
 	 *
-	 * @return mixed
+	 * @return bool
 	 */
-	public function get_col($table_name,$col_name,$conditions);
-
-	/**
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return mixed
-	 */
-	public function insert($table_name,$params);
-
-	/**
-	 * @param $table_name
-	 * @param $parms
-	 *
-	 * @return mixed
-	 */
-	public function update($table_name,$parms);
-
-	/**
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return mixed
-	 */
-	public function delete($table_name,$params);
+	public function erase_product_data($table_name,$id);
 }

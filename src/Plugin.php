@@ -76,6 +76,9 @@ class Plugin extends TemplatePlugin {
 		$this->loader->add_action("query_vars",$this,"add_query_vars",1);
 		$this->loader->add_action("woocommerce_product_query",$this,"alter_product_query",10,2);
 		$this->loader->add_filter("woocommerce_pagination_args",$this,"alter_woocommerce_pagination_args",10,1);
+
+		$this->loader->add_action("save_post"."_product",$this,"reindex_product_on_save",10,3);
+		$this->loader->add_action("save_post"."_product_variation",$this,"reindex_product_variation_on_save",10,3);
 	}
 
 	/**
@@ -159,6 +162,34 @@ class Plugin extends TemplatePlugin {
 			$args['add_fragment'] = "?wbwpf_query=$filter_string";
 		}
 		return $args;
+	}
+
+	/**
+	 * Reindex a product upon save
+	 *
+	 * @hooked 'save_post_product'
+	 *
+	 * @param $post_ID
+	 * @param $post
+	 * @param $update
+	 */
+	public function reindex_product_on_save($post_ID,$post,$update){
+		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
+		$this->fill_products_index_table([$post_ID]);
+	}
+
+	/**
+	 * Reindex a product variation upon save
+	 *
+	 * @hooked 'save_post_product_variation'
+	 *
+	 * @param $post_ID
+	 * @param $post
+	 * @param $update
+	 */
+	public function reindex_product_variation_on_save($post_ID,$post,$update){
+		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
+		$this->fill_products_index_table([$post_ID]);
 	}
 
 	/**
@@ -415,7 +446,7 @@ class Plugin extends TemplatePlugin {
 
 		foreach ($rows as $new_row){
 			//Insert the value
-			$r = $this->DB->Backend->insert(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row);
+			$r = $this->DB->Backend->insert_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row['product_id'],$new_row);
 		}
 	}
 
@@ -428,11 +459,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_products_by_col($col_name,$col_value){
-		global $wpdb;
-
-		$r = $wpdb->get_col("SELECT product_id FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE $col_name = '$col_value'");
-
-		return $r;
+		return $this->DB->Backend->get_products_id_by_property(self::CUSTOM_PRODUCT_INDEX_TABLE,$col_name,$col_value);
 	}
 
 	/**

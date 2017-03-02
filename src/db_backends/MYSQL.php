@@ -65,122 +65,47 @@ class MYSQL implements Backend {
 
 	/**
 	 * @param $table_name
-	 * @param $conditions
+	 * @param $prop_name
+	 * @param $prop_value
 	 *
-	 * @return array|null|object
-	 * @throws \Exception
+	 * @return array
 	 */
-	public function get($table_name, $conditions = []) {
+	public function get_products_id_by_property( $table_name, $prop_name, $prop_value ) {
 		global $wpdb;
+		$r = $wpdb->get_col("SELECT product_id FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE $prop_name = '$prop_value'");
+		return $r;
+	}
 
-		if(!empty($conditions)){
-			if(!isset($conditions['relation'])){
-				throw new \Exception("Incomplete params for get method");
-			}
-
-			$relation = $conditions['relation'];
-			unset($conditions['relation']);
-
-			$where_statement = implode(" ".$relation." ",$conditions);
-
-			$r = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix.$table_name." WHERE ".$where_statement);
-		}else{
-			$r = $wpdb->get_results("SELECT * FROM ".$wpdb->prefix.$table_name);
+	/**
+	 * @param $table_name
+	 * @param $id
+	 * @param $data
+	 *
+	 * @return bool
+	 */
+	public function insert_product_data( $table_name, $id, $data ) {
+		if(!isset($data['product_id'])){
+			$data['product_id'] = $id;
 		}
 
-		return $r;
-	}
-
-	/**
-	 * @param $table_name
-	 * @param $var_name
-	 * @param $conditions
-	 *
-	 * @return mixed
-	 * @throws \Exception
-	 */
-	public function get_var( $table_name, $var_name, $conditions = [] ) {
 		global $wpdb;
 
-		if(!empty($conditions)){
-			if(!isset($conditions['relation'])){
-				throw new \Exception("Incomplete params for get method");
-			}
+		$r = $wpdb->insert($wpdb->prefix.$table_name,$data);
 
-			$relation = $conditions['relation'];
-			unset($conditions['relation']);
-
-			$where_statement = implode(" ".$relation." ",$conditions);
-
-			$r = $wpdb->get_var("SELECT DISTINCT $var_name FROM ".$wpdb->prefix.$table_name." WHERE $where_statement");
-		}else{
-			$r = $wpdb->get_var("SELECT DISTINCT $var_name FROM ".$wpdb->prefix.$table_name);
-		}
-
-		return $r;
+		return $r > 0;
 	}
 
 	/**
 	 * @param $table_name
-	 * @param $col_name
-	 * @param $conditions
+	 * @param $id
 	 *
-	 * @return mixed
-	 * @throws \Exception
+	 * @return bool
 	 */
-	public function get_col( $table_name, $col_name, $conditions = [] ) {
+	public function erase_product_data($table_name, $id) {
 		global $wpdb;
 
-		if(!empty($conditions)){
-			if(!isset($conditions['relation'])){
-				throw new \Exception("Incomplete params for get method");
-			}
+		$r = $wpdb->delete($wpdb->prefix.$table_name,['product_id' => $id]);
 
-			$relation = $conditions['relation'];
-			unset($conditions['relation']);
-
-			$where_statement = implode(" ".$relation." ",$conditions);
-
-			global $wpdb;
-
-			$r = $wpdb->get_col("SELECT DISTINCT $col_name FROM ".$wpdb->prefix.$table_name." WHERE $where_statement");
-		}else{
-			$r = $wpdb->get_col("SELECT DISTINCT $col_name FROM ".$wpdb->prefix.$table_name);
-		}
-
-		return $r;
-	}
-
-	/**
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return false|int
-	 */
-	public function insert($table_name, $params) {
-		global $wpdb;
-		$r = $wpdb->insert($wpdb->prefix.$table_name, $params);
-
-		return $r;
-	}
-
-	/**
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return mixed|void
-	 */
-	public function update($table_name, $params) {
-		// TODO: Implement update() method.
-	}
-
-	/**
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return mixed|void
-	 */
-	public function delete($table_name, $params) {
-		// TODO: Implement delete() method.
+		return $r > 0;
 	}
 }
