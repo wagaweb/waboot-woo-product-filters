@@ -32,7 +32,61 @@ class MYSQL implements Backend {
 
 			$fields = [
 				"relation_id bigint(20) NOT NULL AUTO_INCREMENT",
-				"product_id bigint(20) NOT NULL"
+				"product_id bigint(20) NOT NULL",
+			];
+
+			$default_extra_fields = [
+				"post_type varchar(20) NOT NULL",
+				"post_parent bigint(20) NOT NULL DEFAULT 0",
+				"total_sales bigint(20)", //to order by popularity
+				"price varchar(255)", //to order by price
+				"post_date_gmt DATETIME NOT NULL", //to order by date:
+				"post_modified_gmt DATETIME NOT NULL"
+			];
+
+			foreach ($params as $datatype_slug => $data_key){
+				foreach ($data_key as $k => $v){
+					$fields[] = "$v VARCHAR(255)";
+				}
+			}
+
+			$fields = array_merge($fields,$default_extra_fields);
+
+			$fields[] = "PRIMARY KEY (relation_id)";
+
+			$sql.= implode(",\n",$fields);
+
+			$sql.= ") $charset_collate;";
+
+			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+			$r = dbDelta( $sql );
+		}
+
+		return $r;
+	}
+
+	public function create_support_table( $table_name, $params ) {
+		global $wpdb;
+
+		$r = false;
+
+		if(self::table_exists( $table_name )){
+			//Create table
+			$wpdb->query("DROP TABLE ".$wpdb->prefix.$table_name);
+			$dropped = true;
+		}else{
+			$dropped = false;
+		}
+
+		if(!self::table_exists( $table_name ) || $dropped){
+			$table_name = $wpdb->prefix.$table_name;
+			$charset_collate = $wpdb->get_charset_collate();
+
+			$sql = "CREATE TABLE $table_name (\n";
+
+			$fields = [
+				"relation_id bigint(20) NOT NULL AUTO_INCREMENT",
+				"product_id bigint(20) NOT NULL",
 			];
 
 			foreach ($params as $datatype_slug => $data_key){
@@ -90,6 +144,25 @@ class MYSQL implements Backend {
 
 		global $wpdb;
 
+		/*
+		 * Above completion could be done by: fill_entry_with_default_data, otherwise all rows will have those values.
+		 */
+
+		//Get default extra fields values
+		$post_data = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID = $id");
+		$post_data = $post_data[0];
+
+		$extra_fields = [
+			'post_type' => $post_data->post_type,
+			'post_parent' => $post_data->post_parent,
+			'post_date_gmt' => $post_data->post_date_gmt,
+			'post_modified_gmt' => $post_data->post_modified_gmt,
+			'total_sales' => get_post_meta($id,"total_sales",true),
+			'price' => get_post_meta($id,"_price",true)
+		];
+
+		$data = array_merge($data,$extra_fields);
+
 		$r = $wpdb->insert($wpdb->prefix.$table_name,$data);
 
 		return $r > 0;
@@ -107,5 +180,29 @@ class MYSQL implements Backend {
 		$r = $wpdb->delete($wpdb->prefix.$table_name,['product_id' => $id]);
 
 		return $r > 0;
+	}
+
+	/**
+	 * Complete an entry array before insert it into the database
+	 *
+	 * @param int $id the product id
+	 * @param array $entry
+	 */
+	public function fill_entry_with_default_data(&$entry,$id){
+		//Get default extra fields values
+		global $wpdb;
+		$post_data = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID = $id");
+		$post_data = $post_data[0];
+
+		$extra_fields = [
+			'post_type' => $post_data->post_type,
+			'post_parent' => $post_data->post_parent,
+			'post_date_gmt' => $post_data->post_date_gmt,
+			'post_modified_gmt' => $post_data->post_modified_gmt,
+			'total_sales' => get_post_meta($id,"total_sales",true),
+			'price' => get_post_meta($id,"_price",true)
+		];
+
+		$entry = array_merge($entry,$extra_fields);
 	}
 }

@@ -16,6 +16,14 @@ interface Backend{
 
 	/**
 	 * @param $table_name
+	 * @param $params
+	 *
+	 * @return mixed
+	 */
+	public function create_support_table($table_name,$params);
+
+	/**
+	 * @param $table_name
 	 *
 	 * @return mixed
 	 */
@@ -46,4 +54,10 @@ interface Backend{
 	 * @return bool
 	 */
 	public function erase_product_data($table_name,$id);
+
+	/**
+	 * @param $entry
+	 * @param $id
+	 */
+	public function fill_entry_with_default_data(&$entry,$id);
 }
