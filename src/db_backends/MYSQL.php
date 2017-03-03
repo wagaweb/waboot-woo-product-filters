@@ -6,6 +6,8 @@ use WBF\components\utils\DB;
 
 class MYSQL implements Backend {
 	/**
+	 * Creates the main index table
+	 *
 	 * @param $table_name
 	 * @param $params
 	 *
@@ -65,6 +67,14 @@ class MYSQL implements Backend {
 		return $r;
 	}
 
+	/**
+	 * Creates the support table
+	 *
+	 * @param $table_name
+	 * @param $params
+	 *
+	 * @return array|bool
+	 */
 	public function create_support_table( $table_name, $params ) {
 		global $wpdb;
 
@@ -109,6 +119,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Checks if a table exists in the database
+	 *
 	 * @param $table_name
 	 *
 	 * @return bool
@@ -118,6 +130,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Gets all products that meets a certain property (in mysql context: the WHERE clause).
+	 *
 	 * @param $table_name
 	 * @param $prop_name
 	 * @param $prop_value
@@ -131,6 +145,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Insert a product data into the database
+	 *
 	 * @param $table_name
 	 * @param $id
 	 * @param $data
@@ -169,6 +185,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Delete an indexed product data
+	 *
 	 * @param $table_name
 	 * @param $id
 	 *
@@ -207,6 +225,9 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * WooCommerce ordering form use values as "popularity", "rating", ect... which are converted in meta keys names later on by WC_Query.
+	 * Our queries must do the same, taking these values and convert them to appropriate col names for ordering purposes.
+	 *
 	 * @param $orderby
 	 * @param $order
 	 *
