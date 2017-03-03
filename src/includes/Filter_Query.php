@@ -29,6 +29,49 @@ class Filter_Query{
 	 * @var array
 	 */
 	var $found_products;
+	/**
+	 * @var string
+	 */
+	var $orderby;
+	/**
+	 * @var string
+	 */
+	var $order;
+	/**
+	 * @var int
+	 */
+	var $limit;
+	/**
+	 * @var int
+	 */
+	var $offset;
+
+	/**
+	 * Filter_Query constructor.
+	 */
+	function __construct(){}
+
+	/**
+	 * Set ordering params
+	 *
+	 * @param $orderby
+	 * @param $order
+	 */
+	function set_ordering($orderby,$order){
+		$this->order = $order;
+		$this->orderby = $orderby;
+	}
+
+	/**
+	 * Set pagination params
+	 *
+	 * @param $offset
+	 * @param $limit
+	 */
+	function set_pagination($offset,$limit){
+		$this->offset = $offset;
+		$this->limit = $limit;
+	}
 
 	/**
 	 * Assemble the query using the where statements. This is the first method we are testing.

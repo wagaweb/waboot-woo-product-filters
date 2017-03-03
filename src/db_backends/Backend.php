@@ -60,4 +60,12 @@ interface Backend{
 	 * @param $id
 	 */
 	public function fill_entry_with_default_data(&$entry,$id);
+
+	/**
+	 * @param $orderby
+	 * @param $order
+	 *
+	 * @return array
+	 */
+	public function transform_wc_ordering_param($orderby,$order);
 }

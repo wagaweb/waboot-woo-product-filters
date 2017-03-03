@@ -205,4 +205,44 @@ class MYSQL implements Backend {
 
 		$entry = array_merge($entry,$extra_fields);
 	}
+
+	/**
+	 * @param $orderby
+	 * @param $order
+	 *
+	 * @return array
+	 */
+	public function transform_wc_ordering_param( $orderby, $order ) {
+		switch($orderby){
+			case "menu_order":
+				$orderby = "product_id"; //todo: implement
+				$order = "DESC";
+				break;
+			case "popularity":
+				$orderby = "total_sales";
+				$order = "DESC";
+				break;
+			case "price":
+				$orderby = "price";
+				$order = "DESC";
+				break;
+			case "price-desc":
+				$orderby = "price";
+				$order = "ASC";
+				break;
+			case "date":
+				$orderby = "post_modified_gmt";
+				$order = "DESC";
+				break;
+			case "rating":
+				$orderby = "product_id"; //todo: implement
+				$order = "DESC";
+				break;
+		}
+
+		return [
+			'order' => $order,
+			'orderby' => $orderby
+		];
+	}
 }
