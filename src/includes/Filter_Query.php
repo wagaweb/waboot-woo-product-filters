@@ -118,6 +118,11 @@ class Filter_Query{
 		$final_query.= " INNER JOIN ";
 		$final_query .= implode(" INNER JOIN ",$partials);
 
+		//Ordering
+		if(isset($this->orderby) && isset($this->order)){
+			$final_query .= "ORDER BY ".$this->orderby." ".$this->order;
+		}
+
 		$this->query = $final_query;
 	}
 
