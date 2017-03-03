@@ -410,6 +410,7 @@ class Plugin extends TemplatePlugin {
 		 */
 		foreach ($ids as $product_id){
 			$new_row = [];
+			$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values
 			foreach ($filters_settings as $datatype_slug => $values){
 				foreach ($values as $value){
 					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
