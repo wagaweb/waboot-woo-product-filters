@@ -64,6 +64,7 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function hooks(){
 		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
+		$this->loader->add_action("wp_enqueue_scripts", $this, "public_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
 
 		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
@@ -91,6 +92,27 @@ class Plugin extends TemplatePlugin {
 			'wbwpf-admin' => [
 				'uri' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_uri()."/assets/dist/js/dashboard.pkg.js" : $this->get_uri()."/assets/dist/js/dashboard.min.js",
 				'path' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_dir()."/assets/dist/js/dashboard.pkg.js" : $this->get_dir()."/assets/dist/js/dashboard.min.js",
+				'type' => 'js',
+				'i10n' => [
+					'name' => "wbwpf",
+					'params' => [
+						'ajax_url' => admin_url('admin-ajax.php')
+					]
+				]
+			]
+		];
+
+		(new AssetsManager($assets))->enqueue();
+	}
+
+	/**
+	 * Enqueue public assets
+	 */
+	public function public_assets(){
+		$assets = [
+			'wbwpf-public' => [
+				'uri' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_uri()."/assets/dist/js/frontend.pkg.js" : $this->get_uri()."/assets/dist/js/frontend.min.js",
+				'path' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_dir()."/assets/dist/js/frontend.pkg.js" : $this->get_dir()."/assets/dist/js/frontend.min.js",
 				'type' => 'js',
 				'i10n' => [
 					'name' => "wbwpf",
