@@ -5,8 +5,6 @@ namespace WBWPF\datatypes;
 use WBWPF\includes\Filter;
 
 class Taxonomy extends DataType{
-	var $slug = "tax";
-
 	/**
 	 * Taxonomy constructor
 	 *
@@ -14,7 +12,6 @@ class Taxonomy extends DataType{
 	 */
 	function __construct(Filter &$parent_filter = null) {
 		parent::__construct($parent_filter);
-
 		$this->label = __("Taxonomies","waboot-woo-product-filters");
 		$this->admin_description = __("Select one or more taxonomies","waboot-woo-product-filters");
 	}

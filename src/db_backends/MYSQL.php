@@ -6,6 +6,8 @@ use WBF\components\utils\DB;
 
 class MYSQL implements Backend {
 	/**
+	 * Creates the main index table
+	 *
 	 * @param $table_name
 	 * @param $params
 	 *
@@ -65,6 +67,14 @@ class MYSQL implements Backend {
 		return $r;
 	}
 
+	/**
+	 * Creates the support table
+	 *
+	 * @param $table_name
+	 * @param $params
+	 *
+	 * @return array|bool
+	 */
 	public function create_support_table( $table_name, $params ) {
 		global $wpdb;
 
@@ -109,6 +119,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Checks if a table exists in the database
+	 *
 	 * @param $table_name
 	 *
 	 * @return bool
@@ -118,6 +130,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Gets all products that meets a certain property (in mysql context: the WHERE clause).
+	 *
 	 * @param $table_name
 	 * @param $prop_name
 	 * @param $prop_value
@@ -131,6 +145,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Insert a product data into the database
+	 *
 	 * @param $table_name
 	 * @param $id
 	 * @param $data
@@ -169,6 +185,8 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * Delete an indexed product data
+	 *
 	 * @param $table_name
 	 * @param $id
 	 *
@@ -180,6 +198,34 @@ class MYSQL implements Backend {
 		$r = $wpdb->delete($wpdb->prefix.$table_name,['product_id' => $id]);
 
 		return $r > 0;
+	}
+
+	/**
+	 * @param $table_name
+	 * @param array $ids
+	 * @param array $col_names
+	 *
+	 * @return array
+	 */
+	public function get_available_property_values_for_ids( $table_name, array $ids, array $col_names ) {
+		global $wpdb;
+
+		$results = [];
+
+		$ids = array_unique($ids);
+
+		if(!empty($ids)){
+			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.$table_name." WHERE product_id IN (".implode(",",$ids).")";
+
+			$raw_results = $wpdb->get_results($query);
+
+			foreach ($col_names as $col_name){
+				$results[$col_name] = array_unique(array_filter(wp_list_pluck($raw_results,$col_name)));
+				//$results[$col_name] = array_unique(array_filter(array_column($raw_results,$col_name))); //<- this is better, but wont work on CWG?
+			}
+		}
+
+		return $results;
 	}
 
 	/**
@@ -204,5 +250,48 @@ class MYSQL implements Backend {
 		];
 
 		$entry = array_merge($entry,$extra_fields);
+	}
+
+	/**
+	 * WooCommerce ordering form use values as "popularity", "rating", ect... which are converted in meta keys names later on by WC_Query.
+	 * Our queries must do the same, taking these values and convert them to appropriate col names for ordering purposes.
+	 *
+	 * @param $orderby
+	 * @param $order
+	 *
+	 * @return array
+	 */
+	public function transform_wc_ordering_param( $orderby, $order ) {
+		switch($orderby){
+			case "menu_order":
+				$orderby = "product_id"; //todo: implement
+				$order = "DESC";
+				break;
+			case "popularity":
+				$orderby = "total_sales";
+				$order = "DESC";
+				break;
+			case "price":
+				$orderby = "price";
+				$order = "DESC";
+				break;
+			case "price-desc":
+				$orderby = "price";
+				$order = "ASC";
+				break;
+			case "date":
+				$orderby = "post_modified_gmt";
+				$order = "DESC";
+				break;
+			case "rating":
+				$orderby = "product_id"; //todo: implement
+				$order = "DESC";
+				break;
+		}
+
+		return [
+			'order' => $order,
+			'orderby' => $orderby
+		];
 	}
 }

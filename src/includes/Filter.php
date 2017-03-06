@@ -103,6 +103,18 @@ class Filter{
 			$this->uiType->selected_values = $this->current_values;
 		}
 
+		$content = $this->uiType->generate_output();
+
+		$display_hidden = call_user_func(function(){
+			//Hide if the page displayed is the archive page of the current filter
+ 			$display_hidden = $this->is_current_filter() ? true : false;
+			if(!$display_hidden){
+				//Hide if all the values of the uiType are hidden
+				$display_hidden = count($this->uiType->values) == count($this->uiType->hidden_values);
+			}
+			return $display_hidden;
+		});
+
 		$v = new HTMLView("src/views/single-filter.php","waboot-woo-product-filters");
 
 		$display_args = [
@@ -110,8 +122,8 @@ class Filter{
 			'label' => $this->label,
 			'uiType' => $this->uiType->type_slug,
 			'dataType' => $this->dataType->type_slug,
-			'content' => $this->uiType->generate_output(),
-			'display_hidden' => $this->is_current_filter() ? true : false
+			'content' => $content,
+			'display_hidden' => $display_hidden
 		];
 
 		$display_args = apply_filters("wbwpf/filter/display_args",$display_args,$this);

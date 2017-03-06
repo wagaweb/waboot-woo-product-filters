@@ -327,12 +327,12 @@ class Filter_Factory{
 		 */
 
 		if($queried_object instanceof \WP_Term){
-			if(in_array($queried_object->taxonomy,$settings['filters']['tax'])){ //Proceed if the user as indexed the taxonomy
+			if(array_key_exists($queried_object->taxonomy,$settings['filters_params'])){ //Proceed if the user as indexed the taxonomy
 				$active_filters = [
 					$queried_object->taxonomy => [
 						'slug' => $queried_object->taxonomy,
-						'type' => 'checkbox', //todo: some way to not insert this manually?
-						'dataType' => 'taxonomies'
+						'type' => $settings['filters_params'][$queried_object->taxonomy]['uiType'],
+						'dataType' => $settings['filters_params'][$queried_object->taxonomy]['dataType']
 					]
 				];
 				$filter_current_values = [

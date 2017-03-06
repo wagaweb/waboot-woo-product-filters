@@ -1,5 +1,6 @@
 <?php foreach ($values as $k => $v): ?>
-    <label>
+	<?php $hidden = in_array($v,$hidden_values); ?>
+    <label <?php if($hidden): ?>style="display: none;"<?php endif; ?>>
 		<?php if(in_array($k,$selected_values)): ?>
             <input type="checkbox" value="<?php echo $k ?>" name="<?php echo $input_name; ?>[]" checked>
 		<?php else: ?>

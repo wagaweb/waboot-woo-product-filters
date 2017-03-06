@@ -29,6 +29,53 @@ class Filter_Query{
 	 * @var array
 	 */
 	var $found_products;
+	/**
+	 * @var array the available col values for current $found_products (used to filter UITypes values before displaying)
+	 */
+	var $available_col_values;
+	/**
+	 * @var string
+	 */
+	var $orderby;
+	/**
+	 * @var string
+	 */
+	var $order;
+	/**
+	 * @var int
+	 */
+	var $limit;
+	/**
+	 * @var int
+	 */
+	var $offset;
+
+	/**
+	 * Filter_Query constructor.
+	 */
+	function __construct(){}
+
+	/**
+	 * Set ordering params
+	 *
+	 * @param $orderby
+	 * @param $order
+	 */
+	function set_ordering($orderby,$order){
+		$this->order = $order;
+		$this->orderby = $orderby;
+	}
+
+	/**
+	 * Set pagination params
+	 *
+	 * @param $offset
+	 * @param $limit
+	 */
+	function set_pagination($offset,$limit){
+		$this->offset = $offset;
+		$this->limit = $limit;
+	}
 
 	/**
 	 * Assemble the query using the where statements. This is the first method we are testing.
@@ -72,8 +119,15 @@ class Filter_Query{
 
 		$final_query = "SELECT ".$this->select_statement;
 		$final_query.= " FROM ".$this->from_statement;
-		$final_query.= " INNER JOIN ";
-		$final_query .= implode(" INNER JOIN ",$partials);
+		if(!empty($partials)){
+			$final_query.= " INNER JOIN ";
+			$final_query .= implode(" INNER JOIN ",$partials);
+		}
+
+		//Ordering
+		if(isset($this->orderby) && isset($this->order)){
+			$final_query .= " ORDER BY ".$this->orderby." ".$this->order;
+		}
 
 		$this->query = $final_query;
 	}
@@ -116,12 +170,17 @@ class Filter_Query{
 	 *
 	 * @param array $result the result to parse
 	 *
+	 * @param int $format
+	 *
 	 * @return array
 	 */
 	private function parse_results($result, $format = self::RESULT_FORMAT_OBJECTS){
+		do_action_ref_array("wbwpf/query/parse_results",[$result,&$this,$format]); //This is used by Plugin for providing the available col values
+
 		if($format == self::RESULT_FORMAT_IDS){
 			$result = array_unique($result);
 		}
+
 		return $result;
 	}
 
@@ -142,6 +201,15 @@ class Filter_Query{
 		}else{
 			throw new \Exception("Filter_Query was unable to retrieve any products");
 		}
+	}
+
+	/**
+	 * Set the available col values. This is mainly used by Plugin to set the available col values during "wbwpf/query/parse_results"
+	 *
+	 * @param array $cols
+	 */
+	public function set_available_col_values($cols){
+		$this->available_col_values = $cols;
 	}
 
 	/**

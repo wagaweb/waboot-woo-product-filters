@@ -11,29 +11,40 @@ if(!function_exists("wbwpf_show_filters")):
 	 *
 	 * [
 	 *      'product_cat' => [
-	 *          'type' => "checkbox" //How to display the values
-	 *          'dataType' => "taxonomies" //How to manage the values
+	 *          'type' => "checkbox" //How to display the values  //These values ARE NOT REQUIREDs
+	 *          'dataType' => "taxonomies" //How to manage the values  //These values ARE NOT REQUIRED
 	 *      ],
 	 *      'product_tag' => [
-	 *          'type' => "checkbox"
-	 *          'dataType' => "taxonomies"
+	 *          'type' => "checkbox" //These values ARE NOT REQUIRED
+	 *          'dataType' => "taxonomies"  //These values ARE NOT REQUIRED
 	 *      ]
 	 *      ...
 	 * ]
 	 *
 	 */
-	function wbwpf_show_filters($args){
-		if(empty($args)) return;
-
+	function wbwpf_show_filters($args = []){
 		$plugin = \WBWPF\Plugin::get_instance_from_global();
+		$settings = $plugin->get_plugin_settings();
+		if(!isset($settings['filters_params'])) $settings['filters_params'] = [];
+
+		if(empty($args)){
+			foreach ($settings['filters_params'] as $filter_slug => $filters_param){
+				$args[] = $filter_slug;
+			}
+		}
 
 		$filters = [];
 
 		foreach ($args as $filter_slug => $filter_params){
-			if(!isset($filter_params['dataType']) || !isset($filter_params['type'])) continue;
+			if(is_int($filter_slug)){ //We have an array of simple strings
+				$filter_slug = $filter_params;
+				$filter_params = $filter_params = [];
+			}
 
-			$dataType_slug = $filter_params['dataType'];
-			$uiType_slug = $filter_params['type'];
+			$dataType_slug = isset($filter_params['dataType']) ? $filter_params['dataType'] : $settings['filters_params'][$filter_slug]['dataType'];
+			$uiType_slug = isset($filter_params['type']) ? $filter_params['type'] : $settings['filters_params'][$filter_slug]['uiType'];
+
+			if(!isset($dataType_slug) || !isset($uiType_slug)) continue;
 
 			$f = \WBWPF\includes\Filter_Factory::build($filter_slug,$dataType_slug,$uiType_slug);
 

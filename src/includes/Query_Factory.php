@@ -5,18 +5,28 @@ namespace WBWPF\includes;
 use WBWPF\Plugin;
 
 class Query_Factory{
+	const DEFAULT_ORDERBY = "product_id";
+	const DEFAULT_ORDER = "DESC";
+
 	/**
 	 * Create a new query
 	 *
 	 * @param array $filters (array of \WBWPF\filters\Filter)
+	 * @param string $orderby
+	 * @param string $order
 	 *
 	 * @return Filter_Query
 	 */
-	public static function build($filters = []){
+	public static function build($filters = [], $orderby = self::DEFAULT_ORDERBY, $order = self::DEFAULT_ORDER, $limit = -1, $offset = -1){
 		global $wpdb;
 
-		$query = new Filter_Query();
+		$query = new Filter_Query($orderby,$order,$limit,$offset);
 
+		//Here we might have the woocommerce ordering and orderby names, we must standardize them to our query system
+		$ordering = self::transform_wc_ordering_params($orderby,$order);
+
+		$query->set_ordering($ordering['orderby'],$ordering['order']);
+		$query->set_pagination($offset,$limit);
 		$query->select_statement = "product_id";
 		$query->from_statement = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 
@@ -55,7 +65,8 @@ class Query_Factory{
 	 */
 	public static function build_from_params($active_filters,$current_values){
 		$filters = Filter_Factory::build_from_params($active_filters,$current_values);
-		$filter_query = self::build($filters);
+		$ordering = self::retrieve_ordering_query_params();
+		$filter_query = self::build($filters,$ordering['orderby'],$ordering['order']);
 		return $filter_query;
 	}
 
@@ -66,7 +77,8 @@ class Query_Factory{
 	 */
 	public static function build_from_available_params(){
 		$filters = Filter_Factory::build_from_available_params();
-		$filter_query = self::build($filters);
+		$ordering = self::retrieve_ordering_query_params();
+		$filter_query = self::build($filters,$ordering['orderby'],$ordering['order']);
 		return $filter_query;
 	}
 
@@ -77,7 +89,8 @@ class Query_Factory{
 	 */
 	public static function build_from_get_params(){
 		$filters = Filter_Factory::build_from_get_params();
-		$filter_query = self::build($filters);
+		$ordering = self::retrieve_ordering_query_params();
+		$filter_query = self::build($filters,$ordering['orderby'],$ordering['order']);
 		return $filter_query;
 	}
 
@@ -88,7 +101,8 @@ class Query_Factory{
 	 */
 	public static function build_from_post_params(){
 		$filters =  Filter_Factory::build_from_post_params();
-		$filter_query = self::build($filters);
+		$ordering = self::retrieve_ordering_query_params();
+		$filter_query = self::build($filters,$ordering['orderby'],$ordering['order']);
 		return $filter_query;
 	}
 
@@ -107,10 +121,64 @@ class Query_Factory{
 
 		$filters = Filter_Factory::build_from_wp_query($query);
 		if(!empty($filters)){
-			$filter_query = self::build($filters);
+			$ordering = self::retrieve_ordering_query_params();
+			$filter_query = self::build($filters,$ordering['orderby'],$ordering['order']);
 			return $filter_query;
 		}else{
 			return false;
 		}
+	}
+
+	/**
+	 * Retrieve ordering params from available sources (wp_query, $_GET or $_POST)
+	 *
+	 * @return array
+	 */
+	private static function retrieve_ordering_query_params(){
+		global $wp_query;
+		$params = [
+			'order' => self::DEFAULT_ORDER,
+			'orderby' => self::DEFAULT_ORDERBY
+		];
+
+		if(isset($wp_query->query['orderby'])){
+			$params['orderby'] = $wp_query->query['orderby'];
+		}elseif(isset($_GET['wbwpf_orderby'])){
+			$params['orderby'] = $_GET['wbwpf_orderby'];
+		}elseif(isset($_POST['wbwpf_orderby'])){
+			$params['orderby'] = $_POST['wbwpf_orderby'];
+		}
+
+		if(isset($wp_query->query['order'])){
+			$params['order'] = $wp_query->query['order'];
+		}elseif(isset($_GET['wbwpf_order'])){
+			$params['order'] = $_GET['wbwpf_order'];
+		}elseif(isset($_POST['wbwpf_order'])){
+			$params['order'] = $_POST['wbwpf_order'];
+		}
+
+		return $params;
+	}
+
+	/**
+	 * Transform WooCommerce orderby and order nomenclature to a nomenclature compatible with our query system (See: MYSQL::create_index_table())
+	 *
+	 * @param $orderby
+	 *
+	 * @return string
+	 */
+	private static function transform_wc_ordering_params($orderby,$order){
+		$plugin = Plugin::get_instance_from_global();
+
+		$transformation = [
+			'orderby' => $orderby,
+			'order' => $order
+		];
+
+		if($plugin instanceof Plugin){
+			$transformation = $plugin->DB->Backend->transform_wc_ordering_param($orderby,$order);
+		}
+
+		return $transformation;
 	}
 }
