@@ -220,7 +220,8 @@ class MYSQL implements Backend {
 			$raw_results = $wpdb->get_results($query);
 
 			foreach ($col_names as $col_name){
-				$results[$col_name] = array_unique(array_filter(array_column($raw_results,$col_name)));
+				$results[$col_name] = array_unique(array_filter(wp_list_pluck($raw_results,$col_name)));
+				//$results[$col_name] = array_unique(array_filter(array_column($raw_results,$col_name))); //<- this is better, but wont work on CWG?
 			}
 		}
 
