@@ -5,8 +5,6 @@ namespace WBWPF\datatypes;
 use WBWPF\includes\Filter;
 
 class Attribute extends Taxonomy{
-	var $slug = "attribute";
-
 	/**
 	 * Attribute constructor
 	 *
@@ -14,7 +12,6 @@ class Attribute extends Taxonomy{
 	 */
 	function __construct(Filter &$parent_filter = null) {
 		parent::__construct($parent_filter);
-
 		$this->label = __("Attributes","waboot-woo-product-filters");
 		$this->admin_description = __("Select one or more attributes","waboot-woo-product-filters");
 	}

@@ -41,6 +41,7 @@ abstract class DataType{
 		foreach ($dataTypes as $type_slug => $classname){
 			if($classname == static::class){
 				$this->type_slug = $type_slug;
+				$this->slug = $type_slug;
 				break;
 			}
 		}

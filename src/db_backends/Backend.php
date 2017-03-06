@@ -77,7 +77,7 @@ interface Backend{
 	 *
 	 * @return mixed
 	 */
-	public function get_available_col_values_for_ids($table_name, array $ids, array $col_names);
+	public function get_available_property_values_for_ids($table_name, array $ids, array $col_names);
 
 	/**
 	 * Complete an entry array before insert it into the database

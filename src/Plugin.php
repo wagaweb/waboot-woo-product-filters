@@ -285,6 +285,21 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
+	 * Get which uiType has to be used to display which dataType
+	 *
+	 * @return array
+	 */
+	public function get_dataType_uiType_relations(){
+		$relations = [
+			'meta' => 'checkbox',
+			'taxonomies' => 'checkbox',
+			'attributes' => 'checkbox'
+		];
+		$relations = apply_filters("wbwpf/types/relations",$relations);
+		return $relations;
+	}
+
+	/**
 	 * Get a list of data type object in an associative array with slugs as keys
 	 *
 	 * @return array
@@ -310,7 +325,8 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function get_plugin_default_settings(){
 		$defaults = [
-			'filters' => []
+			'filters' => [],
+			'filters_params' => []
 		];
 		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
 		return $defaults;
@@ -324,6 +340,25 @@ class Plugin extends TemplatePlugin {
 	public function save_plugin_settings($settings){
 		$actual = $this->get_plugin_settings();
 		$settings = wp_parse_args($settings,$actual);
+
+		//Automatically detect dataType and uiType params
+		$dataType_data_to_ui_relations = $this->get_dataType_uiType_relations();
+		$get_uiType_of_dataType = function($dataType) use($dataType_data_to_ui_relations){
+			foreach ($dataType_data_to_ui_relations as $k => $v){
+				if($k == $dataType){
+					return $v;
+				}
+			}
+			return false;
+		};
+
+		foreach ($settings['filters'] as $dataType_slug => $filter_slugs){
+			foreach ($filter_slugs as $filter_slug){
+				$settings['filters_params'][$filter_slug]['dataType'] = $dataType_slug;
+				$settings['filters_params'][$filter_slug]['uiType'] = $get_uiType_of_dataType($dataType_slug);
+			}
+		}
+
 		update_option(Plugin::SETTINGS_OPTION_NAME,$settings);
 	}
 
@@ -483,12 +518,16 @@ class Plugin extends TemplatePlugin {
 	/**
 	 * Do some actions during Filter Query result parsing
 	 *
+	 * @hooked 'wbwpf/query/parse_results'
+	 *
 	 * @param $results
 	 * @param Filter_Query $query
 	 * @param $format
 	 */
 	public function parse_filter_query_results($results, Filter_Query &$query, $format){
-		//We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results (eg: the product color "red" doesn't has to to be visible when no product is red in the current visualization)
+		//We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results
+		//(eg: the product color "red" doesn't has to to be visible when no product is red in the current visualization)
+
 		$settings = $this->get_plugin_settings();
 		$cols = call_user_func(function() use($settings){
 			$r = [];
@@ -501,7 +540,7 @@ class Plugin extends TemplatePlugin {
 			return $r;
 		});
 
-		$r = $this->DB->Backend->get_available_col_values_for_ids(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$results,$cols);
+		$r = $this->DB->Backend->get_available_property_values_for_ids(self::CUSTOM_PRODUCT_INDEX_TABLE,$results,$cols);
 
 		$query->set_available_col_values($r);
 	}

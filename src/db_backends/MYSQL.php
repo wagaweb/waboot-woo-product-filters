@@ -207,7 +207,7 @@ class MYSQL implements Backend {
 	 *
 	 * @return array
 	 */
-	public function get_available_col_values_for_ids( $table_name, array $ids, array $col_names ) {
+	public function get_available_property_values_for_ids( $table_name, array $ids, array $col_names ) {
 		global $wpdb;
 
 		$results = [];
