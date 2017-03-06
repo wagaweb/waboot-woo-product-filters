@@ -22,12 +22,16 @@ if(!function_exists("wbwpf_show_filters")):
 	 * ]
 	 *
 	 */
-	function wbwpf_show_filters($args){
-		if(empty($args)) return;
-
+	function wbwpf_show_filters($args = []){
 		$plugin = \WBWPF\Plugin::get_instance_from_global();
 		$settings = $plugin->get_plugin_settings();
 		if(!isset($settings['filters_params'])) $settings['filters_params'] = [];
+
+		if(empty($args)){
+			foreach ($settings['filters_params'] as $filter_slug => $filters_param){
+				$args[] = $filter_slug;
+			}
+		}
 
 		$filters = [];
 
