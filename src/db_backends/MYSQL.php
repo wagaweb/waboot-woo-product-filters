@@ -201,6 +201,33 @@ class MYSQL implements Backend {
 	}
 
 	/**
+	 * @param $table_name
+	 * @param array $ids
+	 * @param array $col_names
+	 *
+	 * @return array
+	 */
+	public function get_available_col_values_for_ids( $table_name, array $ids, array $col_names ) {
+		global $wpdb;
+
+		$results = [];
+
+		$ids = array_unique($ids);
+
+		if(!empty($ids)){
+			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.$table_name." WHERE product_id IN (".implode(",",$ids).")";
+
+			$raw_results = $wpdb->get_results($query);
+
+			foreach ($col_names as $col_name){
+				$results[$col_name] = array_unique(array_filter(array_column($raw_results,$col_name)));
+			}
+		}
+
+		return $results;
+	}
+
+	/**
 	 * Complete an entry array before insert it into the database
 	 *
 	 * @param int $id the product id

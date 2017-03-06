@@ -80,6 +80,9 @@ class Plugin extends TemplatePlugin {
 
 		$this->loader->add_action("save_post"."_product",$this,"reindex_product_on_save",10,3);
 		$this->loader->add_action("save_post"."_product_variation",$this,"reindex_product_variation_on_save",10,3);
+
+		//Filter Query Customizations
+		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
 	}
 
 	/**
@@ -158,7 +161,9 @@ class Plugin extends TemplatePlugin {
 		try{
 			$filter_query = Query_Factory::build_from_available_params();
 
-			if(isset($filter_query) && $filter_query instanceof Filter_Query){
+			$GLOBALS['wbwpf_query'] = &$filter_query;
+
+			if(isset($filter_query) && $filter_query instanceof Filter_Query && $filter_query->has_query()){
 				$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
 				if(is_array($ids) && count($ids) > 0){
 					$query->set('post__in',$ids);
@@ -471,6 +476,32 @@ class Plugin extends TemplatePlugin {
 			//Insert the value
 			$r = $this->DB->Backend->insert_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row['product_id'],$new_row);
 		}
+	}
+
+	/**
+	 * Do some actions during Filter Query result parsing
+	 *
+	 * @param $results
+	 * @param Filter_Query $query
+	 * @param $format
+	 */
+	public function parse_filter_query_results($results, Filter_Query &$query, $format){
+		//We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results (eg: the product color "red" doesn't has to to be visible when no product is red in the current visualization)
+		$settings = $this->get_plugin_settings();
+		$cols = call_user_func(function() use($settings){
+			$r = [];
+			if(isset($settings['filters'])){
+				foreach ($settings['filters'] as $slug => $cols){
+					$r = array_merge($r,$cols);
+				}
+			}
+
+			return $r;
+		});
+
+		$r = $this->DB->Backend->get_available_col_values_for_ids(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$results,$cols);
+
+		$query->set_available_col_values($r);
 	}
 
 	/**

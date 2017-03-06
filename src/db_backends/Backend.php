@@ -68,6 +68,18 @@ interface Backend{
 	public function erase_product_data($table_name,$id);
 
 	/**
+	 * We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results;
+	 * (eg: the product color "red" does not has to to be visible when no product is "red" in the current results)
+	 *
+	 * @param string $table_name
+	 * @param array $ids
+	 * @param array $col_names
+	 *
+	 * @return mixed
+	 */
+	public function get_available_col_values_for_ids($table_name, array $ids, array $col_names);
+
+	/**
 	 * Complete an entry array before insert it into the database
 	 *
 	 * @param $entry
