@@ -35,11 +35,10 @@ if(!function_exists("wbwpf_show_filters")):
 
 		$filters = [];
 
-		foreach ($args as $filter_slug){
-			if(is_array($filter_slug)){
-				$filter_params = $args[$filter_slug];
-			}else{
-				$filter_params = [];
+		foreach ($args as $filter_slug => $filter_params){
+			if(is_int($filter_slug)){ //We have an array of simple strings
+				$filter_slug = $filter_params;
+				$filter_params = $filter_params = [];
 			}
 
 			$dataType_slug = isset($filter_params['dataType']) ? $filter_params['dataType'] : $settings['filters_params'][$filter_slug]['dataType'];
