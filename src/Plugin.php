@@ -101,7 +101,8 @@ class Plugin extends TemplatePlugin {
 					'params' => [
 						'ajax_url' => admin_url('admin-ajax.php')
 					]
-				]
+				],
+				'deps' => ['jquery','underscore']
 			]
 		];
 
@@ -122,7 +123,8 @@ class Plugin extends TemplatePlugin {
 					'params' => [
 						'ajax_url' => admin_url('admin-ajax.php')
 					]
-				]
+				],
+				'deps' => ['jquery','underscore']
 			]
 		];
 

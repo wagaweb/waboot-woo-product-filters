@@ -1,4 +1,5 @@
 import $ from "jquery";
+import _ from "underscore";
 import { getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters } from './utilities';
 import "./jquery_addons";
 
