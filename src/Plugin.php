@@ -293,7 +293,8 @@ class Plugin extends TemplatePlugin {
 	public function get_available_uiTypes(){
 		$uitypes = [
 			'checkbox' => __NAMESPACE__."\\uitypes\\Checkbox",
-			'range' => __NAMESPACE__."\\uitypes\\Range"
+			'range' => __NAMESPACE__."\\uitypes\\Range",
+			'select' => __NAMESPACE__."\\uitypes\\Select"
 		];
 		$uitypes = apply_filters("wbwpf/uitypes/available",$uitypes);
 		return $uitypes;
