@@ -163,7 +163,7 @@ class Plugin extends TemplatePlugin {
 		try{
 			$filter_query = Query_Factory::build_from_available_params();
 
-			$GLOBALS['wbwpf_query'] = &$filter_query;
+			$GLOBALS['wbwpf_query_instance'] = &$filter_query;
 
 			if(isset($filter_query) && $filter_query instanceof Filter_Query && $filter_query->has_query()){
 				$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);

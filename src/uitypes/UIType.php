@@ -96,11 +96,11 @@ abstract class UIType{
 	 * Check if some values has to be display hidden
 	 */
 	public function check_for_hidden_values(){
-		global $wbwpf_query;
+		global $wbwpf_query_instance;
 
-		if(isset($wbwpf_query) && $wbwpf_query instanceof Filter_Query && isset($wbwpf_query->available_col_values[$this->name])){
+		if(isset($wbwpf_query_instance) && $wbwpf_query_instance instanceof Filter_Query && isset($wbwpf_query_instance->available_col_values[$this->name])){
 			foreach ($this->values as $k => $value){
-				$hide = !in_array($k,$wbwpf_query->available_col_values[$this->name]); //todo: maybe a filter, later
+				$hide = !in_array($k,$wbwpf_query_instance->available_col_values[$this->name]); //todo: maybe a filter, later
 				if($hide){
 					$this->hidden_values[$k] = $value;
 				}
