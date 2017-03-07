@@ -60,6 +60,21 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
+	 * Return the current global instance of Filter_Query
+	 *
+	 * @return bool
+	 */
+	public static function get_query_from_global(){
+		global $wbwpf_query_instance;
+
+		if(isset($wbwpf_query_instance) && $wbwpf_query_instance instanceof Filter_Query){
+			return $wbwpf_query_instance;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Define plugins hooks
 	 */
 	public function hooks(){
