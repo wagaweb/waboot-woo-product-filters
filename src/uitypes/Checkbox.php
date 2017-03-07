@@ -8,7 +8,7 @@ namespace WBWPF\uitypes;
 use WBF\components\mvc\HTMLView;
 use WBWPF\includes\Filter_Query;
 
-class Checkbox extends UIType {
+class Checkbox extends ItemsList {
 	var $selected_values = [];
 
 	/**

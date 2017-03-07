@@ -25,19 +25,13 @@ abstract class UIType{
 	 */
 	var $input_name;
 	/**
-	 * @var array
+	 * @var array the available values to display
 	 */
 	var $values = [];
 	/**
-	 * @var array
+	 * @var array the values currently selected
 	 */
 	var $selected_values = [];
-	/**
-	 * The values that has to be hide
-	 *
-	 * @var array
-	 */
-	var $hidden_values = [];
 
 	/**
 	 * UIType constructor.
@@ -88,23 +82,6 @@ abstract class UIType{
 	 * @throws \Exception
 	 */
 	public function generate_output(){
-		$this->check_for_hidden_values();
 		return implode(",",$this->values);
-	}
-
-	/**
-	 * Check if some values has to be display hidden
-	 */
-	public function check_for_hidden_values(){
-		global $wbwpf_query_instance;
-
-		if(isset($wbwpf_query_instance) && $wbwpf_query_instance instanceof Filter_Query && isset($wbwpf_query_instance->available_col_values[$this->name])){
-			foreach ($this->values as $k => $value){
-				$hide = !in_array($k,$wbwpf_query_instance->available_col_values[$this->name]); //todo: maybe a filter, later
-				if($hide){
-					$this->hidden_values[$k] = $value;
-				}
-			}
-		}
 	}
 }
