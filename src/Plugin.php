@@ -97,6 +97,9 @@ class Plugin extends TemplatePlugin {
 		$this->loader->add_action("save_post"."_product_variation",$this,"reindex_product_variation_on_save",10,3);
 		$this->loader->add_action("before_delete_post",$this,"remove_product_from_index_on_delete",10,1);
 
+		//Hooks during indexing
+		$this->loader->add_action("wbwpf/db/insert_new_product/after",$this,"on_product_indexed",10,4);
+
 		//Filter Query Customizations
 		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
 	}
@@ -187,6 +190,9 @@ class Plugin extends TemplatePlugin {
 					$query->set('post__in',$ids);
 				}else{
 					$query->set('post__in',[0]);
+				}
+				if($filter_query->query_variations){
+					$query->set('post_type',['product','product_variation']);
 				}
 			}
 		}catch (\Exception $e){}
@@ -356,7 +362,9 @@ class Plugin extends TemplatePlugin {
 	public function get_plugin_default_settings(){
 		$defaults = [
 			'filters' => [],
-			'filters_params' => []
+			'filters_params' => [],
+			'show_variations' => false,
+			'hide_parent_products' => true
 		];
 		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
 		return $defaults;
@@ -432,7 +440,7 @@ class Plugin extends TemplatePlugin {
 			$found_products = $params['found_products'];
 		}
 
-		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
+		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE (post_type = 'product' or post_type = 'product_variation') and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
 
 		if(is_array($ids) && !empty($ids)){
 			$this->fill_products_index_table($ids);
@@ -473,7 +481,7 @@ class Plugin extends TemplatePlugin {
 	public function fill_products_index_table($ids = []){
 		global $wpdb;
 		if(empty($ids)){
-			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
+			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE (post_type = 'product' or post_type = 'product_variation') and post_status = 'publish'");
 		}
 
 		$datatypes = $this->get_available_dataTypes_by_slug();
@@ -504,7 +512,7 @@ class Plugin extends TemplatePlugin {
 		 */
 		foreach ($ids as $product_id){
 			$new_row = [];
-			$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values
+			//$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values. NOT USED AT THE MOMENT.
 			foreach ($filters_settings as $datatype_slug => $values){
 				foreach ($values as $value){
 					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
@@ -573,6 +581,22 @@ class Plugin extends TemplatePlugin {
 		$r = $this->DB->Backend->get_available_property_values_for_ids(self::CUSTOM_PRODUCT_INDEX_TABLE,$results,$cols);
 
 		$query->set_available_col_values($r);
+	}
+
+	/**
+	 * Performs some action after a product has been indexed
+	 *
+	 * @param int $product_id
+	 * @param \stdClass $product_data
+	 * @param array $entry_data
+	 * @param mixed $index_result
+	 */
+	public function on_product_indexed($product_id,$product_data,$entry_data,$index_result){
+		if($product_data->post_type == "product_variation"){
+			//We need to assign the visibility of the parent to the variation, because woocommerce adds to the query: [...] ( wp_postmeta.meta_key = '_visibility' AND wp_postmeta.meta_value IN ('visible','catalog') ) [...]
+			$parent_visibility = get_post_meta($product_data->post_parent,"_visibility",true);
+			$r = update_post_meta($product_id,"_visibility",$parent_visibility);
+		}
 	}
 
 	/**

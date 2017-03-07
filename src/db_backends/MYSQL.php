@@ -40,6 +40,7 @@ class MYSQL implements Backend {
 			$default_extra_fields = [
 				"post_type varchar(20) NOT NULL",
 				"post_parent bigint(20) NOT NULL DEFAULT 0",
+				"has_variations boolean NOT NULL DEFAULT FALSE",
 				"total_sales bigint(20)", //to order by popularity
 				"price varchar(255)", //to order by price
 				"post_date_gmt DATETIME NOT NULL", //to order by date:
@@ -161,16 +162,31 @@ class MYSQL implements Backend {
 		global $wpdb;
 
 		/*
-		 * Above completion could be done by: fill_entry_with_default_data, otherwise all rows will have those values.
+		 * The completion below could be done by: fill_entry_with_default_data, otherwise all rows will have those values.
+		 * BUT AT THE MOMENT WE ARE OK WITH THAT!
 		 */
 
 		//Get default extra fields values
 		$post_data = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID = $id");
 		$post_data = $post_data[0];
 
+		//Get if has variations
+		$variations_ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_parent = $id AND post_type = 'product_variation'");
+		$has_variations = !empty($variations_ids);
+
+		//Check if is variation and if has parent
+		if($post_data->post_type == 'product_variation'){
+			$parent = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID = $post_data->post_parent AND post_type = 'product'");
+			$has_parent = !empty($parent);
+			if(!$has_parent){
+				return false; //Do not insert variations without parents
+			}
+		}
+
 		$extra_fields = [
 			'post_type' => $post_data->post_type,
 			'post_parent' => $post_data->post_parent,
+			'has_variations' => $has_variations,
 			'post_date_gmt' => $post_data->post_date_gmt,
 			'post_modified_gmt' => $post_data->post_modified_gmt,
 			'total_sales' => get_post_meta($id,"total_sales",true),
@@ -179,7 +195,11 @@ class MYSQL implements Backend {
 
 		$data = array_merge($data,$extra_fields);
 
+		do_action("wbwpf/db/insert_new_product/before",$id,$post_data,$data);
+
 		$r = $wpdb->insert($wpdb->prefix.$table_name,$data);
+
+		do_action("wbwpf/db/insert_new_product/after",$id,$post_data,$data,$r);
 
 		return $r > 0;
 	}
@@ -230,7 +250,7 @@ class MYSQL implements Backend {
 	}
 
 	/**
-	 * Complete an entry array before insert it into the database
+	 * Complete an entry array before insert it into the database. NOT USED AT THE MOMENT.
 	 *
 	 * @param int $id the product id
 	 * @param array $entry
