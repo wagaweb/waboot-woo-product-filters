@@ -217,11 +217,12 @@ class MYSQL implements Backend {
 		if(!empty($ids)){
 			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.$table_name." WHERE product_id IN (".implode(",",$ids).")";
 
-			$raw_results = $wpdb->get_results($query);
+			$raw_results = $wpdb->get_results($query,ARRAY_A);
 
 			foreach ($col_names as $col_name){
-				$results[$col_name] = array_unique(array_filter(wp_list_pluck($raw_results,$col_name)));
-				//$results[$col_name] = array_unique(array_filter(array_column($raw_results,$col_name))); //<- this is better, but wont work on CWG?
+				//$col_values = wp_list_pluck($raw_results,$col_name);
+				$col_values = array_column($raw_results,$col_name);
+				$results[$col_name] = array_unique(array_filter($col_values)); //<- this is better, but wont work on CWG?
 			}
 		}
 
