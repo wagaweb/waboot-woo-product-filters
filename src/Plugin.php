@@ -95,6 +95,7 @@ class Plugin extends TemplatePlugin {
 
 		$this->loader->add_action("save_post"."_product",$this,"reindex_product_on_save",10,3);
 		$this->loader->add_action("save_post"."_product_variation",$this,"reindex_product_variation_on_save",10,3);
+		$this->loader->add_action("before_delete_post",$this,"remove_product_from_index_on_delete",10,1);
 
 		//Filter Query Customizations
 		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
@@ -234,6 +235,19 @@ class Plugin extends TemplatePlugin {
 	public function reindex_product_variation_on_save($post_ID,$post,$update){
 		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
 		$this->fill_products_index_table([$post_ID]);
+	}
+
+	/**
+	 * Remove a product from the index table upon deletion
+	 *
+	 * @param $post_ID
+	 */
+	public function remove_product_from_index_on_delete($post_ID){
+		$product = wc_get_product($post_ID);
+
+		if($product instanceof \WC_Product){
+			$this->DB->Backend->erase_product_data(self::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
+		}
 	}
 
 	/**
