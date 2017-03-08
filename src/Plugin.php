@@ -263,7 +263,12 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function display_admin_page(){
 		add_submenu_page("woocommerce",__("Filters settings",$this->get_textdomain()),__("Filters settings",$this->get_textdomain()),"manage_woocommerce","wbwpf_settings",function(){
-			global $wpdb;
+			if(isset($_POST['wbwpf_save_settings']) && $_POST['wbwpf_save_settings'] = 1){
+				//Save settings
+				$settings_to_save = $_POST['wbwpf_options'];
+				$this->save_plugin_settings($settings_to_save,false);
+			}
+
 			$v = new HTMLView($this->src_path."/views/admin/settings.php",$this,false);
 
 			$datatypes_tree = [];
@@ -375,27 +380,36 @@ class Plugin extends TemplatePlugin {
 	/**
 	 * Save the plugin settings
 	 *
-	 * @param $settings
+	 * @param array $settings
+	 * @param bool $autodetect_types
 	 */
-	public function save_plugin_settings($settings){
-		$actual = $this->get_plugin_settings();
+	public function save_plugin_settings($settings,$autodetect_types = true){
+		$actual = $this->get_plugin_settings(); //Get current values
+
+		//Do some standardizations
+		$settings['show_variations'] = isset($settings['show_variations']) ? (bool) $settings['show_variations'] : false;
+		$settings['hide_parent_products'] = isset($settings['hide_parent_products']) ? (bool) $settings['hide_parent_products'] : false;
+
+		//Merge the differences
 		$settings = wp_parse_args($settings,$actual);
 
-		//Automatically detect dataType and uiType params
-		$dataType_data_to_ui_relations = $this->get_dataType_uiType_relations();
-		$get_uiType_of_dataType = function($dataType) use($dataType_data_to_ui_relations){
-			foreach ($dataType_data_to_ui_relations as $k => $v){
-				if($k == $dataType){
-					return $v;
+		if($autodetect_types){
+			//Automatically detect dataType and uiType params
+			$dataType_data_to_ui_relations = $this->get_dataType_uiType_relations();
+			$get_uiType_of_dataType = function($dataType) use($dataType_data_to_ui_relations){
+				foreach ($dataType_data_to_ui_relations as $k => $v){
+					if($k == $dataType){
+						return $v;
+					}
 				}
-			}
-			return false;
-		};
+				return false;
+			};
 
-		foreach ($settings['filters'] as $dataType_slug => $filter_slugs){
-			foreach ($filter_slugs as $filter_slug){
-				$settings['filters_params'][$filter_slug]['dataType'] = $dataType_slug;
-				$settings['filters_params'][$filter_slug]['uiType'] = $get_uiType_of_dataType($dataType_slug);
+			foreach ($settings['filters'] as $dataType_slug => $filter_slugs){
+				foreach ($filter_slugs as $filter_slug){
+					$settings['filters_params'][$filter_slug]['dataType'] = $dataType_slug;
+					$settings['filters_params'][$filter_slug]['uiType'] = $get_uiType_of_dataType($dataType_slug);
+				}
 			}
 		}
 
