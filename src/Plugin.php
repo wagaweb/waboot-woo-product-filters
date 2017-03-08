@@ -286,9 +286,11 @@ class Plugin extends TemplatePlugin {
 
 			$v->for_dashboard()->display([
 				'page_title' => __("Filters settings",$this->get_textdomain()),
+				'current_url' => admin_url("admin.php?page=wbwpf_settings"),
 				'data' => $datatypes_tree,
 				'has_data' => isset($datatypes_tree) && is_array($datatypes_tree) && !empty($datatypes_tree),
 				'current_settings' => $this->get_plugin_settings(),
+				'available_uiTypes' => $this->get_available_uiTypes(),
 				'textdomain' => $this->get_textdomain()
 			]);
 		});
