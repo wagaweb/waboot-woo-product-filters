@@ -7,77 +7,67 @@ interface Backend{
 	const RESULT_FORMAT_IDS = 1;
 
 	/**
-	 * Creates the main index table
+	 * Structures the database for indexing the products
 	 *
-	 * @param $table_name
-	 * @param $params
+	 * @param array $params
 	 *
 	 * @return mixed
+	 * @internal param string $table_name main table name
 	 */
-	public function create_index_table($table_name,$params);
+	public function structure_db($params);
 
 	/**
-	 * Creates the support table
+	 * Checks if a collection (a table or the equivalent in the referring db system) exists
 	 *
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return mixed
-	 */
-	public function create_support_table($table_name,$params);
-
-	/**
-	 * Checks if a table exists in the database
-	 *
-	 * @param $table_name
+	 * @param string $collection_name
 	 *
 	 * @return mixed
 	 */
-	public function table_exists($table_name);
+	public function collection_exists($collection_name);
 
 	/**
 	 * Gets all products that meets a certain property (in mysql context: the WHERE clause).
 	 *
-	 * @param $table_name
 	 * @param $prop_name
 	 * @param $prop_value
 	 *
 	 * @return array
+	 * @internal param $table_name
 	 */
-	public function get_products_id_by_property($table_name,$prop_name,$prop_value);
+	public function get_products_id_by_property($prop_name, $prop_value);
 
 	/**
 	 * Insert a product data into the database
 	 *
-	 * @param $table_name
 	 * @param $id
 	 * @param $data
 	 *
 	 * @return mixed
+	 * @internal param $table_name
 	 */
-	public function insert_product_data($table_name,$id,$data);
+	public function insert_product_data($id, $data);
 
 	/**
 	 * Delete an indexed product data
 	 *
-	 * @param $table_name
 	 * @param $id
 	 *
 	 * @return bool
+	 * @internal param $table_name
 	 */
-	public function erase_product_data($table_name,$id);
+	public function erase_product_data($id);
 
 	/**
 	 * We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results;
 	 * (eg: the product color "red" does not has to to be visible when no product is "red" in the current results)
 	 *
-	 * @param string $table_name
 	 * @param array $ids
 	 * @param array $col_names
 	 *
 	 * @return mixed
+	 * @internal param string $table_name
 	 */
-	public function get_available_property_values_for_ids($table_name, array $ids, array $col_names);
+	public function get_available_property_values_for_ids(array $ids, array $col_names);
 
 	/**
 	 * Complete an entry array before insert it into the database

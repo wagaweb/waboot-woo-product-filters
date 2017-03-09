@@ -54,7 +54,7 @@ class Query_Factory{
 			}
 
 			/*
-			 * We are testing two database structures, see Plugin::fill_products_index_table()
+			 * We are testing two database structures, see Plugin::populate_products_index()
 			 */
 
 			/*
@@ -184,7 +184,7 @@ class Query_Factory{
 	}
 
 	/**
-	 * Transform WooCommerce orderby and order nomenclature to a nomenclature compatible with our query system (See: MYSQL::create_index_table())
+	 * Transform WooCommerce orderby and order nomenclature to a nomenclature compatible with our query system (See: MYSQL::structure_db())
 	 *
 	 * @param $orderby
 	 *

@@ -91,9 +91,9 @@ class Plugin extends TemplatePlugin {
 		$this->loader->add_action("wp_enqueue_scripts", $this, "public_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
 
-		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
-		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
-		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
+		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_populate_products_index");
+		$this->loader->add_action("wp_ajax_populate_products_index",$this,"ajax_populate_products_index");
+		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_populate_products_index");
 
 		$this->loader->add_action("wp_ajax_wbwpf_get_products",$this,"get_filtered_products_callback");
 		$this->loader->add_action("wp_ajax_nopriv_wbwpf_get_products",$this,"get_filtered_products_callback");
@@ -237,8 +237,8 @@ class Plugin extends TemplatePlugin {
 	 * @param $update
 	 */
 	public function reindex_product_on_save($post_ID,$post,$update){
-		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
-		$this->fill_products_index_table([$post_ID]);
+		$this->DB->Backend->erase_product_data( $post_ID );
+		$this->populate_products_index([$post_ID]);
 	}
 
 	/**
@@ -251,8 +251,8 @@ class Plugin extends TemplatePlugin {
 	 * @param $update
 	 */
 	public function reindex_product_variation_on_save($post_ID,$post,$update){
-		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
-		$this->fill_products_index_table([$post_ID]);
+		$this->DB->Backend->erase_product_data( $post_ID );
+		$this->populate_products_index([$post_ID]);
 	}
 
 	/**
@@ -264,7 +264,7 @@ class Plugin extends TemplatePlugin {
 		$product = wc_get_product($post_ID);
 
 		if($product instanceof \WC_Product){
-			$this->DB->Backend->erase_product_data(self::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
+			$this->DB->Backend->erase_product_data( $post_ID );
 		}
 	}
 
@@ -402,9 +402,9 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
-	 * Ajax callback to create the filters table
+	 * Ajax callback to create and populate the filters table
 	 */
-	public function ajax_create_products_index_table(){
+	public function ajax_populate_products_index(){
 		$params = $_POST['params'];
 		$table_params = $params['table_params'];
 		$offset = $params['offset'];
@@ -412,7 +412,7 @@ class Plugin extends TemplatePlugin {
 
 		if($offset == 0){ //We just started, so create the table
 			$this->save_plugin_settings(['filters' => $table_params]);
-			$r = $this->create_products_index_table($table_params);
+			$r = $this->DB->Backend->structure_db( $table_params );
 			if(!$r){
 				wp_send_json_error([
 					'status' => 'failed',
@@ -432,7 +432,7 @@ class Plugin extends TemplatePlugin {
 		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE (post_type = 'product' or post_type = 'product_variation') and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
 
 		if(is_array($ids) && !empty($ids)){
-			$this->fill_products_index_table($ids);
+			$this->populate_products_index($ids);
 
 			$current_percentage = ceil( ($limit+$offset)*(100/$found_products) );
 			if($current_percentage > 100) $current_percentage = 100;
@@ -455,19 +455,11 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
-	 * Creates the filters table
-	 */
-	public function create_products_index_table(array $params){
-		$r = $this->DB->Backend->create_index_table(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$params);
-		return $r;
-	}
-
-	/**
 	 * Fill filters table with data
 	 *
 	 * @param array $ids if EMPTY, then the function will get all the products before filling, otherwise it fills only the selected ids
 	 */
-	public function fill_products_index_table($ids = []){
+	public function populate_products_index($ids = []){
 		global $wpdb;
 		if(empty($ids)){
 			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE (post_type = 'product' or post_type = 'product_variation') and post_status = 'publish'");
@@ -538,7 +530,7 @@ class Plugin extends TemplatePlugin {
 
 		foreach ($rows as $new_row){
 			//Insert the value
-			$r = $this->DB->Backend->insert_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row['product_id'],$new_row);
+			$r = $this->DB->Backend->insert_product_data( $new_row['product_id'], $new_row );
 		}
 	}
 
@@ -567,7 +559,7 @@ class Plugin extends TemplatePlugin {
 			return $r;
 		});
 
-		$r = $this->DB->Backend->get_available_property_values_for_ids(self::CUSTOM_PRODUCT_INDEX_TABLE,$results,$cols);
+		$r = $this->DB->Backend->get_available_property_values_for_ids( $results, $cols );
 
 		$query->set_available_col_values($r);
 	}
@@ -625,7 +617,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_products_by_col($col_name,$col_value){
-		return $this->DB->Backend->get_products_id_by_property(self::CUSTOM_PRODUCT_INDEX_TABLE,$col_name,$col_value);
+		return $this->DB->Backend->get_products_id_by_property( $col_name, $col_value );
 	}
 
 	/**

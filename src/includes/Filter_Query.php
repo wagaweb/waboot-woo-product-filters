@@ -142,7 +142,7 @@ class Filter_Query{
 		}
 
 		/*
-		 * We are testing two database structures, see: Plugin::fill_products_index_table().
+		 * We are testing two database structures, see: Plugin::populate_products_index().
 		 * With the structures with the incomplete rows (some rows with NULL values) we have to fake an AND condition by using subsequent inner joins: http://stackoverflow.com/questions/3899614/mysql-intersect-results
 		 */
 

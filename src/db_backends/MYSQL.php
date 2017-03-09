@@ -5,20 +5,27 @@ namespace WBWPF\db_backends;
 use WBF\components\utils\DB;
 
 class MYSQL implements Backend {
+	/*
+	 * This is the name of the table that contains all products id with their filterable values
+	 */
+	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
+
 	/**
 	 * Creates the main index table
 	 *
-	 * @param $table_name
-	 * @param $params
+	 * @param string $params
 	 *
 	 * @return array|bool
+	 * @internal param $table_name
 	 */
-	public function create_index_table( $table_name, $params ) {
+	public function structure_db( $params ) {
 		global $wpdb;
+
+		$table_name = self::CUSTOM_PRODUCT_INDEX_TABLE;
 
 		$r = false;
 
-		if(self::table_exists( $table_name )){
+		if(self::collection_exists( $table_name )){
 			//Create table
 			$wpdb->query("DROP TABLE ".$wpdb->prefix.$table_name);
 			$dropped = true;
@@ -26,7 +33,7 @@ class MYSQL implements Backend {
 			$dropped = false;
 		}
 
-		if(!self::table_exists( $table_name ) || $dropped){
+		if( !self::collection_exists( $table_name ) || $dropped){
 			$table_name = $wpdb->prefix.$table_name;
 			$charset_collate = $wpdb->get_charset_collate();
 
@@ -69,77 +76,26 @@ class MYSQL implements Backend {
 	}
 
 	/**
-	 * Creates the support table
-	 *
-	 * @param $table_name
-	 * @param $params
-	 *
-	 * @return array|bool
-	 */
-	public function create_support_table( $table_name, $params ) {
-		global $wpdb;
-
-		$r = false;
-
-		if(self::table_exists( $table_name )){
-			//Create table
-			$wpdb->query("DROP TABLE ".$wpdb->prefix.$table_name);
-			$dropped = true;
-		}else{
-			$dropped = false;
-		}
-
-		if(!self::table_exists( $table_name ) || $dropped){
-			$table_name = $wpdb->prefix.$table_name;
-			$charset_collate = $wpdb->get_charset_collate();
-
-			$sql = "CREATE TABLE $table_name (\n";
-
-			$fields = [
-				"relation_id bigint(20) NOT NULL AUTO_INCREMENT",
-				"product_id bigint(20) NOT NULL",
-			];
-
-			foreach ($params as $datatype_slug => $data_key){
-				foreach ($data_key as $k => $v){
-					$fields[] = "$v VARCHAR(255)";
-				}
-			}
-
-			$fields[] = "PRIMARY KEY (relation_id)";
-
-			$sql.= implode(",\n",$fields);
-
-			$sql.= ") $charset_collate;";
-
-			require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
-			$r = dbDelta( $sql );
-		}
-
-		return $r;
-	}
-
-	/**
 	 * Checks if a table exists in the database
 	 *
 	 * @param $table_name
 	 *
 	 * @return bool
 	 */
-	public function table_exists( $table_name ) {
+	public function collection_exists( $table_name ) {
 		return DB::table_exists($table_name);
 	}
 
 	/**
 	 * Gets all products that meets a certain property (in mysql context: the WHERE clause).
 	 *
-	 * @param $table_name
 	 * @param $prop_name
 	 * @param $prop_value
 	 *
 	 * @return array
+	 * @internal param $table_name
 	 */
-	public function get_products_id_by_property( $table_name, $prop_name, $prop_value ) {
+	public function get_products_id_by_property( $prop_name, $prop_value ) {
 		global $wpdb;
 		$r = $wpdb->get_col("SELECT product_id FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE $prop_name = '$prop_value'");
 		return $r;
@@ -148,13 +104,13 @@ class MYSQL implements Backend {
 	/**
 	 * Insert a product data into the database
 	 *
-	 * @param $table_name
 	 * @param $id
 	 * @param $data
 	 *
 	 * @return bool
+	 * @internal param $table_name
 	 */
-	public function insert_product_data( $table_name, $id, $data ) {
+	public function insert_product_data( $id, $data ) {
 		if(!isset($data['product_id'])){
 			$data['product_id'] = $id;
 		}
@@ -197,7 +153,7 @@ class MYSQL implements Backend {
 
 		do_action("wbwpf/db/insert_new_product/before",$id,$post_data,$data);
 
-		$r = $wpdb->insert($wpdb->prefix.$table_name,$data);
+		$r = $wpdb->insert($wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE,$data);
 
 		do_action("wbwpf/db/insert_new_product/after",$id,$post_data,$data,$r);
 
@@ -207,27 +163,27 @@ class MYSQL implements Backend {
 	/**
 	 * Delete an indexed product data
 	 *
-	 * @param $table_name
 	 * @param $id
 	 *
 	 * @return bool
+	 * @internal param $table_name
 	 */
-	public function erase_product_data($table_name, $id) {
+	public function erase_product_data( $id) {
 		global $wpdb;
 
-		$r = $wpdb->delete($wpdb->prefix.$table_name,['product_id' => $id]);
+		$r = $wpdb->delete($wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE,['product_id' => $id]);
 
 		return $r > 0;
 	}
 
 	/**
-	 * @param $table_name
 	 * @param array $ids
 	 * @param array $col_names
 	 *
 	 * @return array
+	 * @internal param $table_name
 	 */
-	public function get_available_property_values_for_ids( $table_name, array $ids, array $col_names ) {
+	public function get_available_property_values_for_ids( array $ids, array $col_names ) {
 		global $wpdb;
 
 		$results = [];
@@ -235,7 +191,7 @@ class MYSQL implements Backend {
 		$ids = array_unique($ids);
 
 		if(!empty($ids)){
-			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.$table_name." WHERE product_id IN (".implode(",",$ids).")";
+			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE product_id IN (".implode(",",$ids).")";
 
 			$raw_results = $wpdb->get_results($query,ARRAY_A);
 

@@ -4,7 +4,7 @@ import _ from 'lodash';
 class Dashboard{
     constructor(){
         this.ajax_endpoint = wbwpf.ajax_url;
-        this.ajax_create_filters_table_action = "create_products_index_table";
+        this.ajax_create_filters_table_action = "populate_products_index";
         this.init();
     }
 
