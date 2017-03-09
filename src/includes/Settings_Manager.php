@@ -4,7 +4,7 @@ namespace WBWPF\includes;
 use WBWPF\Plugin;
 
 class Settings_Manager{
-	const SETTINGS_OPTION_NAME = "wpwpf_settings";
+	const SETTINGS_OPTION_NAME = "wbwpf_settings";
 
 	/**
 	 * @var Plugin
