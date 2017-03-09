@@ -23,7 +23,7 @@
     <label style="display: block; margin-bottom: 1em;">
 	    <?php $checked = isset($current_settings['hide_parent_products']) && $current_settings['hide_parent_products']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[hide_parent_products]" <?php if($checked): ?>checked<?php endif; ?>>
-	    <?php _e("Hide products with variations.",$textdomain); ?>
+	    <?php _e("Hide parent products when variations are displayed.",$textdomain); ?>
     </label>
     <button type="submit" class="button button-primary" name="wbwpf_save_settings" value="1"><?php _e("Save settings",$textdomain); ?></button>
 </form>
