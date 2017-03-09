@@ -494,24 +494,24 @@ class Plugin extends TemplatePlugin {
 		foreach ($ids as $product_id){
 			$new_row = [];
 			//$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values. NOT USED AT THE MOMENT.
-			foreach ($filters_settings as $datatype_slug => $values){
-				foreach ($values as $value){
-					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
+			foreach ($filters_settings as $datatype_slug => $properties){ //eg: $datatype_slug: taxonomies
+				foreach ($properties as $property){ //eg: $property: product_cat
+					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$property,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
 					if(is_array($product_values) && !empty($product_values)){
 						/*
 						 * We have multiple values for this data type (eg: multiple product_cat terms), so we need to create multiple, incomplete rows
 						 */
-						array_walk($product_values,function($el) use(&$rows,$product_id,$value,$new_row){
+						array_walk($product_values,function($el) use(&$rows,$product_id,$property,$new_row){
 							$rows[] = [
 								'product_id' => $product_id,
-								$value => $el
+								$property => $el
 							];
 						});
 					}elseif(is_array($product_values) && empty($product_values)){
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
-						$new_row[$value] = null; //todo: change to null or ""?
+						$new_row[$property] = null; //todo: change to null or ""?
 					}else{
 						/*
 						 * We have have a single value for this data type. So it's ok to inject it into the main row. We want only one row that contains all single-valued data types for one product
@@ -519,7 +519,7 @@ class Plugin extends TemplatePlugin {
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
-						$new_row[$value] = $product_values;
+						$new_row[$property] = $product_values;
 					}
 				}
 			}
