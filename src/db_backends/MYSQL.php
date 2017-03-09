@@ -124,7 +124,9 @@ class MYSQL implements Backend {
 
 		//Get default extra fields values
 		$post_data = $wpdb->get_results("SELECT * FROM $wpdb->posts WHERE ID = $id");
-		$post_data = $post_data[0];
+		if(empty($post_data)) return false;
+
+		$post_data = array_pop($post_data);
 
 		//Get if has variations
 		$variations_ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_parent = $id AND post_type = 'product_variation'");
