@@ -13,6 +13,7 @@ use WBWPF\includes\DB_Manager;
 use WBWPF\includes\Filter_Factory;
 use WBWPF\includes\Filter_Query;
 use WBWPF\includes\Query_Factory;
+use WBWPF\includes\Settings_Manager;
 
 /**
  * The core plugin class.
@@ -22,26 +23,34 @@ use WBWPF\includes\Query_Factory;
  */
 class Plugin extends TemplatePlugin {
 	/*
-	 * This is the name of the table that cointains all products id with their filterable values
+	 * This is the name of the table that contains all products id with their filterable values
 	 */
 	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
-	const SETTINGS_OPTION_NAME = "wpwpf_settings";
 	/**
 	 * @var DB_Manager
 	 */
 	var $DB;
+	/**
+	 * @var Settings_Manager
+	 */
+	var $Settings;
 
 	/**
 	 * Define the core functionality of the plugin.
 	 */
 	public function __construct() {
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
-
-		$this->DB = new DB_Manager(new MYSQL());
-
 		$this->add_wc_template("loop/orderby.php");
-
 		$this->hooks();
+	}
+
+	/**
+	 * Loads plugin dependencies. Called by parent during __construct();
+	 */
+	public function load_dependencies() {
+		parent::load_dependencies();
+		$this->DB = new DB_Manager(new MYSQL());
+		$this->Settings = new Settings_Manager($this);
 	}
 
 	/**
@@ -370,14 +379,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_plugin_default_settings(){
-		$defaults = [
-			'filters' => [],
-			'filters_params' => [],
-			'show_variations' => false,
-			'hide_parent_products' => true
-		];
-		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
-		return $defaults;
+		return $this->Settings->get_plugin_default_settings();
 	}
 
 	/**
@@ -387,36 +389,7 @@ class Plugin extends TemplatePlugin {
 	 * @param bool $autodetect_types
 	 */
 	public function save_plugin_settings($settings,$autodetect_types = true){
-		$actual = $this->get_plugin_settings(); //Get current values
-
-		//Do some standardizations
-		$settings['show_variations'] = isset($settings['show_variations']) ? (bool) $settings['show_variations'] : false;
-		$settings['hide_parent_products'] = isset($settings['hide_parent_products']) ? (bool) $settings['hide_parent_products'] : false;
-
-		//Merge the differences
-		$settings = wp_parse_args($settings,$actual);
-
-		if($autodetect_types){
-			//Automatically detect dataType and uiType params
-			$dataType_data_to_ui_relations = $this->get_dataType_uiType_relations();
-			$get_uiType_of_dataType = function($dataType) use($dataType_data_to_ui_relations){
-				foreach ($dataType_data_to_ui_relations as $k => $v){
-					if($k == $dataType){
-						return $v;
-					}
-				}
-				return false;
-			};
-
-			foreach ($settings['filters'] as $dataType_slug => $filter_slugs){
-				foreach ($filter_slugs as $filter_slug){
-					$settings['filters_params'][$filter_slug]['dataType'] = $dataType_slug;
-					$settings['filters_params'][$filter_slug]['uiType'] = $get_uiType_of_dataType($dataType_slug);
-				}
-			}
-		}
-
-		update_option(Plugin::SETTINGS_OPTION_NAME,$settings);
+		$this->Settings->save_plugin_settings($settings,$autodetect_types);
 	}
 
 	/**
@@ -425,10 +398,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_plugin_settings(){
-		$defaults = $this->get_plugin_default_settings();
-		$settings = get_option(Plugin::SETTINGS_OPTION_NAME);
-		$settings = wp_parse_args($settings,$defaults);
-		return $settings;
+		return $this->Settings->get_plugin_settings();
 	}
 
 	/**
