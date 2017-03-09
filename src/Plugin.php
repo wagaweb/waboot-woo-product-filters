@@ -102,6 +102,9 @@ class Plugin extends TemplatePlugin {
 
 		//Filter Query Customizations
 		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
+
+		//Catalog visualizations hooks
+		$this->loader->add_filter("the_title",$this,"alter_variations_title",10,2);
 	}
 
 	/**
@@ -613,6 +616,34 @@ class Plugin extends TemplatePlugin {
 			$parent_visibility = get_post_meta($product_data->post_parent,"_visibility",true);
 			$r = update_post_meta($product_id,"_visibility",$parent_visibility);
 		}
+	}
+
+	/**
+	 * Assign variation parent title to variation title
+	 *
+	 * @hooked 'the_title'
+	 *
+	 * @param $title
+	 * @param $post_ID
+	 *
+	 * @return string
+	 */
+	public function alter_variations_title($title,$post_ID){
+		if(!$this->get_plugin_settings()['show_variations']) return $title; //Do nothing if variations are not displayed
+
+		global $wpdb;
+		$data = $wpdb->get_results("SELECT post_type,post_parent FROM $wpdb->posts WHERE ID = $post_ID");
+		if(empty($data)) return $title; //Do nothing if no results found
+
+		$data = array_pop($data);
+
+		if($data->post_type != "product_variation") return $title; //Do nothing if it is not a variation
+
+		$parent_title = get_the_title($data->post_parent);
+
+		if(!$parent_title || !is_string($parent_title) || $parent_title == "") return $title; //Do nothing if it is not a valid title
+
+		return $parent_title;
 	}
 
 	/**
