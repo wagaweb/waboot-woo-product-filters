@@ -3,12 +3,12 @@
 namespace WBWPF\uitypes;
 
 /*
- * Manage and output a checkbox-type filter
+ * Manage and output a select-type filter
  */
 use WBF\components\mvc\HTMLView;
 use WBWPF\includes\Filter_Query;
 
-class Checkbox extends ItemsList {
+class Select extends ItemsList {
 	var $selected_values = [];
 
 	/**
@@ -22,7 +22,7 @@ class Checkbox extends ItemsList {
 	public function generate_output($input_name = false) {
 		parent::check_for_hidden_values();
 
-		$v = new HTMLView("src/views/uitypes/checkbox.php","waboot-woo-product-filters");
+		$v = new HTMLView("src/views/uitypes/select.php","waboot-woo-product-filters");
 		$output = $v->get([
 			"values" => $this->values,
 			"selected_values" => $this->selected_values,

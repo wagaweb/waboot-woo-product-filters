@@ -13,6 +13,7 @@ use WBWPF\includes\DB_Manager;
 use WBWPF\includes\Filter_Factory;
 use WBWPF\includes\Filter_Query;
 use WBWPF\includes\Query_Factory;
+use WBWPF\includes\Settings_Manager;
 
 /**
  * The core plugin class.
@@ -22,26 +23,34 @@ use WBWPF\includes\Query_Factory;
  */
 class Plugin extends TemplatePlugin {
 	/*
-	 * This is the name of the table that cointains all products id with their filterable values
+	 * This is the name of the table that contains all products id with their filterable values
 	 */
 	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
-	const SETTINGS_OPTION_NAME = "wpwpf_settings";
 	/**
 	 * @var DB_Manager
 	 */
 	var $DB;
+	/**
+	 * @var Settings_Manager
+	 */
+	var $Settings;
 
 	/**
 	 * Define the core functionality of the plugin.
 	 */
 	public function __construct() {
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
-
-		$this->DB = new DB_Manager(new MYSQL());
-
 		$this->add_wc_template("loop/orderby.php");
-
 		$this->hooks();
+	}
+
+	/**
+	 * Loads plugin dependencies. Called by parent during __construct();
+	 */
+	public function load_dependencies() {
+		parent::load_dependencies();
+		$this->DB = new DB_Manager(new MYSQL());
+		$this->Settings = new Settings_Manager($this);
 	}
 
 	/**
@@ -60,6 +69,21 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
+	 * Return the current global instance of Filter_Query
+	 *
+	 * @return bool
+	 */
+	public static function get_query_from_global(){
+		global $wbwpf_query_instance;
+
+		if(isset($wbwpf_query_instance) && $wbwpf_query_instance instanceof Filter_Query){
+			return $wbwpf_query_instance;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Define plugins hooks
 	 */
 	public function hooks(){
@@ -67,9 +91,9 @@ class Plugin extends TemplatePlugin {
 		$this->loader->add_action("wp_enqueue_scripts", $this, "public_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
 
-		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_create_products_index_table");
-		$this->loader->add_action("wp_ajax_create_products_index_table",$this,"ajax_create_products_index_table");
-		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_create_products_index_table");
+		//$this->loader->add_ajax_action("create_products_index_table",$this,"ajax_populate_products_index");
+		$this->loader->add_action("wp_ajax_populate_products_index",$this,"ajax_populate_products_index");
+		$this->loader->add_action("wp_ajax_nopriv_create_products_index_table",$this,"ajax_populate_products_index");
 
 		$this->loader->add_action("wp_ajax_wbwpf_get_products",$this,"get_filtered_products_callback");
 		$this->loader->add_action("wp_ajax_nopriv_wbwpf_get_products",$this,"get_filtered_products_callback");
@@ -80,9 +104,16 @@ class Plugin extends TemplatePlugin {
 
 		$this->loader->add_action("save_post"."_product",$this,"reindex_product_on_save",10,3);
 		$this->loader->add_action("save_post"."_product_variation",$this,"reindex_product_variation_on_save",10,3);
+		$this->loader->add_action("before_delete_post",$this,"remove_product_from_index_on_delete",10,1);
+
+		//Hooks during indexing
+		$this->loader->add_action("wbwpf/db/insert_new_product/after",$this,"on_product_indexed",10,4);
 
 		//Filter Query Customizations
 		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
+
+		//Catalog visualizations hooks
+		$this->loader->add_filter("the_title",$this,"alter_variations_title",10,2);
 	}
 
 	/**
@@ -163,7 +194,7 @@ class Plugin extends TemplatePlugin {
 		try{
 			$filter_query = Query_Factory::build_from_available_params();
 
-			$GLOBALS['wbwpf_query'] = &$filter_query;
+			$GLOBALS['wbwpf_query_instance'] = &$filter_query;
 
 			if(isset($filter_query) && $filter_query instanceof Filter_Query && $filter_query->has_query()){
 				$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
@@ -171,6 +202,9 @@ class Plugin extends TemplatePlugin {
 					$query->set('post__in',$ids);
 				}else{
 					$query->set('post__in',[0]);
+				}
+				if($filter_query->query_variations){
+					$query->set('post_type',['product','product_variation']);
 				}
 			}
 		}catch (\Exception $e){}
@@ -203,8 +237,8 @@ class Plugin extends TemplatePlugin {
 	 * @param $update
 	 */
 	public function reindex_product_on_save($post_ID,$post,$update){
-		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
-		$this->fill_products_index_table([$post_ID]);
+		$this->DB->Backend->erase_product_data( $post_ID );
+		$this->populate_products_index([$post_ID]);
 	}
 
 	/**
@@ -217,8 +251,21 @@ class Plugin extends TemplatePlugin {
 	 * @param $update
 	 */
 	public function reindex_product_variation_on_save($post_ID,$post,$update){
-		$this->DB->Backend->erase_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$post_ID);
-		$this->fill_products_index_table([$post_ID]);
+		$this->DB->Backend->erase_product_data( $post_ID );
+		$this->populate_products_index([$post_ID]);
+	}
+
+	/**
+	 * Remove a product from the index table upon deletion
+	 *
+	 * @param $post_ID
+	 */
+	public function remove_product_from_index_on_delete($post_ID){
+		$product = wc_get_product($post_ID);
+
+		if($product instanceof \WC_Product){
+			$this->DB->Backend->erase_product_data( $post_ID );
+		}
 	}
 
 	/**
@@ -228,7 +275,12 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function display_admin_page(){
 		add_submenu_page("woocommerce",__("Filters settings",$this->get_textdomain()),__("Filters settings",$this->get_textdomain()),"manage_woocommerce","wbwpf_settings",function(){
-			global $wpdb;
+			if(isset($_POST['wbwpf_save_settings']) && $_POST['wbwpf_save_settings'] = 1){
+				//Save settings
+				$settings_to_save = $_POST['wbwpf_options'];
+				$this->save_plugin_settings($settings_to_save,false);
+			}
+
 			$v = new HTMLView($this->src_path."/views/admin/settings.php",$this,false);
 
 			$datatypes_tree = [];
@@ -251,9 +303,11 @@ class Plugin extends TemplatePlugin {
 
 			$v->for_dashboard()->display([
 				'page_title' => __("Filters settings",$this->get_textdomain()),
+				'current_url' => admin_url("admin.php?page=wbwpf_settings"),
 				'data' => $datatypes_tree,
 				'has_data' => isset($datatypes_tree) && is_array($datatypes_tree) && !empty($datatypes_tree),
 				'current_settings' => $this->get_plugin_settings(),
+				'available_uiTypes' => $this->get_available_uiTypes(),
 				'textdomain' => $this->get_textdomain()
 			]);
 		});
@@ -278,7 +332,8 @@ class Plugin extends TemplatePlugin {
 	public function get_available_uiTypes(){
 		$uitypes = [
 			'checkbox' => __NAMESPACE__."\\uitypes\\Checkbox",
-			'range' => __NAMESPACE__."\\uitypes\\Range"
+			'range' => __NAMESPACE__."\\uitypes\\Range",
+			'select' => __NAMESPACE__."\\uitypes\\Select"
 		];
 		$uitypes = apply_filters("wbwpf/uitypes/available",$uitypes);
 		return $uitypes;
@@ -324,42 +379,17 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_plugin_default_settings(){
-		$defaults = [
-			'filters' => [],
-			'filters_params' => []
-		];
-		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
-		return $defaults;
+		return $this->Settings->get_plugin_default_settings();
 	}
 
 	/**
 	 * Save the plugin settings
 	 *
-	 * @param $settings
+	 * @param array $settings
+	 * @param bool $autodetect_types
 	 */
-	public function save_plugin_settings($settings){
-		$actual = $this->get_plugin_settings();
-		$settings = wp_parse_args($settings,$actual);
-
-		//Automatically detect dataType and uiType params
-		$dataType_data_to_ui_relations = $this->get_dataType_uiType_relations();
-		$get_uiType_of_dataType = function($dataType) use($dataType_data_to_ui_relations){
-			foreach ($dataType_data_to_ui_relations as $k => $v){
-				if($k == $dataType){
-					return $v;
-				}
-			}
-			return false;
-		};
-
-		foreach ($settings['filters'] as $dataType_slug => $filter_slugs){
-			foreach ($filter_slugs as $filter_slug){
-				$settings['filters_params'][$filter_slug]['dataType'] = $dataType_slug;
-				$settings['filters_params'][$filter_slug]['uiType'] = $get_uiType_of_dataType($dataType_slug);
-			}
-		}
-
-		update_option(Plugin::SETTINGS_OPTION_NAME,$settings);
+	public function save_plugin_settings($settings,$autodetect_types = true){
+		$this->Settings->save_plugin_settings($settings,$autodetect_types);
 	}
 
 	/**
@@ -368,16 +398,13 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_plugin_settings(){
-		$defaults = $this->get_plugin_default_settings();
-		$settings = get_option(Plugin::SETTINGS_OPTION_NAME);
-		$settings = wp_parse_args($settings,$defaults);
-		return $settings;
+		return $this->Settings->get_plugin_settings();
 	}
 
 	/**
-	 * Ajax callback to create the filters table
+	 * Ajax callback to create and populate the filters table
 	 */
-	public function ajax_create_products_index_table(){
+	public function ajax_populate_products_index(){
 		$params = $_POST['params'];
 		$table_params = $params['table_params'];
 		$offset = $params['offset'];
@@ -385,7 +412,7 @@ class Plugin extends TemplatePlugin {
 
 		if($offset == 0){ //We just started, so create the table
 			$this->save_plugin_settings(['filters' => $table_params]);
-			$r = $this->create_products_index_table($table_params);
+			$r = $this->DB->Backend->structure_db( $table_params );
 			if(!$r){
 				wp_send_json_error([
 					'status' => 'failed',
@@ -402,10 +429,10 @@ class Plugin extends TemplatePlugin {
 			$found_products = $params['found_products'];
 		}
 
-		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
+		$ids = $wpdb->get_col("SELECT ID FROM $wpdb->posts WHERE (post_type = 'product' or post_type = 'product_variation') and post_status = 'publish' LIMIT {$limit} OFFSET {$offset}");
 
 		if(is_array($ids) && !empty($ids)){
-			$this->fill_products_index_table($ids);
+			$this->populate_products_index($ids);
 
 			$current_percentage = ceil( ($limit+$offset)*(100/$found_products) );
 			if($current_percentage > 100) $current_percentage = 100;
@@ -428,22 +455,14 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
-	 * Creates the filters table
-	 */
-	public function create_products_index_table(array $params){
-		$r = $this->DB->Backend->create_index_table(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$params);
-		return $r;
-	}
-
-	/**
 	 * Fill filters table with data
 	 *
 	 * @param array $ids if EMPTY, then the function will get all the products before filling, otherwise it fills only the selected ids
 	 */
-	public function fill_products_index_table($ids = []){
+	public function populate_products_index($ids = []){
 		global $wpdb;
 		if(empty($ids)){
-			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE post_type = 'product' and post_status = 'publish'");
+			$ids = $wpdb->get_var("SELECT ID FROM $wpdb->posts WHERE (post_type = 'product' or post_type = 'product_variation') and post_status = 'publish'");
 		}
 
 		$datatypes = $this->get_available_dataTypes_by_slug();
@@ -474,25 +493,25 @@ class Plugin extends TemplatePlugin {
 		 */
 		foreach ($ids as $product_id){
 			$new_row = [];
-			$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values
-			foreach ($filters_settings as $datatype_slug => $values){
-				foreach ($values as $value){
-					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$value,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
+			//$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values. NOT USED AT THE MOMENT.
+			foreach ($filters_settings as $datatype_slug => $properties){ //eg: $datatype_slug: taxonomies
+				foreach ($properties as $property){ //eg: $property: product_cat
+					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$property,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
 					if(is_array($product_values) && !empty($product_values)){
 						/*
 						 * We have multiple values for this data type (eg: multiple product_cat terms), so we need to create multiple, incomplete rows
 						 */
-						array_walk($product_values,function($el) use(&$rows,$product_id,$value,$new_row){
+						array_walk($product_values,function($el) use(&$rows,$product_id,$property,$new_row){
 							$rows[] = [
 								'product_id' => $product_id,
-								$value => $el
+								$property => $el
 							];
 						});
 					}elseif(is_array($product_values) && empty($product_values)){
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
-						$new_row[$value] = null; //todo: change to null or ""?
+						$new_row[$property] = null; //todo: change to null or ""?
 					}else{
 						/*
 						 * We have have a single value for this data type. So it's ok to inject it into the main row. We want only one row that contains all single-valued data types for one product
@@ -500,7 +519,7 @@ class Plugin extends TemplatePlugin {
 						if(!isset($new_row['product_id'])){
 							$new_row['product_id'] = $product_id;
 						}
-						$new_row[$value] = $product_values;
+						$new_row[$property] = $product_values;
 					}
 				}
 			}
@@ -511,7 +530,7 @@ class Plugin extends TemplatePlugin {
 
 		foreach ($rows as $new_row){
 			//Insert the value
-			$r = $this->DB->Backend->insert_product_data(Plugin::CUSTOM_PRODUCT_INDEX_TABLE,$new_row['product_id'],$new_row);
+			$r = $this->DB->Backend->insert_product_data( $new_row['product_id'], $new_row );
 		}
 	}
 
@@ -540,9 +559,53 @@ class Plugin extends TemplatePlugin {
 			return $r;
 		});
 
-		$r = $this->DB->Backend->get_available_property_values_for_ids(self::CUSTOM_PRODUCT_INDEX_TABLE,$results,$cols);
+		$r = $this->DB->Backend->get_available_property_values_for_ids( $results, $cols );
 
 		$query->set_available_col_values($r);
+	}
+
+	/**
+	 * Performs some action after a product has been indexed
+	 *
+	 * @param int $product_id
+	 * @param \stdClass $product_data
+	 * @param array $entry_data
+	 * @param mixed $index_result
+	 */
+	public function on_product_indexed($product_id,$product_data,$entry_data,$index_result){
+		if($product_data->post_type == "product_variation"){
+			//We need to assign the visibility of the parent to the variation, because woocommerce adds to the query: [...] ( wp_postmeta.meta_key = '_visibility' AND wp_postmeta.meta_value IN ('visible','catalog') ) [...]
+			$parent_visibility = get_post_meta($product_data->post_parent,"_visibility",true);
+			$r = update_post_meta($product_id,"_visibility",$parent_visibility);
+		}
+	}
+
+	/**
+	 * Assign variation parent title to variation title
+	 *
+	 * @hooked 'the_title'
+	 *
+	 * @param $title
+	 * @param $post_ID
+	 *
+	 * @return string
+	 */
+	public function alter_variations_title($title,$post_ID){
+		if(!$this->get_plugin_settings()['show_variations']) return $title; //Do nothing if variations are not displayed
+
+		global $wpdb;
+		$data = $wpdb->get_results("SELECT post_type,post_parent FROM $wpdb->posts WHERE ID = $post_ID");
+		if(empty($data)) return $title; //Do nothing if no results found
+
+		$data = array_pop($data);
+
+		if($data->post_type != "product_variation") return $title; //Do nothing if it is not a variation
+
+		$parent_title = get_the_title($data->post_parent);
+
+		if(!$parent_title || !is_string($parent_title) || $parent_title == "") return $title; //Do nothing if it is not a valid title
+
+		return $parent_title;
 	}
 
 	/**
@@ -554,7 +617,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_products_by_col($col_name,$col_value){
-		return $this->DB->Backend->get_products_id_by_property(self::CUSTOM_PRODUCT_INDEX_TABLE,$col_name,$col_value);
+		return $this->DB->Backend->get_products_id_by_property( $col_name, $col_value );
 	}
 
 	/**

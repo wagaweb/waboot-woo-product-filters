@@ -80,7 +80,16 @@ class Taxonomy extends DataType{
 	 */
 	public function getValueOf( $product_id, $key, $format = self::VALUES_FOR_FORMAT_COMMA_SEPARATED, Filter $parent_filter = null ) {
 		$terms = [];
+
+		$post_type = get_post_type($product_id);
+
 		$raw_terms = wp_get_post_terms($product_id,$key);
+		if(empty($raw_terms) && $post_type == "product_variation"){
+			//If it is a variation, try to get the terms from the parent
+			$parent_product_id = wp_get_post_parent_id($product_id);
+			$raw_terms = wp_get_post_terms($parent_product_id,$key);
+		}
+
 		if(is_array($raw_terms) && !empty($raw_terms)){
 			$terms = wp_list_pluck($raw_terms,"term_id");
 			if($format == self::VALUES_FOR_FORMAT_COMMA_SEPARATED){

@@ -49,6 +49,14 @@ class Filter_Query{
 	 * @var int
 	 */
 	var $offset;
+	/**
+	 * @var bool
+	 */
+	var $query_variations = false;
+	/**
+	 * @var bool
+	 */
+	var $do_not_query_parent_product = false;
 
 	/**
 	 * Filter_Query constructor.
@@ -82,7 +90,7 @@ class Filter_Query{
 	 *
 	 * @return $this
 	 */
-	public function build(){
+	public function build($head_only = false){
 		$query = "SELECT ".$this->select_statement;
 		$query.= " FROM ".$this->from_statement;
 		if(is_array($this->where_statements) && !empty($this->where_statements)){
@@ -96,7 +104,28 @@ class Filter_Query{
 				$i++;
 			}
 		}
+
+		if(!$head_only){
+			//Post types
+			if($this->query_variations){
+				if($this->do_not_query_parent_product){
+					//Here we want VARIATIONS and PRODUCT WITHOUT VARIATIONS ONLY
+					$query .= " WHERE (post_type = 'product' OR post_type = 'product_variation') AND has_variations = 0 ";
+				}else{
+					$query .= " WHERE post_type = 'product' OR post_type = 'product_variation' ";
+				}
+			}else{
+				$query .= " WHERE post_type = 'product' ";
+			}
+
+			//Ordering
+			if(isset($this->orderby) && isset($this->order)){
+				$query .= " ORDER BY ".$this->orderby." ".$this->order;
+			}
+		}
+
 		$this->query = $query;
+
 		return $this;
 	}
 
@@ -107,13 +136,13 @@ class Filter_Query{
 		$partials = [];
 		if(!empty($this->sub_queries)){
 			foreach ($this->sub_queries as $k => $query){
-				$query->build();
+				$query->build(true);
 				$partials[] = "(".$query->query.") t$k USING(product_id)";
 			}
 		}
 
 		/*
-		 * We are testing two database structures, see: Plugin::fill_products_index_table().
+		 * We are testing two database structures, see: Plugin::populate_products_index().
 		 * With the structures with the incomplete rows (some rows with NULL values) we have to fake an AND condition by using subsequent inner joins: http://stackoverflow.com/questions/3899614/mysql-intersect-results
 		 */
 
@@ -124,12 +153,26 @@ class Filter_Query{
 			$final_query .= implode(" INNER JOIN ",$partials);
 		}
 
+		//Post types
+		if($this->query_variations){
+			if($this->do_not_query_parent_product){
+				//Here we want VARIATIONS and PRODUCT WITHOUT VARIATIONS ONLY
+				$final_query .= " WHERE (post_type = 'product' OR post_type = 'product_variation') AND has_variations = 0 ";
+			}else{
+				$final_query .= " WHERE post_type = 'product' OR post_type = 'product_variation' ";
+			}
+		}else{
+			$final_query .= " WHERE post_type = 'product' ";
+		}
+
 		//Ordering
 		if(isset($this->orderby) && isset($this->order)){
 			$final_query .= " ORDER BY ".$this->orderby." ".$this->order;
 		}
 
 		$this->query = $final_query;
+
+		return $this;
 	}
 
 	/**

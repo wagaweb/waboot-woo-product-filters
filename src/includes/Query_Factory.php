@@ -30,6 +30,22 @@ class Query_Factory{
 		$query->select_statement = "product_id";
 		$query->from_statement = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
 
+		//Additional settings:
+		$plugin = Plugin::get_instance_from_global();
+		if($plugin instanceof Plugin){
+			$settings = $plugin->get_plugin_settings();
+			$query_settings = [
+				'show_variations' => $settings['show_variations'],
+				'hide_parent_products' => $settings['hide_parent_products'],
+			];
+			$query_settings = apply_filters("wbwpf/query/settings",$query_settings);
+			$query->query_variations = $query_settings['show_variations'];
+			$query->do_not_query_parent_product = $query_settings['hide_parent_products'];
+		}else{
+			$query->query_variations = false;
+			$query->do_not_query_parent_product = false;
+		}
+
 		if(!empty($filters)){
 			foreach ($filters as $filter){
 				if($filter instanceof Filter){
@@ -38,7 +54,7 @@ class Query_Factory{
 			}
 
 			/*
-			 * We are testing two database structures, see Plugin::fill_products_index_table()
+			 * We are testing two database structures, see Plugin::populate_products_index()
 			 */
 
 			/*
@@ -50,6 +66,13 @@ class Query_Factory{
 			 * This is for the second:
 			 */
 			$query->build_from_sub_queries();
+		}else{
+			//Check if we are in main shop page
+			$shop_page_id = wc_get_page_id('shop');
+			$queried_object = get_queried_object_id();
+			if(is_numeric($shop_page_id) && $shop_page_id > 0 && $shop_page_id == $queried_object){
+				$query->build(); //Build the query for selecting all the products
+			}
 		}
 
 		return $query;
@@ -161,7 +184,7 @@ class Query_Factory{
 	}
 
 	/**
-	 * Transform WooCommerce orderby and order nomenclature to a nomenclature compatible with our query system (See: MYSQL::create_index_table())
+	 * Transform WooCommerce orderby and order nomenclature to a nomenclature compatible with our query system (See: MYSQL::structure_db())
 	 *
 	 * @param $orderby
 	 *
