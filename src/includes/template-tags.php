@@ -1,5 +1,17 @@
 <?php
 
+if(!function_exists("wbwpf_get_base_url")):
+	function wbwpf_get_base_url(){
+		if(is_product_taxonomy()){
+			$o = get_queried_object();
+			if($o instanceof \WP_Term){
+				$link = get_term_link($o->term_id,$o->taxonomy);
+				return $link;
+			}
+		}
+		return wc_get_page_permalink("shop");
+	}
+endif;
 
 if(!function_exists("wbwpf_show_filters")):
 	/**
@@ -58,16 +70,7 @@ if(!function_exists("wbwpf_show_filters")):
 			}
 		}
 
-		$form_action_url = call_user_func(function(){
-			if(is_product_taxonomy()){
-				$o = get_queried_object();
-				if($o instanceof \WP_Term){
-					$link = get_term_link($o->term_id,$o->taxonomy);
-					return $link;
-				}
-			}
-			return wc_get_page_permalink("shop");
-		});
+		$form_action_url = wbwpf_get_base_url();
 
 		if(isset($_GET['orderby'])){
 			$form_action_url = add_query_arg(["orderby"=>$_GET['orderby']],$form_action_url);
@@ -89,9 +92,9 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 	 */
 	function wbwpf_filters_breadcrumb(){
 		$filters = \WBWPF\includes\Filter_Factory::build_from_available_params();
+		$plugin = \WBWPF\Plugin::get_instance_from_global();
 		if(is_array($filters) && !empty($filters)){
 			$posted_filters = \WBWPF\includes\Filter_Factory::parse_filters_array($filters);
-			$plugin = \WBWPF\Plugin::get_instance_from_global();
 			$breadcrumb = [];
 			$i = 0;
 			foreach ($filters as $f){
@@ -135,6 +138,8 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 
 			$v = new \WBF\components\mvc\HTMLView("views/filters-breadcrumb.php",$plugin);
 			$v->display([
+				'clear_all_label' => __("Clear all",$plugin->get_textdomain()),
+				'clear_all_url' => wbwpf_get_base_url(),
 				'breadcrumb' => $breadcrumb,
 				'has_items' => !empty($breadcrumb)
 			]);
