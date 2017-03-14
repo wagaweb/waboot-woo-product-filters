@@ -386,6 +386,13 @@ class Filter_Factory{
 			foreach ($posted_params as $param => $param_values){
 				if(!in_array($param,$ignorelist) && preg_match("/wbwpf_/",$param)){
 					$param = preg_replace("/wbwpf_/","",$param);
+
+					//Sanitization:
+					$param = sanitize_text_field($param);
+					foreach ($param_values as $param_key => $param_value){
+						$param_values[$param_key] = sanitize_text_field($param_value);
+					}
+
 					$current_values[$param] = $param_values;
 				}
 			}
@@ -436,7 +443,12 @@ class Filter_Factory{
 			if($filter_string_values[3] == ""){
 				$current_values[$filter_string_values[0]] = null; //todo: move it to another place?
 			}else{
-				$current_values[$filter_string_values[0]] = explode(",",$filter_string_values[3]);
+				$the_filter_value = explode(",",$filter_string_values[3]);
+
+				//Sanitization:
+				$the_filter_value = sanitize_text_field($the_filter_value);
+
+				$current_values[$filter_string_values[0]] = $the_filter_value;
 			}
 		}
 

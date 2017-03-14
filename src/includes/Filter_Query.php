@@ -185,6 +185,34 @@ class Filter_Query{
 	}
 
 	/**
+	 * Set the select statement
+	 *
+	 * @param $statement
+	 */
+	public function set_select_statement($statement){
+		$statement = sanitize_text_field($statement);
+		$this->select_statement = $statement;
+	}
+
+	/**
+	 * Set the from statement
+	 *
+	 * @param $statement
+	 */
+	public function set_from_statement($statement){
+		$statement = sanitize_text_field($statement);
+		$this->from_statement = $statement;
+	}
+
+	/**
+	 * Add a new where statement
+	 */
+	public function add_where_statement($statement){
+		$statement = sanitize_text_field($statement);
+		$this->where_statements[] = $statement;
+	}
+
+	/**
 	 * Performs the query and return the result
 	 *
 	 * @param int $result_format

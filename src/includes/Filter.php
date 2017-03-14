@@ -53,7 +53,7 @@ class Filter{
 
 			//$query->where_statements[] = $statement;
 			$new_query = Query_Factory::build();
-			$new_query->where_statements[] = $statement;
+			$new_query->add_where_statement($statement);
 			$query->add_sub_query($new_query);
 		}
 	}

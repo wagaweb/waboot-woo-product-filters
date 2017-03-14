@@ -27,8 +27,8 @@ class Query_Factory{
 
 		$query->set_ordering($ordering['orderby'],$ordering['order']);
 		$query->set_pagination($offset,$limit);
-		$query->select_statement = "product_id";
-		$query->from_statement = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
+		$query->set_select_statement("product_id");
+		$query->set_from_statement($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
 
 		//Additional settings:
 		$plugin = Plugin::get_instance_from_global();
@@ -167,17 +167,17 @@ class Query_Factory{
 		if(isset($wp_query->query['orderby'])){
 			$params['orderby'] = $wp_query->query['orderby'];
 		}elseif(isset($_GET['wbwpf_orderby'])){
-			$params['orderby'] = $_GET['wbwpf_orderby'];
+			$params['orderby'] = sanitize_text_field($_GET['wbwpf_orderby']);
 		}elseif(isset($_POST['wbwpf_orderby'])){
-			$params['orderby'] = $_POST['wbwpf_orderby'];
+			$params['orderby'] = sanitize_text_field($_POST['wbwpf_orderby']);
 		}
 
 		if(isset($wp_query->query['order'])){
 			$params['order'] = $wp_query->query['order'];
 		}elseif(isset($_GET['wbwpf_order'])){
-			$params['order'] = $_GET['wbwpf_order'];
+			$params['order'] = sanitize_text_field($_GET['wbwpf_order']);
 		}elseif(isset($_POST['wbwpf_order'])){
-			$params['order'] = $_POST['wbwpf_order'];
+			$params['order'] = sanitize_text_field($_POST['wbwpf_order']);
 		}
 
 		return $params;
