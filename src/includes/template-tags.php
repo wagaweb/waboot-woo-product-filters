@@ -58,10 +58,25 @@ if(!function_exists("wbwpf_show_filters")):
 			}
 		}
 
+		$form_action_url = call_user_func(function(){
+			if(is_product_taxonomy()){
+				$o = get_queried_object();
+				if($o instanceof \WP_Term){
+					$link = get_term_link($o->term_id,$o->taxonomy);
+					return $link;
+				}
+			}
+			return wc_get_page_permalink("shop");
+		});
+
+		if(isset($_GET['orderby'])){
+			$form_action_url = add_query_arg(["orderby"=>$_GET['orderby']],$form_action_url);
+		}
+
 		$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);
 		$v->display([
 			'filters' => $filters,
-			'form_action_url' => is_product_taxonomy() ? "" : wc_get_page_permalink("shop"),
+			'form_action_url' => $form_action_url,
 			'has_filters' => is_array($filters) && !empty($filters),
 			'textdomain' => $plugin->get_textdomain()
 		]);
