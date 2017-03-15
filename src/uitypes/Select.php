@@ -23,7 +23,7 @@ class Select extends ItemsList {
 		parent::check_for_hidden_values();
 
 		//Sort alphabetically by label
-		usort($this->values,function($a,$b){
+		uasort($this->values,function($a,$b){
 			return strcmp($a,$b);
 		});
 
