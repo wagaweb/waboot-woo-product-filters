@@ -22,6 +22,11 @@ class Checkbox extends ItemsList {
 	public function generate_output($input_name = false) {
 		parent::check_for_hidden_values();
 
+		//Sort alphabetically by label
+		usort($this->values,function($a,$b){
+			return strcmp($a,$b);
+		});
+
 		$v = new HTMLView("src/views/uitypes/checkbox.php","waboot-woo-product-filters");
 		$output = $v->get([
 			"values" => $this->values,
