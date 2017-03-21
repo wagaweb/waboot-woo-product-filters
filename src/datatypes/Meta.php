@@ -5,6 +5,8 @@ namespace WBWPF\datatypes;
 use WBWPF\includes\Filter;
 
 class Meta extends DataType {
+	var $value_type = self::VALUES_TYPE_STRING;
+
 	function __construct(Filter &$parent_filter = null) {
 		parent::__construct($parent_filter);
 		$this->label = __("Product metas","waboot-woo-product-filters");

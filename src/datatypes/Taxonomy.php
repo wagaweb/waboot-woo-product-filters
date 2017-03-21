@@ -5,6 +5,8 @@ namespace WBWPF\datatypes;
 use WBWPF\includes\Filter;
 
 class Taxonomy extends DataType{
+	var $value_type = self::VALUES_TYPE_INT;
+
 	/**
 	 * Taxonomy constructor
 	 *

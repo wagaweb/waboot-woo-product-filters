@@ -9,6 +9,9 @@ use WBWPF\Plugin;
 abstract class DataType{
 	const VALUES_FOR_FORMAT_COMMA_SEPARATED = 0;
 	const VALUES_FOR_VALUES_FORMAT_ARRAY = 1;
+	const VALUES_TYPE_INT = "integer";
+	const VALUES_TYPE_FLOAT = "float";
+	const VALUES_TYPE_STRING = "string";
 	/**
 	 * @var Filter
 	 */
@@ -29,6 +32,10 @@ abstract class DataType{
 	 * @var string
 	 */
 	var $admin_description = "";
+	/**
+	 * @var int the type (integer, float or string) of the values. Useful for SQL escaping
+	 */
+	var $value_type;
 
 	/**
 	 * DataType constructor.
