@@ -2,6 +2,8 @@
 
 namespace WBWPF\includes;
 
+use WBWPF\datatypes\DataType;
+
 class Filter_Query{
 	const RESULT_FORMAT_IDS = 0;
 	const RESULT_FORMAT_OBJECTS = 1;
@@ -210,6 +212,43 @@ class Filter_Query{
 	public function add_where_statement($statement){
 		$statement = sanitize_text_field($statement);
 		$this->where_statements[] = $statement;
+	}
+
+	/**
+	 * Prepare a statement for SQL
+	 *
+	 * @param $string
+	 * @param $args
+	 *
+	 * @return string
+	 */
+	static function prepare($string,$args){
+		global $wpdb;
+		$string = $wpdb->prepare($string,$args);
+		return $string;
+	}
+
+	/**
+	 * Get the corresponding value placeholder for type $type (used for preparing the statements)
+	 *
+	 * @param $type
+	 *
+	 * @return string
+	 */
+	static function get_placeholder_for_value_of_type($type){
+		switch ($type){
+			case DataType::VALUES_TYPE_INT:
+				return "%d";
+				break;
+			case DataType::VALUES_TYPE_FLOAT:
+				return "%f";
+				break;
+			case DataType::VALUES_TYPE_STRING:
+				return "%s";
+				break;
+		}
+
+		return "%s";
 	}
 
 	/**
