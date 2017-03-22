@@ -76,18 +76,25 @@ if(!function_exists("wbwpf_show_filters")):
 			$form_action_url = add_query_arg(["orderby"=>$_GET['orderby']],$form_action_url);
 		}
 
+		$has_products = call_user_func(function(){
+			$q = \WBWPF\Plugin::get_query_from_global();
+			if($q instanceof \WBWPF\includes\Filter_Query && !$q->has_products()){
+				return false;
+			}
+			return true;
+		});
+
+		$container_classes[] = "wbwpf-filters";
+		if(!$has_products) $container_classes[] = "no-products";
+		$container_classes = apply_filters("wbwpf/filters/container/classes",$container_classes);
+
 		$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);
 		$v->display([
+			'container_classes' => implode(" ",$container_classes),
 			'filters' => $filters,
 			'form_action_url' => $form_action_url,
 			'has_filters' => is_array($filters) && !empty($filters),
-			'has_products' => call_user_func(function(){
-				$q = \WBWPF\Plugin::get_query_from_global();
-				if($q instanceof \WBWPF\includes\Filter_Query && !$q->has_products()){
-					return false;
-				}
-				return true;
-			}),
+			'has_products' => $has_products,
 			'textdomain' => $plugin->get_textdomain()
 		]);
 	}
