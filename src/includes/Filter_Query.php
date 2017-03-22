@@ -330,4 +330,13 @@ class Filter_Query{
 	public function has_query(){
 		return isset($this->query) && $this->query != "";
 	}
+
+	/**
+	 * Checks if the query has found some products
+	 *
+	 * @return bool
+	 */
+	public function has_products(){
+		return !empty($this->found_products);
+	}
 }

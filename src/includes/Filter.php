@@ -4,6 +4,7 @@ namespace WBWPF\includes;
 
 use WBF\components\mvc\HTMLView;
 use WBWPF\datatypes\DataType;
+use WBWPF\Plugin;
 use WBWPF\uitypes\UIType;
 
 class Filter{
@@ -121,6 +122,13 @@ class Filter{
 			if(!$display_hidden){
 				//Hide if all the values of the uiType are hidden
 				$display_hidden = count($this->uiType->values) == count($this->uiType->hidden_values);
+			}
+			if(!$display_hidden){
+				$query = Plugin::get_query_from_global();
+				if($query instanceof Filter_Query && !$query->has_products()){
+					//Hide if no product are found
+					$display_hidden = true;
+				}
 			}
 			return $display_hidden;
 		});

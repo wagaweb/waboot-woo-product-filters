@@ -81,6 +81,13 @@ if(!function_exists("wbwpf_show_filters")):
 			'filters' => $filters,
 			'form_action_url' => $form_action_url,
 			'has_filters' => is_array($filters) && !empty($filters),
+			'has_products' => call_user_func(function(){
+				$q = \WBWPF\Plugin::get_query_from_global();
+				if($q instanceof \WBWPF\includes\Filter_Query && !$q->has_products()){
+					return false;
+				}
+				return true;
+			}),
 			'textdomain' => $plugin->get_textdomain()
 		]);
 	}
