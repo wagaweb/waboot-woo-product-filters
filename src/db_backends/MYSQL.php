@@ -196,11 +196,11 @@ class MYSQL implements Backend {
 
 		if(!empty($ids)){
 			// backquote fix for names with "-"
-			$col_names = array_map(function($col_name){
+			$col_names_db = array_map(function($col_name){
 				return "`".$col_name."`";
 			}, $col_names);
 
-			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE product_id IN (".implode(",",$ids).")";
+			$query = "SELECT ".implode(",",$col_names_db)." FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE product_id IN (".implode(",",$ids).")";
 
 			$raw_results = $wpdb->get_results($query,ARRAY_A);
 
