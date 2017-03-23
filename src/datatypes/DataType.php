@@ -128,7 +128,7 @@ abstract class DataType{
 	public function getAvailableValuesFor($key, Filter $parent_filter = null){
 		global $wpdb;
 		$table_name = $wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE;
-		$values = $wpdb->get_col("SELECT DISTINCT $key FROM $table_name");
+		$values = $wpdb->get_col("SELECT DISTINCT `$key` FROM $table_name");
 		$values = array_filter($values); //Remove null values
 		return $values;
 	}

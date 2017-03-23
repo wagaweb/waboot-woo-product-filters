@@ -55,8 +55,8 @@ class Filter{
 			$placeholder_values = array_map(function($el) use($value_placeholder){ return $value_placeholder; },$this->current_values);
 
 			//Build up the statement
-			$statement = implode(" OR $this->slug = ",$placeholder_values);
-			$statement = "$this->slug = ".$statement;
+			$statement = implode(" OR `$this->slug` = ",$placeholder_values);
+			$statement = "`$this->slug` = ".$statement;
 
 			//Prepare the statement with actual values
 			$statement = Filter_Query::prepare($statement,$this->current_values);

@@ -56,7 +56,7 @@ class MYSQL implements Backend {
 
 			foreach ($params as $datatype_slug => $data_key){
 				foreach ($data_key as $k => $v){
-					$fields[] = "$v VARCHAR(255)";
+					$fields[] = "`$v` VARCHAR(255)";
 				}
 			}
 
@@ -97,7 +97,9 @@ class MYSQL implements Backend {
 	 */
 	public function get_products_id_by_property( $prop_name, $prop_value ) {
 		global $wpdb;
-		$r = $wpdb->get_col("SELECT product_id FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE $prop_name = '$prop_value'");
+
+
+		$r = $wpdb->get_col("SELECT product_id FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE `$prop_name` = '$prop_value'");
 		return $r;
 	}
 
@@ -193,6 +195,11 @@ class MYSQL implements Backend {
 		$ids = array_unique($ids);
 
 		if(!empty($ids)){
+			// backquote fix for names with "-"
+			$col_names = array_map(function($col_name){
+				return "`".$col_name."`";
+			}, $col_names);
+
 			$query = "SELECT ".implode(",",$col_names)." FROM ".$wpdb->prefix.self::CUSTOM_PRODUCT_INDEX_TABLE." WHERE product_id IN (".implode(",",$ids).")";
 
 			$raw_results = $wpdb->get_results($query,ARRAY_A);
