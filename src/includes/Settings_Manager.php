@@ -58,7 +58,7 @@ class Settings_Manager{
 				}
 				return false;
 			};
-
+			unset($settings['filters_params']);
 			foreach ($settings['filters'] as $dataType_slug => $filter_slugs){
 				foreach ($filter_slugs as $filter_slug){
 					$settings['filters_params'][$filter_slug]['dataType'] = $dataType_slug;
