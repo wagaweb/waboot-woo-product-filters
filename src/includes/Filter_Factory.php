@@ -39,7 +39,7 @@ class Filter_Factory{
 			//Guess the value from $_POST or $_GET
 			if(isset($_GET['wbwpf_query'])){
 				$r = self::parse_stringified_params($_GET['wbwpf_query']);
-			}elseif(isset($_GET['wbwpf_active_filters']) || isset($_POST['wbwpf_active_filters'])){
+			}elseif(isset($_GET['wbwpf_search_by_filters']) || isset($_POST['wbwpf_search_by_filters'])){
 				/*
 				 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
 				 * We are testing the two...
@@ -206,7 +206,7 @@ class Filter_Factory{
 	 * @return array
 	 */
 	public static function build_from_get_params(){
-		if(!isset($_GET['wbwpf_query']) && !isset($_GET['wbwpf_active_filters'])) return [];
+		if(!isset($_GET['wbwpf_query']) && !isset($_GET['wbwpf_search_by_filters'])) return [];
 
 		/*
 		 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
@@ -234,7 +234,7 @@ class Filter_Factory{
 	 * @return array
 	 */
 	public static function build_from_post_params(){
-		if(!isset($_POST['wbwpf_active_filters'])) return [];
+		if(!isset($_POST['wbwpf_search_by_filters'])) return [];
 
 		$r = self::parse_get_or_post_params();
 
@@ -366,17 +366,20 @@ class Filter_Factory{
 	 * return bool|array
 	 */
 	public static function parse_get_or_post_params(){
-		if(isset($_POST['wbwpf_active_filters'])){
-			$active_filters = $_POST['wbwpf_active_filters'];
+		if(isset($_POST['wbwpf_search_by_filters'])){
+			//$active_filters = $_POST['wbwpf_active_filters'];
 			$use = "POST";
-		}elseif(isset($_GET['wbwpf_active_filters'])){
-			$active_filters = $_GET['wbwpf_active_filters'];
+		}elseif(isset($_GET['wbwpf_search_by_filters'])){
+			//$active_filters = $_GET['wbwpf_active_filters'];
 			$use = "GET";
+		}else{
+			return false;
 		}
 
-		if(!isset($active_filters) && !isset($use)) return false;
+		//if(!isset($active_filters) && !isset($use)) return false;
+		$active_filters = [];
 
-		$filter_current_values = call_user_func(function() use($use){
+		$filter_current_values = call_user_func(function() use($use,&$active_filters){
 			$posted_params = $use == "GET" ? $_GET : $_POST;
 
 			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters","wbwpf_query"];
@@ -385,12 +388,16 @@ class Filter_Factory{
 
 			foreach ($posted_params as $param => $param_values){
 				if(!in_array($param,$ignorelist) && preg_match("/wbwpf_/",$param)){
-					$param = preg_replace("/wbwpf_/","",$param);
+					$param = preg_replace("/wbwpf_/","",$param); //Here the "param" is a filter slug
 
 					//Sanitization:
 					$param = sanitize_text_field($param);
 					foreach ($param_values as $param_key => $param_value){
 						$param_values[$param_key] = sanitize_text_field($param_value);
+					}
+
+					if(!in_array($param,$active_filters)){
+						$active_filters[] = $param;
 					}
 
 					$current_values[$param] = $param_values;
@@ -399,6 +406,8 @@ class Filter_Factory{
 
 			return $current_values;
 		});
+
+		$active_filters = self::complete_active_filters($active_filters);
 
 		return [
 			'filters' => $active_filters,
@@ -446,7 +455,13 @@ class Filter_Factory{
 				$the_filter_value = explode(",",$filter_string_values[3]);
 
 				//Sanitization:
-				$the_filter_value = sanitize_text_field($the_filter_value);
+				if(is_array($the_filter_value)){
+					foreach ($the_filter_value as $k => $v){
+						$the_filter_value[$k] = sanitize_text_field($v);
+					}
+				}else{
+					$the_filter_value = sanitize_text_field($the_filter_value);
+				}
 
 				$current_values[$filter_string_values[0]] = $the_filter_value;
 			}
@@ -505,6 +520,39 @@ class Filter_Factory{
 	}
 
 	/**
+	 * Build a query string from specific params
+	 *
+	 * THIS IS TO TEST! NEVER USED AT THE MOMENT.
+	 *
+	 * @param $active_filters
+	 * @param $filter_values
+	 * @param bool $return_args
+	 *
+	 * @return array|string
+	 */
+	public static function querystring_from_params($active_filters,$filter_values,$return_args = false){
+		$qs['wbwpf_active_filters'] = 1;
+
+		foreach ($active_filters as $filter_slug){
+			if(isset($filter_values[$filter_slug])){
+				if(is_array($filter_values[$filter_slug])){
+					foreach ($filter_values[$filter_slug] as $value){
+						$qs[$filter_slug."[]"] = $value;
+					}
+				}else{
+					$qs[$filter_slug] = $filter_values[$filter_slug];
+				}
+			}
+		}
+
+		if($return_args){
+			return $qs;
+		}else{
+			return "?".implode("&",$qs);
+		}
+	}
+
+	/**
 	 * Build a string that represent active filters and their values
 	 *
 	 * @param $active_filters
@@ -558,21 +606,29 @@ class Filter_Factory{
 	 * @return string
 	 */
 	public static function stringify_from_post_params(){
-		if(!isset($_POST['wbwpf_active_filters'])) return "";
+		if(!isset($_POST['wbwpf_search_by_filters'])) return "";
 
-		$active_filters = $_POST['wbwpf_active_filters'];
-		$filter_current_values = call_user_func(function(){
+		$active_filters = [];
+
+		$filter_current_values = call_user_func(function() use(&$active_filters){
 			$posted_params = $_POST;
 			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters","wbwpf_query"];
 			$current_values = [];
 			foreach ($posted_params as $param => $param_values){
 				if(!in_array($param,$ignorelist)){
 					$param = preg_replace("/wbwpf_/","",$param);
+
+					if(!in_array($param,$active_filters)){
+						$active_filters[] = $param;
+					}
+
 					$current_values[$param] = $param_values;
 				}
 			}
 			return $current_values;
 		});
+
+		$active_filters = self::complete_active_filters($active_filters);
 
 		return self::stringify_from_params($active_filters,$filter_current_values);
 	}
@@ -583,10 +639,11 @@ class Filter_Factory{
 	 * @return string
 	 */
 	public static function stringify_from_get_params(){
-		if(!isset($_GET['wbwpf_active_filters'])) return "";
+		if(!isset($_GET['wbwpf_search_by_filters'])) return "";
 
-		$active_filters = $_GET['wbwpf_active_filters'];
-		$filter_current_values = call_user_func(function(){
+		$active_filters = [];
+
+		$filter_current_values = call_user_func(function() use(&$active_filters){
 			$posted_params = $_GET;
 			$ignorelist = ["wbwpf_active_filters","wbwpf_search_by_filters","wbwpf_query"];
 			$current_values = [];
@@ -594,11 +651,41 @@ class Filter_Factory{
 				if(!in_array($param,$ignorelist)){
 					$param = preg_replace("/wbwpf_/","",$param);
 					$current_values[$param] = $param_values;
+
+					if(!in_array($param,$active_filters)){
+						$active_filters[] = $param;
+					}
 				}
 			}
 			return $current_values;
 		});
 
+		$active_filters = self::complete_active_filters($active_filters);
+
 		return self::stringify_from_params($active_filters,$filter_current_values);
+	}
+
+	/**
+	 * Takes an array of active filters slug, completes with other necessary data
+	 *
+	 * @param array $active_filters
+	 *
+	 * @return array
+	 */
+	private static function complete_active_filters($active_filters){
+		$plugin = Plugin::get_instance_from_global();
+		$settings = $plugin->get_plugin_settings();
+		$completed_active_filters = [];
+		foreach ($active_filters as $slug){
+			if(!isset($settings['filters_params']) || !isset($settings['filters_params'][$slug])) continue;
+
+			$completed_active_filters[$slug] = [
+				'slug' => $slug,
+				'dataType' => $settings['filters_params'][$slug]['dataType'],
+				'type' => $settings['filters_params'][$slug]['uiType']
+			];
+		}
+
+		return $completed_active_filters;
 	}
 }

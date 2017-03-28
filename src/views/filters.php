@@ -8,7 +8,7 @@
         <?php _e("No filters defined in calling function.",$textdomain); ?>
     <?php endif; ?>
         <?php if($has_products): ?>
-        <button name="wbwpf_search_by_filters" type="submit"><?php _ex("Search","Filters search button",$textdomain); ?></button>
+        <button name="wbwpf_search_by_filters" value="1" type="submit"><?php _ex("Search","Filters search button",$textdomain); ?></button>
 	    <?php endif; ?>
     </form>
 </div>
