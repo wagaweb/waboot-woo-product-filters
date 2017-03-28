@@ -113,7 +113,11 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 			$i = 0;
 			foreach ($filters as $f){
 				if(!is_array($f->current_values)) continue;
-				if($f->is_current_filter()) continue;
+
+				$skip = $f->is_current_filter();
+				$skip = apply_filters("wbwpf/breadcrumb/skip_parsing",$skip,$f);
+				if($skip) continue;
+
 				foreach ($f->current_values as $current_value){
 
 					$single_filter_params = [
@@ -125,7 +129,7 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 					$single_filter_values = [
 						$f->slug => $current_value
 					];
-					$single_query_string = \WBWPF\includes\Filter_Factory::stringify_from_params($single_filter_params,$single_filter_values);
+					$single_query_string = \WBWPF\includes\Filter_Factory::stringify_from_params($single_filter_params,$single_filter_values,true);
 
 					$cloned_posted_filters = $posted_filters;
 					if(isset($cloned_posted_filters['values']) && isset($cloned_posted_filters['values'][$f->slug])){
@@ -134,7 +138,7 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 							if(empty($cloned_posted_filters['values'][$f->slug])) unset($cloned_posted_filters['values'][$f->slug]);
 						}
 					}
-					$current_query_string_without_self = \WBWPF\includes\Filter_Factory::stringify_from_params($cloned_posted_filters['filters'],$cloned_posted_filters['values']);
+					$current_query_string_without_self = \WBWPF\includes\Filter_Factory::stringify_from_params($cloned_posted_filters['filters'],$cloned_posted_filters['values'],true);
 
 					$breadcrumb[$i] = [
 						'label' => $f->dataType->getPublicItemLabelOf($current_value,$f),
@@ -145,6 +149,8 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 
 					$breadcrumb[$i]['link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['cumulated_query_string']]);
 					$breadcrumb[$i]['delete_link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['current_query_string_without_self']]);
+
+					$breadcrumb[$i] = apply_filters("wbwpf/breadcrumb/item",$breadcrumb[$i]);
 
 					$i++;
 				}

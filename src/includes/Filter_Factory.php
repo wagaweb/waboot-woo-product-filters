@@ -37,7 +37,7 @@ class Filter_Factory{
 			$f->set_value($values);
 		}else{
 			//Guess the value from $_POST or $_GET
-			if(isset($_GET['wbwpf_query'])){
+			if(isset($_GET['wbwpf_query']) && $_GET['wbwpf_query'] != ""){
 				$r = self::parse_stringified_params($_GET['wbwpf_query']);
 			}elseif(isset($_GET['wbwpf_search_by_filters']) || isset($_POST['wbwpf_search_by_filters'])){
 				/*
@@ -195,7 +195,7 @@ class Filter_Factory{
 		 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
 		 * We are testing the two...
 		 */
-		if(isset($_GET['wbwpf_query'])){
+		if(isset($_GET['wbwpf_query']) && $_GET['wbwpf_query'] != ""){
 			$params = $_GET['wbwpf_query'];
 			$r = self::parse_stringified_params($params);
 		}else{
@@ -544,13 +544,20 @@ class Filter_Factory{
 	 *
 	 * @param $active_filters
 	 * @param $filter_values
+	 * @param bool $empty_for_no_values
 	 *
 	 * @return string
 	 */
-	public static function stringify_from_params($active_filters,$filter_values){
+	public static function stringify_from_params($active_filters,$filter_values,$empty_for_no_values = false){
 		$out =  "";
 		$i = 0;
 		foreach($active_filters as $filter_slug => $filter_params){
+			if($empty_for_no_values){
+				if(!isset($filter_values[$filter_slug]) || empty($filter_values[$filter_slug])){
+					$out .= "";
+					continue;
+				}
+			}
 			if($i > 0){
 				$out .= "-";
 			}

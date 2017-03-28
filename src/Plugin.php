@@ -625,7 +625,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array;
 	 */
 	public function inject_wbwpf_query_params_into_detect_filters($result_filters){
-		if(!isset($_GET['wbwpf_query'])) return $result_filters;
+		if(!isset($_GET['wbwpf_query']) || $_GET['wbwpf_query'] == "") return $result_filters;
 
 		$wrapped_params = $_GET['wbwpf_query'];
 		$unwrapped_filters = Filter_Factory::parse_stringified_params($wrapped_params);
