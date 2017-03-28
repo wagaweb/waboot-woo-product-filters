@@ -164,28 +164,10 @@ class Filter_Factory{
 			}
 		}
 
-		//The wbwpf_query param can further filter the generated detected filters array; namely, we:
-		// - remove from $result_filters the filters not present in wbwpf_query)
-		// - overwrite any values in $result_filters with wbwpf_query values
-		if(isset($_GET['wbwpf_query'])){
-			$wrapped_params = $_GET['wbwpf_query'];
-			$unwrapped_filters = self::parse_stringified_params($wrapped_params);
-			foreach ($result_filters['filters'] as $filter_slug => $filter_params){
-				if(!isset($unwrapped_filters['filters'][$filter_slug])){
-					unset($result_filters['filters'][$filter_slug]);
-					if(isset($result_filters['values'][$filter_slug])){
-						unset($result_filters['values'][$filter_slug]);
-					}
-				}
-				if(isset($unwrapped_filters['values'][$filter_slug])){
-					$result_filters['values'][$filter_slug] = $unwrapped_filters['values'][$filter_slug];
-				}else{
-					if(isset($result_filters['values'][$filter_slug])){
-						unset($result_filters['values'][$filter_slug]);
-					}
-				}
-			}
-		}
+		/*
+		 * @hooked Plugin->inject_wbwpf_query_params_into_detect_filters() . Here we parse wbwpf_query param, and alter the $result_filters accordingly
+		 */
+		$result_filters = apply_filters("wbwpf/filters/detected/parsed",$result_filters);
 
 		if(is_array($result_filters) && !empty($result_filters)){
 			//Finally build them into an array of Filters

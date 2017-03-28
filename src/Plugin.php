@@ -109,6 +109,9 @@ class Plugin extends TemplatePlugin {
 		//Hooks during indexing
 		$this->loader->add_action("wbwpf/db/insert_new_product/after",$this,"on_product_indexed",10,4);
 
+		//Filters parsing Customizations
+		$this->loader->add_filter("wbwpf/filters/detected/parsed",$this,"inject_wbwpf_query_params_into_detect_filters",10,1);
+
 		//Filter Query Customizations
 		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
 
@@ -606,6 +609,43 @@ class Plugin extends TemplatePlugin {
 		if(!$parent_title || !is_string($parent_title) || $parent_title == "") return $title; //Do nothing if it is not a valid title
 
 		return $parent_title;
+	}
+
+	/**
+	 * Takes parsed format of detected filters, applies params specified in wbwpf_query param to them. This is used for BREADCRUMB.
+	 *
+	 * The wbwpf_query param can further filter the generated detected filters array; namely, we:
+	 * - remove from $result_filters the filters not present in wbwpf_query)
+	 * - overwrite any values in $result_filters with wbwpf_query values
+	 *
+	 * @param array $result_filters
+	 *
+	 * @hooked "wbwpf/filters/detected/parsed"
+	 *
+	 * @return array;
+	 */
+	public function inject_wbwpf_query_params_into_detect_filters($result_filters){
+		if(!isset($_GET['wbwpf_query'])) return $result_filters;
+
+		$wrapped_params = $_GET['wbwpf_query'];
+		$unwrapped_filters = Filter_Factory::parse_stringified_params($wrapped_params);
+		foreach ($result_filters['filters'] as $filter_slug => $filter_params){
+			if(!isset($unwrapped_filters['filters'][$filter_slug])){
+				unset($result_filters['filters'][$filter_slug]);
+				if(isset($result_filters['values'][$filter_slug])){
+					unset($result_filters['values'][$filter_slug]);
+				}
+			}
+			if(isset($unwrapped_filters['values'][$filter_slug])){
+				$result_filters['values'][$filter_slug] = $unwrapped_filters['values'][$filter_slug];
+			}else{
+				if(isset($result_filters['values'][$filter_slug])){
+					unset($result_filters['values'][$filter_slug]);
+				}
+			}
+		}
+
+		return $result_filters;
 	}
 
 	/**
