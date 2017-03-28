@@ -123,6 +123,8 @@ class Filter_Factory{
 
 		$detected_filters = array_filter($detected_filters); //Remove FALSE or NULL values
 
+		$detected_filters = apply_filters("wbwpf/filters/detected",$detected_filters);
+
 		/*
 		 * Now we have to merge the detected filters. We need to build an array like this:
 		 *
@@ -143,21 +145,20 @@ class Filter_Factory{
 
 		//todo: can we FURTHER optimize this cycle?
 		foreach ($detected_filters as $filters){
-			if(isset($filters['filters'])){
-				foreach ($filters['filters'] as $filter_slug => $filter_params){
-					//Get types
-					if(!isset($result_filters['filters'][$filter_slug])){
-						$result_filters['filters'][$filter_slug] = $filter_params;
-					}
-					//Get values
-					if(isset($filters['values'][$filter_slug])){
-						$filter_values = $filters['values'][$filter_slug];
-						if(!isset($result_filters['values'][$filter_slug])){
-							$result_filters['values'][$filter_slug] = $filter_values;
-						}else{
-							$result_filters['values'][$filter_slug] = array_merge($result_filters['values'][$filter_slug],$filter_values);
-							$result_filters['values'][$filter_slug] = array_unique($result_filters['values'][$filter_slug]);
-						}
+			if(!isset($filters['filters'])) continue;
+			foreach ($filters['filters'] as $filter_slug => $filter_params){
+				//Get types
+				if(!isset($result_filters['filters'][$filter_slug])){
+					$result_filters['filters'][$filter_slug] = $filter_params;
+				}
+				//Get values
+				if(isset($filters['values'][$filter_slug])){
+					$filter_values = $filters['values'][$filter_slug];
+					if(!isset($result_filters['values'][$filter_slug])){
+						$result_filters['values'][$filter_slug] = $filter_values;
+					}else{
+						$result_filters['values'][$filter_slug] = array_merge($result_filters['values'][$filter_slug],$filter_values);
+						$result_filters['values'][$filter_slug] = array_unique($result_filters['values'][$filter_slug]);
 					}
 				}
 			}
@@ -342,6 +343,7 @@ class Filter_Factory{
 		}
 
 		return [
+			'_origin' => 'wp_query',
 			'filters' => $active_filters,
 			'values' => $filter_current_values
 		];
@@ -410,6 +412,7 @@ class Filter_Factory{
 		$active_filters = self::complete_active_filters($active_filters);
 
 		return [
+			'_origin' => $use,
 			'filters' => $active_filters,
 			'values' => $filter_current_values
 		];
@@ -468,6 +471,7 @@ class Filter_Factory{
 		}
 
 		return [
+			'_origin' => 'string',
 			'filters' => $active_filters,
 			'values' => $current_values
 		];
@@ -511,6 +515,7 @@ class Filter_Factory{
 
 		if(!empty($active_filters)){
 			return [
+				'_origin' => 'provided',
 				'filters' => $active_filters,
 				'values' => $current_values
 			];
