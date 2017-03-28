@@ -141,6 +141,7 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 					$current_query_string_without_self = \WBWPF\includes\Filter_Factory::stringify_from_params($cloned_posted_filters['filters'],$cloned_posted_filters['values'],true);
 
 					$breadcrumb[$i] = [
+						'value' => $current_value,
 						'label' => $f->dataType->getPublicItemLabelOf($current_value,$f),
 						'single_query_string' => $single_query_string,
 						'current_query_string_without_self' => $current_query_string_without_self,
