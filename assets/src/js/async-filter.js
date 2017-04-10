@@ -1,4 +1,4 @@
-import React from 'react';
+import Vue from 'vue';
 import $ from "jquery";
 import _ from 'lodash';
 
@@ -7,10 +7,9 @@ class FilterController{
     getValues(){}
 }
 
-class Filter extends React.Component{
-    constructor(props){
+class Filter{
+    constructor(props) {
         debugger;
-        super(props);
         this.Controller = new FilterController();
         this.tpl = _template();
         this.state = {
@@ -18,20 +17,27 @@ class Filter extends React.Component{
         };
     }
 
-    componentDidMount(){
+    componentDidMount() {
         debugger;
-        this.Controller.getValues().then(function(){
+        this.Controller.getValues().then(function () {
             debugger;
             //Resolve
-        },function(){
+        }, function () {
             debugger;
             //Reject
         });
     }
 
-    render(){
+    render() {
         debugger;
     }
 }
 
-export {Filter,FilterController}
+export default Vue.component("Filter",{
+    data(){
+        return {
+            current_values: []
+        }
+    },
+    props: ['label','slug']
+});
