@@ -98,9 +98,11 @@ class Filter{
 	/**
 	 * Display the filter
 	 *
+	 * @param bool $async
+	 *
 	 * @return void
 	 */
-	function display(){
+	function display($async = false){
 		$values = $this->dataType->getAvailableValuesFor($this->slug);
 		$values = apply_filters("wbwpf/filter/available_values",$values,$this);
 
@@ -141,7 +143,8 @@ class Filter{
 			'uiType' => $this->uiType->type_slug,
 			'dataType' => $this->dataType->type_slug,
 			'content' => $content,
-			'display_hidden' => $display_hidden
+			'display_hidden' => $display_hidden,
+			'async' => $async
 		];
 
 		$display_args = apply_filters("wbwpf/filter/display_args",$display_args,$this);
