@@ -114,7 +114,7 @@ class Filter{
 		$values = $this->dataType->getAvailableValuesFor($this->slug); //Get all available value for this filter from the dababase
 		$values = apply_filters("wbwpf/filter/available_values",$values,$this);
 
-		$this->uiType->set_values($values);
+		$this->uiType->set_values($values); //Here we set the values to UITypes, this values will be displayed during generate_output();
 
 		if(isset($this->current_values)){ //Here we have current selected values
 			$this->uiType->selected_values = $this->current_values; //$this->current_values is set by Filter_Factory. We never create a filter manually.

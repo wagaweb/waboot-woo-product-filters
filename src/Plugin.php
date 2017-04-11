@@ -9,6 +9,7 @@ use WBF\components\utils\DB;
 use WBWPF\datatypes\DataType;
 use WBWPF\db_backends\MYSQL;
 use WBWPF\filters\Filter;
+use WBWPF\includes\AjaxEndpoint;
 use WBWPF\includes\DB_Manager;
 use WBWPF\includes\Filter_Factory;
 use WBWPF\includes\Filter_Query;
@@ -34,6 +35,10 @@ class Plugin extends TemplatePlugin {
 	 * @var Settings_Manager
 	 */
 	var $Settings;
+	/**
+	 * @var AjaxEndpoint
+	 */
+	var $AjaxEndpoint;
 
 	/**
 	 * Define the core functionality of the plugin.
@@ -51,6 +56,7 @@ class Plugin extends TemplatePlugin {
 		parent::load_dependencies();
 		$this->DB = new DB_Manager(new MYSQL());
 		$this->Settings = new Settings_Manager($this);
+		$this->AjaxEndpoint = new AjaxEndpoint();
 	}
 
 	/**
@@ -117,6 +123,9 @@ class Plugin extends TemplatePlugin {
 
 		//Catalog visualizations hooks
 		$this->loader->add_filter("the_title",$this,"alter_variations_title",10,2);
+
+		//Ajax
+		$this->AjaxEndpoint->setup_endpoints();
 	}
 
 	/**

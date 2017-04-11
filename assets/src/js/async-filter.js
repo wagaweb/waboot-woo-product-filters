@@ -3,45 +3,42 @@ import $ from "jquery";
 import _ from 'lodash';
 
 class FilterController{
-    constructor(){}
-    getValues(){}
-}
-
-/*class Filter extends React.Component{
-    constructor(props) {
-        debugger;
-        this.Controller = new FilterController();
-        this.tpl = _template();
-        this.state = {
-            current_values: {}
-        };
+    constructor(slug){
+        this.slug = slug;
     }
-
-    componentDidMount() {
-        debugger;
-        this.Controller.getValues().then(function () {
-            debugger;
-            //Resolve
-        }, function () {
-            debugger;
-            //Reject
+    getValues(){
+        return $.ajax({
+            url: wbwpf.ajax_url,
+            data: {
+                action: "get_values_for_filter",
+                slug: this.slug
+            },
+            method: "POST",
+            dataType: "json"
         });
     }
-
-    render() {
-        debugger;
-    }
-}*/
+}
 
 let Filter = Vue.component("wbwpf-filter",{
     data(){
+        let controller = new FilterController(this.slug);
         return {
-            current_values: []
+            controller: controller,
+            items: []
         }
     },
     props: ['label','slug','hidden'],
     created: function(){
         debugger;
+        let self = this,
+            req = this.controller.getValues();
+        req.then((data, textStatus, jqXHR) => {
+            //Resolve
+            self.items = data.data;
+        },(jqXHR, textStatus, errorThrown) => {
+            //Reject
+            self.items = [];
+        });
     },
 });
 
