@@ -84,4 +84,11 @@ abstract class UIType{
 	public function generate_output(){
 		return implode(",",$this->values);
 	}
+
+	/**
+	 * Generate the HTML template for output (used for vue async filters)
+	 */
+	public function generate_vue_template(){
+		return "<ul><li v-for='item in items'>{{ item }}</li></ul>";
+	}
 }

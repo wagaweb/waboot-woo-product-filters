@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     sass = require('gulp-sass'),
     browserify = require('browserify'),
+    vueify = require('vueify'),
     source = require('vinyl-source-stream'), //https://www.npmjs.com/package/vinyl-source-stream
     buffer = require('vinyl-buffer'), //https://www.npmjs.com/package/vinyl-buffer
     babelify = require('babelify'),
@@ -67,7 +68,9 @@ gulp.task('browserify', function(){
         insertGlobals : true,
         debug: true
     })
-        .transform("babelify", {presets: ["latest"]}).bundle()
+        .transform("babelify", {presets: ["latest"]})
+        .transform(vueify)
+        .bundle()
         .pipe(source('frontend.pkg.js'))
         .pipe(buffer()) //This might be not required, it works even if commented
         .pipe(gulp.dest('./assets/dist/js'));

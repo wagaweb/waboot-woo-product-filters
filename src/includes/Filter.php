@@ -103,20 +103,30 @@ class Filter{
 	 * @return void
 	 */
 	function display($async = false){
-		$values = $this->dataType->getAvailableValuesFor($this->slug);
-		$values = apply_filters("wbwpf/filter/available_values",$values,$this);
+		//Setup name and label:
 
 		$this->uiType->set_name($this->slug);
 
-		$this->uiType->set_values($values);
-
 		if(!isset($this->label)) $this->set_label();
 
-		if(isset($this->current_values)){
-			$this->uiType->selected_values = $this->current_values;
+		//Setup values:
+
+		$values = $this->dataType->getAvailableValuesFor($this->slug); //Get all available value for this filter from the dababase
+		$values = apply_filters("wbwpf/filter/available_values",$values,$this);
+
+		$this->uiType->set_values($values);
+
+		if(isset($this->current_values)){ //Here we have current selected values
+			$this->uiType->selected_values = $this->current_values; //$this->current_values is set by Filter_Factory. We never create a filter manually.
 		}
 
-		$content = $this->uiType->generate_output();
+		if($async){
+			$content = $this->uiType->generate_vue_template();
+		}else{
+			$content = $this->uiType->generate_output();
+		}
+
+		//Check if this filter should be seen:
 
 		$display_hidden = call_user_func(function(){
 			//Hide if the page displayed is the archive page of the current filter

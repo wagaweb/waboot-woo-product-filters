@@ -7,7 +7,7 @@ class FilterController{
     getValues(){}
 }
 
-class Filter{
+/*class Filter extends React.Component{
     constructor(props) {
         debugger;
         this.Controller = new FilterController();
@@ -31,13 +31,18 @@ class Filter{
     render() {
         debugger;
     }
-}
+}*/
 
-export default Vue.component("Filter",{
+let Filter = Vue.component("wbwpf-filter",{
     data(){
         return {
             current_values: []
         }
     },
-    props: ['label','slug']
+    props: ['label','slug','hidden'],
+    created: function(){
+        debugger;
+    },
 });
+
+export {Filter, FilterController}

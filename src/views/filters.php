@@ -1,12 +1,11 @@
 <?php if($async): ?>
-
+    <div class="wbwpf-filters" data-filters data-async>
 	    <?php if($has_filters): ?>
 		    <?php foreach ($filters as $filter): ?>
 			    <?php $filter->display(true); ?>
 		    <?php endforeach; ?>
 	    <?php endif; ?>
-
-    <div class="wbwpf-filters" data-filters data-async></div>
+    </div>
 <?php else: ?>
     <div class="wbwpf-filters" data-filters>
         <form method="get" action="<?php echo $form_action_url; ?>" data-filters-form>

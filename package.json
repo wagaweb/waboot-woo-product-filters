@@ -41,7 +41,11 @@
     "merge-stream": "^1.0.1",
     "run-sequence": "^1.0.2",
     "vinyl-buffer": "^1.0.0",
-    "vinyl-source-stream": "^1.1.0"
+    "vinyl-source-stream": "^1.1.0",
+    "vueify": "^9.4.1"
+  },
+  "browser": {
+    "vue": "vue/dist/vue.common.js"
   },
   "browserify": {
     "transform": [

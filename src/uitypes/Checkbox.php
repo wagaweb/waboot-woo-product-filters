@@ -36,4 +36,15 @@ class Checkbox extends ItemsList {
 		]);
 		return $output;
 	}
+
+	/**
+	 * Generate the template for async use of this UIType
+	 */
+	public function generate_vue_template() {
+		$v = new HTMLView("src/views/uitypes/async-checkbox.php","waboot-woo-product-filters");
+		$output = $v->get([
+			"input_name" => $this->input_name
+		]);
+		return $output;
+	}
 }

@@ -1,8 +1,11 @@
 import $ from "jquery";
 import _ from "underscore";
+
+import Vue from "vue";
+
 import { getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters } from './utilities';
 import "./jquery_addons";
-import Vue from "vue";
+
 import {Filter,FilterController} from './async-filter';
 
 class WooCommerce_Ordering_Form_Injection{
@@ -35,21 +38,6 @@ class WooCommerce_Ordering_Form_Injection{
     }
 }
 
-class AsyncFilters{
-    constructor($container){
-        this.$container = new Vue({
-            el: $container,
-            components: {
-                Filter: Filter
-            },
-            data: {
-                Filter: []
-            }
-        });
-    }
-    render(){}
-}
-
 $(document).ready(function($){
     let $wc_ordering = $("form.woocommerce-ordering"),
         $async_filters = $(".wbwpf-filters[data-async]");
@@ -59,7 +47,9 @@ $(document).ready(function($){
     }
 
     if($async_filters.length > 0){
-        debugger;
-        new AsyncFilters("wbwpf-filters[data-async]");
+        //Init a new Vue instance for the filters
+        window.FiltersApp = new Vue({
+            el: ".wbwpf-filters[data-async]"
+        });
     }
 });
