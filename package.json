@@ -53,9 +53,7 @@
     ]
   },
   "browserify-shim": {
-    "jquery": "global:jQuery",
-    "backbone": "global:Backbone",
-    "underscore": "global:_"
+    "jquery": "global:jQuery"
   },
   "dependencies": {
     "lodash": "^4.17.4",
