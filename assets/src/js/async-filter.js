@@ -6,8 +6,13 @@ class FiltersManager{
     constructor() {
         this.activeFilters = [];
     }
+
+    /**
+     * Adds or update a filter
+     * @param slug
+     * @param value
+     */
     updateFilter(slug,value){
-        debugger;
         let actualIndex = _.findIndex(this.activeFilters,{slug:slug});
         if(actualIndex !== -1){
             //Update
@@ -23,24 +28,47 @@ class FiltersManager{
             });
         }
     }
+
+    /**
+     * Remove a filter
+     * @param slug
+     */
     removeFilter(slug){
         let actualIndex = _.findIndex(this.activeFilters,{slug:slug});
         if(actualIndex !== -1){
             this.activeFilters.splice(actualIndex,1);
         }
     }
+
+    /**
+     * Update the DOM input with the current filters
+     */
+    getFilters(){
+        return this.activeFilters
+    }
 }
 
 class FilterController{
+    /**
+     * FilterController constructor
+     * @param slug
+     */
     constructor(slug){
         this.slug = slug;
     }
+
+    /**
+     * Ajax to make the update values request
+     * @returns {$.ajax}
+     */
     getValues(){
+        debugger;
         return $.ajax({
             url: wbwpf.ajax_url,
             data: {
                 action: "get_values_for_filter",
-                slug: this.slug
+                slug: this.slug,
+                current_filters: manager.getFilters()
             },
             method: "POST",
             dataType: "json"
@@ -60,22 +88,33 @@ let Filter = Vue.component("wbwpf-filter",{
             items: []
         }
     },
-    props: ['label','slug','hidden'],
-    created: function(){
-        let self = this,
-            req = this.controller.getValues();
-        req.then((data, textStatus, jqXHR) => {
-            //Resolve
-            self.items = data.data;
-        },(jqXHR, textStatus, errorThrown) => {
-            //Reject
-            self.items = [];
-        });
+    props: ['label','slug','hidden','update'],
+    created(){
+        this.updateValues();
     },
     methods: {
-        valueSelected: function(event){
+        /**
+         * Update displayed values of the filter via ajax.
+         */
+        updateValues(){
+            let self = this,
+                req = this.controller.getValues();
+            req.then((data, textStatus, jqXHR) => {
+                //Resolve
+                self.items = data.data;
+            },(jqXHR, textStatus, errorThrown) => {
+                //Reject
+                self.items = [];
+            });
+        },
+        /**
+         * Callback for currentValues changes.
+         * @param event
+         */
+        valueSelected(event){
             let $target = $(event.target);
             this.manager.updateFilter(this.slug,this.currentValues);
+            this.$parent.$emit("valueSelected");
         }
     }
 });

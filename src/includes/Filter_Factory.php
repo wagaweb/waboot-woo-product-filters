@@ -106,6 +106,19 @@ class Filter_Factory{
 	}
 
 	/**
+	 * Build an array of filter instances starting from an array of filter slugs
+	 *
+	 * @param array $slugs
+	 * @param bool $filter_values
+	 *
+	 * @return array
+	 */
+	public static function build_from_slugs($slugs,$filter_values = false){
+		$params = self::complete_active_filters($slugs);
+		return self::build_from_params($params,$filter_values);
+	}
+
+	/**
 	 * Build a Filters array from available params. At the moment we use this builder mainly.
 	 *
 	 * @return array

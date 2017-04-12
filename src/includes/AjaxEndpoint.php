@@ -40,7 +40,29 @@ class AjaxEndpoint{
 				$all_values = $f->dataType->getAvailableValuesFor($f->slug);
 
 				//Now we need to instantiate a new Filter_Query and then retrieve the available_col_values for current filter
-				//$filter_query = Query_Factory::build_from_available_params();
+				if(isset($_POST['current_filters'])){
+					$slugs = [];
+					$filter_values = [];
+					foreach ($_POST['current_filters'] as $k => $v){
+						$slugs[] = $v['slug'];
+						$filter_values[$v['slug']] = $v['value'];
+					}
+					$filters = Filter_Factory::build_from_slugs($slugs,$filter_values);
+					if(is_array($filters) && !empty($filters)){
+						$filters_query = Query_Factory::build($filters);
+						if($filters_query instanceof Filter_Query){
+							//$filters_query->perform(); <- not work?
+						}else{
+							wp_send_json_error([
+								'error' => "Unable to instance Filter_Query"
+							]);
+						}
+					}else{
+						wp_send_json_error([
+							'error' => "Unable to instance Filters"
+						]);
+					}
+				}
 
 				//Now we build a values array each one with hidden \ visible property
 				foreach ($all_values as $retrieved_value_id => $retrieved_value_label){

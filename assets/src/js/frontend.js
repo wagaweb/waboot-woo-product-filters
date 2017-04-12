@@ -49,7 +49,16 @@ $(document).ready(function($){
     if($async_filters.length > 0){
         //Init a new Vue instance for the filters
         window.FiltersApp = new Vue({
-            el: ".wbwpf-filters[data-async]"
+            el: ".wbwpf-filters[data-async]",
+            data: {
+                filtersUpdated: false
+            }
+        });
+        //Listen on value changes on components
+        window.FiltersApp.$on("valueSelected",function(){
+            _.each(this.$children,function(filter){
+                filter.updateValues();
+            });
         });
     }
 });
