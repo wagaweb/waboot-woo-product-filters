@@ -62,7 +62,6 @@ class FilterController{
      * @returns {$.ajax}
      */
     getValues(){
-        debugger;
         return $.ajax({
             url: wbwpf.ajax_url,
             data: {
