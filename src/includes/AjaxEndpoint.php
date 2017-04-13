@@ -12,8 +12,6 @@ class AjaxEndpoint{
 
 	/**
 	 * Async endpoint to get the available values for a filter
-	 *
-	 * @param $filter_slug
 	 */
 	public function get_values_for_filter(){
 		$filter_slug = isset($_POST['slug']) ? $_POST['slug'] : "";
@@ -66,8 +64,13 @@ class AjaxEndpoint{
 
 				//Now we build a values array each one with hidden \ visible property
 				foreach ($all_values as $retrieved_value_id => $retrieved_value_label){
+					$is_visible = true;
+					if(isset($filters_query)){
+						$is_visible = isset($filters_query->available_col_values[$f->slug]) && in_array($retrieved_value_id,$filters_query->available_col_values[$f->slug]);
+					}
+
 					$values[] = [
-						'visible' => isset($filters_query) && isset($filters_query->available_col_values[$f->slug]) && in_array($retrieved_value_id,$filters_query->available_col_values[$f->slug]),//check in available_col_values//check in available_col_values//check in available_col_values//check in available_col_values//check in available_col_values//check in available_col_values
+						'visible' => $is_visible,
 						'id' => $retrieved_value_id,
 						'label' => $retrieved_value_label
 					];
