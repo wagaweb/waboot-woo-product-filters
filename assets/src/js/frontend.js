@@ -6,8 +6,9 @@ import Vue from "vue";
 import { getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters } from './utilities';
 import "./jquery_addons";
 
-import {Filter,FilterController} from './async-filter';
-import {Product} from './async-product';
+import {FiltersApp} from './async-filters';
+import {FiltersManager} from "./async-filter-helpers";
+import {ProductsManager} from "./async-product-helpers";
 
 class WooCommerce_Ordering_Form_Injection{
     /**
@@ -49,45 +50,15 @@ $(document).ready(function($){
     }
 
     if($async_filters.length > 0){
-        //Init a new Vue instance for the filters
-        window.FiltersList = new Vue({
-            el: ".wbwpf-filters[data-async]"
-        });
-        //Listen on value changes on components
-        window.FiltersList.$on("valueSelected",function(){
-            _.each(this.$children,function(filter){
-                filter.updateValues();
-            });
-            this.$emit("filtersUpdated");
-        });
-    }
-
-    if($async_product_list.length > 0){
-        window.ProductList = new Vue({
-            el: ".wbwpf-product-list[data-async]",
-            mounted(){
-                window.FiltersList.$on("filtersUpdated",function(){
-                    console.log("Must update product list!");
-                    window.ProductList.updateProducts();
-                })
-            },
-            data: {
-                products: [
-                    {
-                        title: "Title",
-                        content: "Content"
-                    },
-                    {
-                        title: "Title",
-                        content: "Content"
-                    }
-                ]
-            },
-            methods: {
-                updateProducts(){
-                    console.log("Updated products!")
-                }
-            }
-        });
+        if($async_product_list.length > 0){
+            let fm = new FiltersManager(),
+                pm = new ProductsManager();
+            window.FiltersApp = new FiltersApp(fm,pm);
+            window.FiltersApp.start(".wbwpf-filters[data-async]",".wbwpf-product-list[data-async]");
+        }else{
+            let fm = new FiltersManager();
+            window.FiltersApp = new FiltersApp(fm);
+            window.FiltersApp.start(".wbwpf-filters[data-async]")
+        }
     }
 });

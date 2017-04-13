@@ -52,9 +52,11 @@ class FilterController{
     /**
      * FilterController constructor
      * @param slug
+     * @param FiltersManager
      */
-    constructor(slug){
+    constructor(slug,FiltersManager){
         this.slug = slug;
+        this.manager = FiltersManager;
     }
 
     /**
@@ -67,7 +69,7 @@ class FilterController{
             data: {
                 action: "get_values_for_filter",
                 slug: this.slug,
-                current_filters: manager.getFilters()
+                current_filters: this.manager.getFilters()
             },
             method: "POST",
             dataType: "json"
@@ -75,47 +77,4 @@ class FilterController{
     }
 }
 
-let manager = new FiltersManager();
-
-let Filter = Vue.component("wbwpf-filter",{
-    data(){
-        let controller = new FilterController(this.slug);
-        return {
-            manager: manager,
-            controller: controller,
-            currentValues: [],
-            items: []
-        }
-    },
-    props: ['label','slug','hidden','update'],
-    created(){
-        this.updateValues();
-    },
-    methods: {
-        /**
-         * Update displayed values of the filter via ajax.
-         */
-        updateValues(){
-            let self = this,
-                req = this.controller.getValues();
-            req.then((data, textStatus, jqXHR) => {
-                //Resolve
-                self.items = data.data;
-            },(jqXHR, textStatus, errorThrown) => {
-                //Reject
-                self.items = [];
-            });
-        },
-        /**
-         * Callback for currentValues changes.
-         * @param event
-         */
-        valueSelected(event){
-            let $target = $(event.target);
-            this.manager.updateFilter(this.slug,this.currentValues);
-            this.$parent.$emit("valueSelected");
-        }
-    }
-});
-
-export {Filter, FilterController}
+export {FiltersManager, FilterController}

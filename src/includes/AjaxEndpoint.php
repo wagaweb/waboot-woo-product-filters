@@ -8,6 +8,26 @@ class AjaxEndpoint{
 	public function setup_endpoints(){
 		add_action("wp_ajax_"."get_values_for_filter",[$this,"get_values_for_filter"]);
 		add_action("wp_ajax_nopriv_"."get_values_for_filter",[$this,"get_values_for_filter"]);
+
+		add_action("wp_ajax_"."get_products_for_filters",[$this,"get_products_for_filters"]);
+		add_action("wp_ajax_nopriv_"."get_products_for_filters",[$this,"get_products_for_filters"]);
+	}
+
+	public function get_products_for_filters(){
+		$filters = isset($_POST['filters']) ? $_POST['filters'] : [];
+
+		$products = [
+			[
+				'title' => 'Product 1',
+				'content' => 'Content 1'
+			],
+			[
+				'title' => 'Product 2',
+				'content' => 'Content 2'
+			]
+		];
+
+		wp_send_json_success($products);
 	}
 
 	/**
