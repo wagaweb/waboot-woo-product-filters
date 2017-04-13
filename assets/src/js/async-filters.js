@@ -6,21 +6,39 @@ import Vue from "vue";
 import {FilterController} from "./async-filter-helpers";
 
 class FiltersApp{
-    constructor(FiltersManager,ProductsManager){
-        this.FiltersManager = FiltersManager;
-        if(typeof ProductsManager !== "undefined"){
-            this.ProductManager = ProductsManager;
+    /**
+     * Build up the application
+     *
+     * @param {FiltersManager} fm
+     * @param {ProductsManager} pm
+     */
+    constructor(fm,pm){
+        this.FiltersManager = fm;
+        if(typeof pm !== "undefined"){
+            this.ProductManager = pm;
         }
     }
+
+    /**
+     * Startup the application
+     *
+     * @param {string} filtersList the vue root element of the filters list
+     * @param {string} productsList the vue root element of the products list
+     */
     start(filtersList,productsList){
         if(typeof filtersList !== "undefined"){
-            this.startFiltersList(filtersList);
+            this._startFiltersList(filtersList);
         }
         if(typeof productsList !== "undefined"){
-            this.startProductsList(productsList);
+            this._startProductsList(productsList);
         }
     }
-    startFiltersList(el){
+
+    /**
+     * Startup the filters list vue instance
+     * @param {string} el the root element
+     */
+    _startFiltersList(el){
         let _app = this;
 
         Vue.component("wbwpf-filter",{
@@ -53,7 +71,7 @@ class FiltersApp{
                 },
                 /**
                  * Callback for currentValues changes.
-                 * @param event
+                 * @param {object} event
                  */
                 valueSelected(event){
                     let $target = $(event.target);
@@ -75,7 +93,12 @@ class FiltersApp{
             this.$emit("filtersUpdated");
         });
     }
-    startProductsList(el){
+
+    /**
+     * Startup the products list vue instance
+     * @param {string} el the root element
+     */
+    _startProductsList(el){
         let _app = this;
 
         Vue.component('wbwpf-product',{
@@ -99,6 +122,10 @@ class FiltersApp{
                 })
             },
             methods: {
+                /**
+                 * Update the current product list via ajax
+                 * @param {array} currentFilters
+                 */
                 updateProducts(currentFilters){
                     let self = this,
                         req = _app.ProductManager.getProducts(currentFilters);
