@@ -98,7 +98,7 @@ class FiltersApp{
             mounted(){
                 //Listen to filters changes:
                 window.FiltersList.$on("filtersUpdated",function(){
-                    window.ProductList.updateProducts();
+                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
                 })
             },
             methods: {
