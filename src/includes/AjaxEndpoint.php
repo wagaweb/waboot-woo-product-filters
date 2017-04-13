@@ -67,7 +67,7 @@ class AjaxEndpoint{
 				//Now we build a values array each one with hidden \ visible property
 				foreach ($all_values as $retrieved_value_id => $retrieved_value_label){
 					$values[] = [
-						'visible' => true, //check in available_col_values
+						'visible' => isset($filters_query) && isset($filters_query->available_col_values[$f->slug]) && in_array($retrieved_value_id,$filters_query->available_col_values[$f->slug]),//check in available_col_values//check in available_col_values//check in available_col_values//check in available_col_values//check in available_col_values//check in available_col_values
 						'id' => $retrieved_value_id,
 						'label' => $retrieved_value_label
 					];
