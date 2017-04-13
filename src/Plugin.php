@@ -551,7 +551,7 @@ class Plugin extends TemplatePlugin {
 	 *
 	 * @hooked 'wbwpf/query/parse_results'
 	 *
-	 * @param $results
+	 * @param array $results an array of post ids (the function will search available col values for these ids)
 	 * @param Filter_Query $query
 	 * @param $format
 	 */
@@ -559,6 +559,7 @@ class Plugin extends TemplatePlugin {
 		//We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results
 		//(eg: the product color "red" doesn't has to to be visible when no product is red in the current visualization)
 
+		//Here we get the current active filters
 		$settings = $this->get_plugin_settings();
 		$cols = call_user_func(function() use($settings){
 			$r = [];
@@ -571,6 +572,7 @@ class Plugin extends TemplatePlugin {
 			return $r;
 		});
 
+		//Here we get the available values of the active filters for the current considered ids
 		$r = $this->DB->Backend->get_available_property_values_for_ids( $results, $cols );
 
 		$query->set_available_col_values($r);

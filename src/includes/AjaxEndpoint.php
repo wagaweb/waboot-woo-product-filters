@@ -51,7 +51,7 @@ class AjaxEndpoint{
 					if(is_array($filters) && !empty($filters)){
 						$filters_query = Query_Factory::build($filters);
 						if($filters_query instanceof Filter_Query){
-							//$filters_query->perform(); <- not work?
+							$filters_query->perform(Filter_Query::RESULT_FORMAT_IDS);
 						}else{
 							wp_send_json_error([
 								'error' => "Unable to instance Filter_Query"
