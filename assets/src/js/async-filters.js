@@ -4,7 +4,6 @@ import _ from "lodash";
 import Vue from "vue";
 
 import {FilterController} from "./async-filter-helpers";
-import {ProductsManager} from "./async-product-helpers";
 
 class FiltersApp{
     constructor(FiltersManager,ProductsManager){
