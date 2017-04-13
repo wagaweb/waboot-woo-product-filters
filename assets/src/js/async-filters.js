@@ -3,7 +3,7 @@ import _ from "lodash";
 
 import Vue from "vue";
 
-import {FilterController,FiltersManager} from "./async-filter-helpers";
+import {FilterController} from "./async-filter-helpers";
 import {ProductsManager} from "./async-product-helpers";
 
 class FiltersApp{
@@ -28,7 +28,6 @@ class FiltersApp{
             data(){
                 let controller = new FilterController(this.slug,_app.FiltersManager);
                 return {
-                    manager: _app.FiltersManager,
                     controller: controller,
                     currentValues: [],
                     items: []
@@ -59,7 +58,7 @@ class FiltersApp{
                  */
                 valueSelected(event){
                     let $target = $(event.target);
-                    this.manager.updateFilter(this.slug,this.currentValues);
+                    _app.FiltersManager.updateFilter(this.slug,this.currentValues);
                     this.$parent.$emit("valueSelected");
                 }
             }
@@ -88,7 +87,6 @@ class FiltersApp{
         window.ProductList = new Vue({
             el: el,
             data: {
-                product_manager: new ProductsManager(),
                 products: []
             },
             created(){
