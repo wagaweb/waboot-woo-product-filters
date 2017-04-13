@@ -2,6 +2,7 @@
 
 namespace WBWPF\includes;
 
+use WBWPF\db_backends\MYSQL;
 use WBWPF\Plugin;
 
 class Query_Factory{
@@ -20,7 +21,7 @@ class Query_Factory{
 	public static function build($filters = [], $orderby = self::DEFAULT_ORDERBY, $order = self::DEFAULT_ORDER, $limit = -1, $offset = -1){
 		global $wpdb;
 
-		$query = new Filter_Query($orderby,$order,$limit,$offset);
+		$query = new Filter_Query(new DB_Manager(new MYSQL())); //todo: allows multiple backend
 
 		//Here we might have the woocommerce ordering and orderby names, we must standardize them to our query system
 		$ordering = self::transform_wc_ordering_params($orderby,$order);

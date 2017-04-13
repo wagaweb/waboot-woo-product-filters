@@ -54,7 +54,7 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function load_dependencies() {
 		parent::load_dependencies();
-		$this->DB = new DB_Manager(new MYSQL());
+		$this->DB = new DB_Manager(new MYSQL()); //todo: allows multiple backend
 		$this->Settings = new Settings_Manager($this);
 		$this->AjaxEndpoint = new AjaxEndpoint();
 	}
@@ -117,9 +117,6 @@ class Plugin extends TemplatePlugin {
 
 		//Filters parsing Customizations
 		$this->loader->add_filter("wbwpf/filters/detected/parsed",$this,"inject_wbwpf_query_params_into_detect_filters",10,1);
-
-		//Filter Query Customizations
-		$this->loader->add_action("wbwpf/query/parse_results",$this,"parse_filter_query_results",10,3);
 
 		//Catalog visualizations hooks
 		$this->loader->add_filter("the_title",$this,"alter_variations_title",10,2);
@@ -544,38 +541,6 @@ class Plugin extends TemplatePlugin {
 			//Insert the value
 			$r = $this->DB->Backend->insert_product_data( $new_row['product_id'], $new_row );
 		}
-	}
-
-	/**
-	 * Do some actions during Filter Query result parsing
-	 *
-	 * @hooked 'wbwpf/query/parse_results'
-	 *
-	 * @param array $results an array of post ids (the function will search available col values for these ids)
-	 * @param Filter_Query $query
-	 * @param $format
-	 */
-	public function parse_filter_query_results($results, Filter_Query &$query, $format){
-		//We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results
-		//(eg: the product color "red" doesn't has to to be visible when no product is red in the current visualization)
-
-		//Here we get the current active filters
-		$settings = $this->get_plugin_settings();
-		$cols = call_user_func(function() use($settings){
-			$r = [];
-			if(isset($settings['filters'])){
-				foreach ($settings['filters'] as $slug => $cols){
-					$r = array_merge($r,$cols);
-				}
-			}
-
-			return $r;
-		});
-
-		//Here we get the available values of the active filters for the current considered ids
-		$r = $this->DB->Backend->get_available_property_values_for_ids( $results, $cols );
-
-		$query->set_available_col_values($r);
 	}
 
 	/**

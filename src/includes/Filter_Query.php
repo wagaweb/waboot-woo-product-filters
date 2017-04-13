@@ -3,10 +3,15 @@
 namespace WBWPF\includes;
 
 use WBWPF\datatypes\DataType;
+use WBWPF\Plugin;
 
 class Filter_Query{
 	const RESULT_FORMAT_IDS = 0;
 	const RESULT_FORMAT_OBJECTS = 1;
+	/**
+	 * @var DB_Manager
+	 */
+	var $DB;
 	/**
 	 * @var
 	 */
@@ -62,8 +67,12 @@ class Filter_Query{
 
 	/**
 	 * Filter_Query constructor.
+	 *
+	 * @param DB_Manager $backend
 	 */
-	function __construct(){}
+	function __construct(DB_Manager $backend){
+		$this->DB = $backend;
+	}
 
 	/**
 	 * Set ordering params
@@ -285,7 +294,31 @@ class Filter_Query{
 	 * @return array
 	 */
 	private function parse_results($result, $format = self::RESULT_FORMAT_OBJECTS){
-		do_action_ref_array("wbwpf/query/parse_results",[$result,&$this,$format]); //This is used by Plugin for providing the available col values
+
+		/*
+		 * We need a way to allows UITypes to know which of their values as an actual product associated in the current queried results
+		 * (eg: the product color "red" doesn't has to to be visible when no product is red in the current visualization)
+		 */
+
+		//Here we get the current active filters
+		$settings = Plugin::get_instance_from_global()->get_plugin_settings();
+		$cols = call_user_func(function() use($settings){
+			$r = [];
+			if(isset($settings['filters'])){
+				foreach ($settings['filters'] as $slug => $cols){
+					$r = array_merge($r,$cols);
+				}
+			}
+
+			return $r;
+		});
+
+		//Here we get the available values of the active filters for the current considered ids
+		$available_col_values = $this->DB->Backend->get_available_property_values_for_ids( $result, $cols );
+
+		$this->set_available_col_values($available_col_values);
+
+		do_action_ref_array("wbwpf/query/parse_results",[$result,&$this,$format]);
 
 		if($format == self::RESULT_FORMAT_IDS){
 			$result = array_unique($result);
