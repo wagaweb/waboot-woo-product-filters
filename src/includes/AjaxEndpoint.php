@@ -27,10 +27,25 @@ class AjaxEndpoint{
 			'page' => $page
 		];
 
+		//todo: retrieve order and orderby
+
 		if(empty($filters)){
 			$filter_query = Query_Factory::build([],"product_id","DESC");
 		}else{
-			$filter_query = Query_Factory::build([],"product_id","DESC"); //todo: change this
+			$active_filters = call_user_func(function() use($filters){
+				$slugs = [];
+				$values = [];
+				foreach ($filters as $filter){
+					$slugs[] = $filter['slug'];
+					$values[$filter['slug']] = $filter['value'];
+				}
+				return Filter_Factory::build_from_slugs($slugs,$values);
+			});
+			if(is_array($active_filters) && !empty($active_filters)){
+				$filter_query = Query_Factory::build($active_filters,"product_id","DESC");
+			}else{
+				$filter_query = Query_Factory::build([],"product_id","DESC");
+			}
 		}
 
 		if($filter_query instanceof Filter_Query){

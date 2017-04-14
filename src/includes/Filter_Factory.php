@@ -109,7 +109,7 @@ class Filter_Factory{
 	 * Build an array of filter instances starting from an array of filter slugs
 	 *
 	 * @param array $slugs
-	 * @param bool $filter_values
+	 * @param array $filter_values
 	 *
 	 * @return array
 	 */
