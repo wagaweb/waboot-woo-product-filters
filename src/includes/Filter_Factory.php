@@ -124,63 +124,7 @@ class Filter_Factory{
 	 * @return array
 	 */
 	public static function build_from_available_params(){
-		global $wp_query;
-
-		$result_filters = [];
-		$detected_filters = [];
-
-		if($wp_query instanceof \WP_Query){
-			$detected_filters[] = self::parse_wp_query_params($wp_query); //Get from WP_Query (so we detect active filter in taxonomy archive pages)
-		}
-		$detected_filters[] = self::parse_get_or_post_params();
-
-		$detected_filters = array_filter($detected_filters); //Remove FALSE or NULL values
-
-		$detected_filters = apply_filters("wbwpf/filters/detected",$detected_filters);
-
-		/*
-		 * Now we have to merge the detected filters. We need to build an array like this:
-		 *
-		 * [
-		 *      'filters' => [
-		 *          'product_cat' => [
-		 *              'slug' => ....
-		 *              'type' => ....
-		 *              'dataType => ....
-		 *           ]
-		 *      ]
-		 *      'values' => [
-		 *          'product_cat' => [...]
-		 *      ]
-		 * ]
-		 *
-		 */
-
-		//todo: can we FURTHER optimize this cycle?
-		foreach ($detected_filters as $filters){
-			if(!isset($filters['filters'])) continue;
-			foreach ($filters['filters'] as $filter_slug => $filter_params){
-				//Get types
-				if(!isset($result_filters['filters'][$filter_slug])){
-					$result_filters['filters'][$filter_slug] = $filter_params;
-				}
-				//Get values
-				if(isset($filters['values'][$filter_slug])){
-					$filter_values = $filters['values'][$filter_slug];
-					if(!isset($result_filters['values'][$filter_slug])){
-						$result_filters['values'][$filter_slug] = $filter_values;
-					}else{
-						$result_filters['values'][$filter_slug] = array_merge($result_filters['values'][$filter_slug],$filter_values);
-						$result_filters['values'][$filter_slug] = array_unique($result_filters['values'][$filter_slug]);
-					}
-				}
-			}
-		}
-
-		/*
-		 * @hooked Plugin->inject_wbwpf_query_params_into_detect_filters() . Here we parse wbwpf_query param, and alter the $result_filters accordingly
-		 */
-		$result_filters = apply_filters("wbwpf/filters/detected/parsed",$result_filters);
+		$result_filters = self::parse_available_params();
 
 		if(is_array($result_filters) && !empty($result_filters)){
 			//Finally build them into an array of Filters
@@ -278,6 +222,73 @@ class Filter_Factory{
 		$current_values = $r['values'];
 
 		return self::build_from_params($active_filters,$current_values);
+	}
+
+	/**
+	 * Parse all available params to build an array of filters and their values.
+	 *
+	 * @return array
+	 */
+	public static function parse_available_params(){
+		global $wp_query;
+
+		$result_filters = [];
+		$detected_filters = [];
+
+		if($wp_query instanceof \WP_Query){
+			$detected_filters[] = self::parse_wp_query_params($wp_query); //Get from WP_Query (so we detect active filter in taxonomy archive pages)
+		}
+		$detected_filters[] = self::parse_get_or_post_params();
+
+		$detected_filters = array_filter($detected_filters); //Remove FALSE or NULL values
+
+		$detected_filters = apply_filters("wbwpf/filters/detected",$detected_filters); //todo: this filter could be specific for each parse function
+
+		/*
+		 * Now we have to merge the detected filters. We need to build an array like this:
+		 *
+		 * [
+		 *      'filters' => [
+		 *          'product_cat' => [
+		 *              'slug' => ....
+		 *              'type' => ....
+		 *              'dataType => ....
+		 *           ]
+		 *      ]
+		 *      'values' => [
+		 *          'product_cat' => [...]
+		 *      ]
+		 * ]
+		 *
+		 */
+
+		//todo: can we FURTHER optimize this cycle?
+		foreach ($detected_filters as $filters){
+			if(!isset($filters['filters'])) continue;
+			foreach ($filters['filters'] as $filter_slug => $filter_params){
+				//Get types
+				if(!isset($result_filters['filters'][$filter_slug])){
+					$result_filters['filters'][$filter_slug] = $filter_params;
+				}
+				//Get values
+				if(isset($filters['values'][$filter_slug])){
+					$filter_values = $filters['values'][$filter_slug];
+					if(!isset($result_filters['values'][$filter_slug])){
+						$result_filters['values'][$filter_slug] = $filter_values;
+					}else{
+						$result_filters['values'][$filter_slug] = array_merge($result_filters['values'][$filter_slug],$filter_values);
+						$result_filters['values'][$filter_slug] = array_unique($result_filters['values'][$filter_slug]);
+					}
+				}
+			}
+		}
+
+		/*
+		 * @hooked Plugin->inject_wbwpf_query_params_into_detect_filters() . Here we parse wbwpf_query param, and alter the $result_filters accordingly
+		 */
+		$result_filters = apply_filters("wbwpf/filters/detected/parsed",$result_filters); //todo: could this filter be specific for each parse function?
+
+		return $result_filters;
 	}
 
 	/**
