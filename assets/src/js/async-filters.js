@@ -83,7 +83,20 @@ class FiltersApp{
 
         //Init a new Vue instance for the filters
         window.FiltersList = new Vue({
-            el: el
+            el: el,
+            mounted(){
+                //detect the active filters (thanks jQuery! :))
+                let activeFilters = $(this.$el).data("filters");
+                if(typeof activeFilters.filters === "object"){
+                    //Let's add the active filters to FiltersManager
+                    _.forEach(activeFilters.filters,function(filter_params,filter_slug){
+                        if(typeof activeFilters.values === "object" && !_.isUndefined(activeFilters.values[filter_slug])){
+                            let filter_value = activeFilters.values[filter_slug];
+                            _app.FiltersManager.updateFilter(filter_slug,filter_value);
+                        }
+                    })
+                }
+            }
         });
         //Listen on value changes on components
         window.FiltersList.$on("valueSelected",function(){
