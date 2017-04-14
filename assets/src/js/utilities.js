@@ -56,7 +56,6 @@ function getFiltersSearchParameters(){
  */
 function getStrippedFiltersSearchParameters(){
     let query_parameters = getFiltersSearchParameters();
-    debugger;
     let filters_parameters = {};
     _.each(query_parameters,function(value,key,list){
         let filter_key = key.replace(/^wbwpf_/,"");
