@@ -74,11 +74,26 @@ class AjaxEndpoint{
 
 				$products[] = [
 					'ID' => $raw_product->ID,
+					'post_class' => implode(" ",get_post_class('',$raw_product->ID)),
+					'img_html' => $wc_product->get_image(),
 					'title' => $wc_product->get_title(),
 					'price' => $wc_product->get_display_price(),
 					'price_html' => $wc_product->get_price_html(),
-					'image' => $wc_product->get_image()
+					'image' => $wc_product->get_image(),
+					'add_to_cart' => "",
+					'rating_html' => $wc_product->get_rating_html()
 				];
+
+				/*$GLOBALS['product'] = $wc_product;
+				ob_start();
+				wc_get_template_part( 'content', 'product' );
+				$output = trim(preg_replace( "|[\r\n\t]|", "", ob_get_clean()));
+
+				$products[] = [
+					'ID' => $raw_product->ID,
+					'content' => $output
+				];
+				*/
 			}
 
 			$products = apply_filters("wbwpf/ajax/get_products/retrieved",$products,$filters);
