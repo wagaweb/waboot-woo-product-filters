@@ -25,5 +25,10 @@
         <input type="checkbox" value="1" name="wbwpf_options[hide_parent_products]" <?php if($checked): ?>checked<?php endif; ?>>
 	    <?php _e("Hide parent products when variations are displayed.",$textdomain); ?>
     </label>
+    <label style="display: block; margin-bottom: 1em;">
+		<?php $checked = isset($current_settings['use_async_product_list']) && $current_settings['use_async_product_list']; ?>
+        <input type="checkbox" value="1" name="wbwpf_options[use_async_product_list]" <?php if($checked): ?>checked<?php endif; ?>>
+		<?php _e("Use async product list.",$textdomain); ?>
+    </label>
     <button type="submit" class="button button-primary" name="wbwpf_save_settings" value="1"><?php _e("Save settings",$textdomain); ?></button>
 </form>
