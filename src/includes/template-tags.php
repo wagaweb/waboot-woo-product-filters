@@ -1,5 +1,22 @@
 <?php
 
+if(!function_exists("wbwpf_get_current_active_filters")):
+	/**
+	 * Get the current active filters in array or json format
+	 *
+	 * @return array|string
+	 */
+	function wbwpf_get_current_active_filters($json_output = false){
+		$available_filters = \WBWPF\includes\Filter_Factory::parse_available_params();
+		if(!$json_output){
+			return $available_filters;
+		}else{
+			$str = json_encode($available_filters);
+			return $str;
+		}
+	}
+endif;
+
 if(!function_exists("wbwpf_get_base_url")):
 	function wbwpf_get_base_url(){
 		if(is_product_taxonomy()){
