@@ -73,6 +73,9 @@ class Query_Factory{
 			$queried_object = get_queried_object_id();
 			if(is_numeric($shop_page_id) && $shop_page_id > 0 && $shop_page_id == $queried_object){
 				$query->build(); //Build the query for selecting all the products
+			}elseif(defined('DOING_AJAX') && DOING_AJAX){
+				//If we are making a ajax request, and no filters provided, it means we are in the main shop page
+				$query->build();
 			}
 		}
 

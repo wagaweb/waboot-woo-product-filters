@@ -13,19 +13,63 @@ class AjaxEndpoint{
 		add_action("wp_ajax_nopriv_"."get_products_for_filters",[$this,"get_products_for_filters"]);
 	}
 
+	/**
+	 * Ajax endpoint to get the paged available products for a combination of filters
+	 */
 	public function get_products_for_filters(){
 		$filters = isset($_POST['filters']) ? $_POST['filters'] : [];
 
-		$products = [
-			[
-				'title' => 'Product 1',
-				'content' => 'Content 1'
-			],
-			[
-				'title' => 'Product 2',
-				'content' => 'Content 2'
-			]
+		$page = isset($_POST['page']) ? intval($_POST['page']) : 1;
+
+		$get_posts_args = [
+			'posts_per_page' => apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ),
+			'paged' => $page,
+			'page' => $page
 		];
+
+		if(empty($filters)){
+			$filter_query = Query_Factory::build([],"product_id","DESC");
+		}else{
+			$filter_query = Query_Factory::build([],"product_id","DESC"); //todo: change this
+		}
+
+		if($filter_query instanceof Filter_Query){
+			$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
+			if(is_array($ids) && count($ids) > 0){
+				$get_posts_args['post__in'] = $ids;
+			}else{
+				$get_posts_args['post__in'] = [0];
+			}
+		}
+
+		if($filter_query->query_variations){
+			$get_posts_args['post_type'] = ['product','product_variation'];
+		}else{
+			$get_posts_args['post_type'] = ['product'];
+		}
+
+		$raw_products = get_posts($get_posts_args);
+
+		if(is_array($raw_products) && !empty($raw_products)){
+			$products = [];
+
+			foreach ($raw_products as $raw_product){
+				$wc_product = wc_get_product($raw_product->ID);
+				//$wc_product_meta = get_post_meta($raw_product->ID);
+
+				$products[] = [
+					'ID' => $raw_product->ID,
+					'title' => $wc_product->get_title(),
+					'price' => $wc_product->get_display_price(),
+					'price_html' => $wc_product->get_price_html(),
+					'image' => $wc_product->get_image()
+				];
+			}
+
+			$products = apply_filters("wbwpf/ajax/get_products/retrieved",$products,$filters);
+		}else{
+			$products = [];
+		}
 
 		wp_send_json_success($products);
 	}
@@ -85,14 +129,28 @@ class AjaxEndpoint{
 				//Now we build a values array each one with hidden \ visible property
 				foreach ($all_values as $retrieved_value_id => $retrieved_value_label){
 					$is_visible = true;
+					$is_selected = false;
 					if(isset($filters_query)){
 						$is_visible = isset($filters_query->available_col_values[$f->slug]) && in_array($retrieved_value_id,$filters_query->available_col_values[$f->slug]);
+						if(isset($filters)){
+							$is_selected = call_user_func(function() use($filters,$filter_slug,$retrieved_value_id){
+								foreach ($filters as $f){
+									if($f->slug == $filter_slug && is_array($f->current_values)){
+										if(in_array($retrieved_value_id,$f->current_values)){
+											return true;
+										}
+									}
+								}
+								return false;
+							});
+						}
 					}
 
 					$values[] = [
 						'visible' => $is_visible,
 						'id' => $retrieved_value_id,
-						'label' => $retrieved_value_label
+						'label' => $retrieved_value_label,
+						'selected' => $is_selected
 					];
 				}
 
