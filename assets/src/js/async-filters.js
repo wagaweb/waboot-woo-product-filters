@@ -51,9 +51,7 @@ class FiltersApp{
                 }
             },
             props: ['label','slug','hidden','update'],
-            created(){
-                this.updateValues();
-            },
+            mounted(){},
             methods: {
                 /**
                  * Update displayed values of the filter via ajax.
@@ -85,25 +83,44 @@ class FiltersApp{
         window.FiltersList = new Vue({
             el: el,
             mounted(){
-                //detect the active filters (thanks jQuery! :))
-                let activeFilters = $(this.$el).data("filters");
-                if(typeof activeFilters.filters === "object"){
-                    //Let's add the active filters to FiltersManager
-                    _.forEach(activeFilters.filters,function(filter_params,filter_slug){
-                        if(typeof activeFilters.values === "object" && !_.isUndefined(activeFilters.values[filter_slug])){
-                            let filter_value = activeFilters.values[filter_slug];
-                            _app.FiltersManager.updateFilter(filter_slug,filter_value);
-                        }
-                    })
+                this.$on("valueSelected",function(){
+                    this.updateChildrenValues(); //Every time a value is selected in a child, then "valueSelected" is emitted
+                });
+
+                this.$on("filtersDetected",function(){
+                    this.updateChildrenValues();
+                });
+
+                this.detectActiveFilters();
+            },
+            methods: {
+                /**
+                 * Detect current active filters based on data- attribute of root element.
+                 */
+                detectActiveFilters(){
+                    let activeFilters = $(this.$el).data("filters"); //detect the active filters (thanks jQuery! :))
+                    if(typeof activeFilters.filters === "object"){
+                        //Let's add the active filters to FiltersManager
+                        _.forEach(activeFilters.filters,function(filter_params,filter_slug){
+                            if(typeof activeFilters.values === "object" && !_.isUndefined(activeFilters.values[filter_slug])){
+                                let filter_value = activeFilters.values[filter_slug];
+                                _app.FiltersManager.updateFilter(filter_slug,filter_value);
+                            }
+                        })
+                    }
+
+                    this.$emit("filtersDetected");
+                },
+                /**
+                 * Calls "updateValues" on each children.
+                 */
+                updateChildrenValues(){
+                    _.each(this.$children,function(filter){
+                        filter.updateValues();
+                    });
+                    this.$emit("filtersUpdated");
                 }
             }
-        });
-        //Listen on value changes on components
-        window.FiltersList.$on("valueSelected",function(){
-            _.each(this.$children,function(filter){
-                filter.updateValues();
-            });
-            this.$emit("filtersUpdated");
         });
     }
 
@@ -124,11 +141,10 @@ class FiltersApp{
             data: {
                 products: []
             },
-            created(){
+            created(){},
+            mounted(){
                 //Getting the current products
                 this.updateProducts(_app.FiltersManager.getFilters());
-            },
-            mounted(){
                 //Listen to filters changes:
                 window.FiltersList.$on("filtersUpdated",function(){
                     window.ProductList.updateProducts(_app.FiltersManager.getFilters());
