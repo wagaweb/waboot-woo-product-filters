@@ -25,7 +25,8 @@ class Settings_Manager{
 			'filters' => [],
 			'filters_params' => [],
 			'show_variations' => false,
-			'hide_parent_products' => true
+			'hide_parent_products' => true,
+			'use_async_product_list' => false
 		];
 		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
 		return $defaults;
@@ -43,6 +44,7 @@ class Settings_Manager{
 		//Do some standardizations
 		$settings['show_variations'] = isset($settings['show_variations']) ? (bool) $settings['show_variations'] : false;
 		$settings['hide_parent_products'] = isset($settings['hide_parent_products']) ? (bool) $settings['hide_parent_products'] : false;
+		$settings['use_async_product_list'] = isset($settings['use_async_product_list']) ? (bool) $settings['use_async_product_list'] : false;
 
 		//Merge the differences
 		$settings = wp_parse_args($settings,$actual);
@@ -80,5 +82,27 @@ class Settings_Manager{
 		$settings = get_option(self::SETTINGS_OPTION_NAME);
 		$settings = wp_parse_args($settings,$defaults);
 		return $settings;
+	}
+
+	/**
+	 * Automatically retrieve setting by $name
+	 *
+	 * @param $name
+	 *
+	 * @return mixed
+	 */
+	public function __get( $name ) {
+		$settings = $this->get_plugin_settings();
+		if(isset($settings[$name])){
+			return $settings[$name];
+		}else{
+			$trace = debug_backtrace();
+			trigger_error(
+				'Undefined property via __get(): ' . $name .
+				' in ' . $trace[0]['file'] .
+				' on line ' . $trace[0]['line'],
+				E_USER_NOTICE);
+			return null;
+		}
 	}
 }

@@ -30,6 +30,25 @@ if(!function_exists("wbwpf_get_base_url")):
 	}
 endif;
 
+if(!function_exists("wbwpf_show_products_async")):
+	/**
+	 * Display the template to handle the async product list
+	 */
+	function wbwpf_show_products_async(){
+		$theme = wp_get_theme();
+
+		$tpl = "src/views/async-loops/".$theme->get_template().".php"; //search for a standard template
+		try{
+			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
+			$v->display();
+		}catch (Exception $e){
+			$tpl = "src/views/async-loops/base.php";
+			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
+			$v->display();
+		}
+	}
+endif;
+
 if(!function_exists("wbwpf_show_filters_async")):
 	function wbwpf_show_filters_async($args = []){
 		wbwpf_show_filters($args,true);
