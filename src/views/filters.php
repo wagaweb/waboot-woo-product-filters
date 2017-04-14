@@ -1,5 +1,5 @@
 <?php if($async): ?>
-    <div class="wbwpf-filters" data-filters data-async>
+    <div class="wbwpf-filters" data-filters='<?php echo wbwpf_get_current_active_filters(true); ?>' data-async>
 	    <?php if($has_filters): ?>
 		    <?php foreach ($filters as $filter): ?>
 			    <?php $filter->display(true); ?>
