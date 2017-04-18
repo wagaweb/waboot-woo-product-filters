@@ -7,9 +7,9 @@
 ?>
 
 <div class="wbwpf-product-list" data-async>
-	<ul class="products">
+	<?php wc_get_template( 'loop/loop-start.php' ); ?>
 		<wbwpf-product v-for="product in products" :data="product"></wbwpf-product>
-	</ul>
+	<?php wc_get_template( 'loop/loop-end.php' ); ?>
 </div>
 
 <template id="wbwpf-product-template">

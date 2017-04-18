@@ -142,7 +142,7 @@ class Plugin extends TemplatePlugin {
 				'i10n' => [
 					'name' => "wbwpf",
 					'params' => [
-						'ajax_url' => admin_url('admin-ajax.php')
+						'ajax_url' => admin_url('admin-ajax.php'),
 					]
 				],
 				'deps' => ['jquery','underscore']

@@ -21,10 +21,11 @@ class AjaxEndpoint{
 
 		$plugin = \WBWPF\Plugin::get_instance_from_global();
 
-		$page = isset($_POST['page']) ? intval($_POST['page']) : 1;
+		$page = isset($_POST['page']) ? max(1,intval($_POST['page'])) : 1; //See: result-count.php
+		$posts_per_page = apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) );
 
 		$get_posts_args = [
-			'posts_per_page' => apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) ),
+			'posts_per_page' => $posts_per_page,
 			'paged' => $page,
 			'page' => $page
 		];
@@ -109,7 +110,28 @@ class AjaxEndpoint{
 			$products = [];
 		}
 
-		wp_send_json_success($products);
+		//Additional data
+		$found_products = isset($filter_query) ? count($filter_query->found_products) : 0;
+		$showing_from = ( $posts_per_page * $page ) - $posts_per_page + 1; //See: result-count.php
+		$showing_to = min($found_products, $posts_per_page * $page); //See: result-count.php
+
+		if($found_products <= $posts_per_page || $posts_per_page == -1){ //See: result-count.php
+			$result_count_label = sprintf( _n( 'Showing the single result', 'Showing all %d results', $found_products, 'woocommerce' ), $found_products );
+		}else{
+			$result_count_label = sprintf( _nx( 'Showing the single result', 'Showing %1$d&ndash;%2$d of %3$d results', $found_products, '%1$d = first, %2$d = last, %3$d = total', 'woocommerce' ), $showing_from, $showing_to, $found_products );
+		}
+
+		$result = [
+			'products' => $products,
+			'found_products' => $found_products,
+			'current_page' => $page,
+			'showing_from' => $showing_from,
+			'showing_to' => $showing_to,
+			'products_per_page' => $posts_per_page,
+			'result_count_label' => $result_count_label
+		];
+
+		wp_send_json_success($result);
 	}
 
 	/**

@@ -139,7 +139,8 @@ class FiltersApp{
         window.ProductList = new Vue({
             el: el,
             data: {
-                products: []
+                products: [],
+                result_count_label: ""
             },
             created(){},
             mounted(){
@@ -158,9 +159,18 @@ class FiltersApp{
                 updateProducts(currentFilters){
                     let self = this,
                         req = _app.ProductManager.getProducts(currentFilters);
-                    req.then((data, textStatus, jqXHR) => {
+                    req.then((response, textStatus, jqXHR) => {
                         //Resolve
-                        self.products = data.data;
+
+                        //Update app:
+                        _app.total_products = response.data.found_produts;
+                        _app.current_page = response.data.current_page;
+                        _app.showing_from = response.data.showing_from;
+                        _app.showing_to = response.data.showing_to;
+
+                        //Update self:
+                        self.products = response.data.products;
+                        self.result_count_label = response.data.result_count_label;
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.products = [];
