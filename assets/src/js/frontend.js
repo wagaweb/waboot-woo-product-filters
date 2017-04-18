@@ -45,7 +45,7 @@ $(document).ready(function($){
         $async_filters = $(".wbwpf-filters[data-async]"),
         $async_product_list = $(".wbwpf-product-list[data-async]");
 
-    if($wc_ordering.length > 0){
+    if($wc_ordering.length > 0 && $async_product_list.length === 0){
         new WooCommerce_Ordering_Form_Injection($wc_ordering);
     }
 

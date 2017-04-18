@@ -131,6 +131,14 @@ class FiltersApp{
     _startProductsList(el){
         let _app = this;
 
+        //Re-bind ordering
+        $("select.orderby").closest("form").removeClass("woocommerce-ordering").addClass("wbwpf-woocommerce-ordering");
+        $("body").on( 'change', '.wbwpf-woocommerce-ordering select.orderby', function() {
+            if(window.ProductList !== "undefined"){
+                window.ProductList.$emit("orderingChanged",$(this).val());
+            }
+        });
+
         Vue.component('wbwpf-product',{
             template: "#wbwpf-product-template",
             props: ['data']
@@ -140,6 +148,7 @@ class FiltersApp{
             el: el,
             data: {
                 products: [],
+                ordering: $("select.orderby").val() || "menu_order",
                 result_count_label: ""
             },
             created(){},
@@ -149,7 +158,13 @@ class FiltersApp{
                 //Listen to filters changes:
                 window.FiltersList.$on("filtersUpdated",function(){
                     window.ProductList.updateProducts(_app.FiltersManager.getFilters());
-                })
+                });
+                //Listen to ordering changing
+                //This is a nasty nasty trick to make ordering works without further modifications
+                this.$on("orderingChanged", function(new_order){
+                    this.ordering = new_order;
+                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                });
             },
             methods: {
                 /**
@@ -158,7 +173,7 @@ class FiltersApp{
                  */
                 updateProducts(currentFilters){
                     let self = this,
-                        req = _app.ProductManager.getProducts(currentFilters);
+                        req = _app.ProductManager.getProducts(currentFilters,this.ordering);
                     req.then((response, textStatus, jqXHR) => {
                         //Resolve
 

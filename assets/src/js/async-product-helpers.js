@@ -8,12 +8,15 @@ class ProductsManager{
         this.showing_to = 0;
         this.showing_from = 0;
     }
-    getProducts(filters){
+    getProducts(filters,ordering){
+        if(typeof ordering === "undefined") ordering = "menu_order";
+
         return $.ajax({
             url: wbwpf.ajax_url,
             data: {
                 action: "get_products_for_filters",
-                filters: filters
+                filters: filters,
+                ordering: ordering
             },
             method: "POST",
             dataType: "json"
