@@ -42,7 +42,12 @@ if(!function_exists("wbwpf_show_products_async")):
 			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
 			$v->display();
 		}catch (Exception $e){
-			$tpl = "src/views/async-loops/base.php";
+			$plugin = \WBWPF\Plugin::get_instance_from_global();
+			if($plugin->Settings->use_custom_product_loop_template){
+				$tpl = "src/views/async-loops/base-custom.php";
+			}else{
+				$tpl = "src/views/async-loops/base.php";
+			}
 			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
 			$v->display();
 		}

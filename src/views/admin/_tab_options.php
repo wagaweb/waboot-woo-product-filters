@@ -30,5 +30,10 @@
         <input type="checkbox" value="1" name="wbwpf_options[use_async_product_list]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Use async product list.",$textdomain); ?>
     </label>
+    <label style="display: block; margin-bottom: 1em;">
+		<?php $checked = isset($current_settings['use_custom_product_loop_template']) && $current_settings['use_custom_product_loop_template']; ?>
+        <input type="checkbox" value="1" name="wbwpf_options[use_custom_product_loop_template]" <?php if($checked): ?>checked<?php endif; ?>>
+		<?php _e("Use a custom product loop template instead of content-product.php",$textdomain); ?>
+    </label>
     <button type="submit" class="button button-primary" name="wbwpf_save_settings" value="1"><?php _e("Save settings",$textdomain); ?></button>
 </form>

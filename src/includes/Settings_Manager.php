@@ -26,7 +26,8 @@ class Settings_Manager{
 			'filters_params' => [],
 			'show_variations' => false,
 			'hide_parent_products' => true,
-			'use_async_product_list' => false
+			'use_async_product_list' => false,
+			'use_custom_product_loop_template' => false,
 		];
 		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
 		return $defaults;
@@ -45,6 +46,7 @@ class Settings_Manager{
 		$settings['show_variations'] = isset($settings['show_variations']) ? (bool) $settings['show_variations'] : false;
 		$settings['hide_parent_products'] = isset($settings['hide_parent_products']) ? (bool) $settings['hide_parent_products'] : false;
 		$settings['use_async_product_list'] = isset($settings['use_async_product_list']) ? (bool) $settings['use_async_product_list'] : false;
+		$settings['use_custom_product_loop_template'] = isset($settings['use_custom_product_loop_template']) ? (bool) $settings['use_custom_product_loop_template'] : false;
 
 		//Merge the differences
 		$settings = wp_parse_args($settings,$actual);

@@ -19,6 +19,8 @@ class AjaxEndpoint{
 	public function get_products_for_filters(){
 		$filters = isset($_POST['filters']) ? $_POST['filters'] : [];
 
+		$plugin = \WBWPF\Plugin::get_instance_from_global();
+
 		$page = isset($_POST['page']) ? intval($_POST['page']) : 1;
 
 		$get_posts_args = [
@@ -68,40 +70,65 @@ class AjaxEndpoint{
 		if(is_array($raw_products) && !empty($raw_products)){
 			$products = [];
 
+			$use_custom_product_loop_template = $plugin->Settings->use_custom_product_loop_template;
+
 			foreach ($raw_products as $raw_product){
 				$wc_product = wc_get_product($raw_product->ID);
 				//$wc_product_meta = get_post_meta($raw_product->ID);
 
-				$products[] = [
-					'ID' => $raw_product->ID,
-					'post_class' => implode(" ",get_post_class('',$raw_product->ID)),
-					'img_html' => $wc_product->get_image(),
-					'title' => $wc_product->get_title(),
-					'price' => $wc_product->get_display_price(),
-					'price_html' => $wc_product->get_price_html(),
-					'image' => $wc_product->get_image(),
-					'add_to_cart' => "",
-					'rating_html' => $wc_product->get_rating_html()
-				];
+				if(!$use_custom_product_loop_template){
+					//Retrieve a full html output
 
-				/*$GLOBALS['product'] = $wc_product;
-				ob_start();
-				wc_get_template_part( 'content', 'product' );
-				$output = trim(preg_replace( "|[\r\n\t]|", "", ob_get_clean()));
+					$content = $this->get_content_product_ouput($wc_product);
 
-				$products[] = [
-					'ID' => $raw_product->ID,
-					'content' => $output
-				];
-				*/
+					$products[] = [
+						'ID' => $raw_product->ID,
+						'content' => $content
+					];
+				}else{
+					//Retrieve specific fields to display later
+
+					$products[] = [
+						'ID' => $raw_product->ID,
+						'post_class' => implode(" ",get_post_class('',$raw_product->ID)),
+						'img_html' => $wc_product->get_image(),
+						'title' => $wc_product->get_title(),
+						'price' => $wc_product->get_display_price(),
+						'price_html' => $wc_product->get_price_html(),
+						'image' => $wc_product->get_image(),
+						'add_to_cart' => "",
+						'rating_html' => $wc_product->get_rating_html()
+					];
+				}
 			}
 
-			$products = apply_filters("wbwpf/ajax/get_products/retrieved",$products,$filters);
+			if($use_custom_product_loop_template){
+				$products = apply_filters("wbwpf/ajax/get_products/retrieved",$products,$filters);
+			}
 		}else{
 			$products = [];
 		}
 
 		wp_send_json_success($products);
+	}
+
+	/**
+	 * Get the output of content-product.php for a specific $product
+	 *
+	 * @param \WC_Product|mixed $product
+	 *
+	 * @return string
+	 */
+	private function get_content_product_ouput($product){
+		if(!is_object($product)) return "[Invalid object provided]";
+
+		ob_start();
+		$GLOBALS['product'] = $product;
+		$GLOBALS['post'] = $product->post;
+		wc_get_template_part( 'content', 'product' );
+		$output = trim(preg_replace( "|[\r\n\t]|", "", ob_get_clean()));
+
+		return $output;
 	}
 
 	/**
