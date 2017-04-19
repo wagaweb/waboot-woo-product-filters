@@ -31,7 +31,8 @@ class AjaxEndpoint{
 		];
 
 		//Detect ordering (see: class-wc-query.php)
-		$orderby_value = isset($_POST['ordering']) ? $_POST['ordering'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$ordering = isset($_POST['ordering']) ? $_POST['ordering'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$orderby_value = $ordering;
 		$orderby_value = explode( '-', $orderby_value );
 		$orderby = esc_attr( $orderby_value[0] );
 		$order = ! empty( $orderby_value[1] ) ? $orderby_value[1] : '';
@@ -41,7 +42,7 @@ class AjaxEndpoint{
 		$get_posts_args = array_merge($get_posts_args,$wc_ordering_args);
 
 		if(empty($filters)){
-			$filter_query = Query_Factory::build([],$orderby_value);
+			$filter_query = Query_Factory::build([],$ordering);
 		}else{
 			$active_filters = call_user_func(function() use($filters){
 				$slugs = [];
@@ -53,9 +54,9 @@ class AjaxEndpoint{
 				return Filter_Factory::build_from_slugs($slugs,$values);
 			});
 			if(is_array($active_filters) && !empty($active_filters)){
-				$filter_query = Query_Factory::build($active_filters,$orderby_value);
+				$filter_query = Query_Factory::build($active_filters,$ordering);
 			}else{
-				$filter_query = Query_Factory::build([],$orderby_value);
+				$filter_query = Query_Factory::build([],$ordering);
 			}
 		}
 
