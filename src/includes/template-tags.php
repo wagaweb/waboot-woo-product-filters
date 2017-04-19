@@ -169,25 +169,33 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 
 				foreach ($f->current_values as $current_value){
 
-					$single_filter_params = [
-						$f->slug => [
-							'type' => $f->uiType->type_slug,
-							'dataType' => $f->dataType->type_slug
-						]
-					];
-					$single_filter_values = [
-						$f->slug => $current_value
-					];
-					$single_query_string = \WBWPF\includes\Filter_Factory::stringify_from_params($single_filter_params,$single_filter_values,true);
+					//Getting the query string that includes the current filter only
+					$single_query_string =  call_user_func(function() use($f,$current_value){
+						$single_filter_params = [
+							$f->slug => [
+								'type' => $f->uiType->type_slug,
+								'dataType' => $f->dataType->type_slug
+							]
+						];
+						$single_filter_values = [
+							$f->slug => $current_value
+						];
+						$single_query_string = \WBWPF\includes\Filter_Factory::stringify_from_params($single_filter_params,$single_filter_values,true);
+						return $single_query_string;
+					});
 
-					$cloned_posted_filters = $posted_filters;
-					if(isset($cloned_posted_filters['values']) && isset($cloned_posted_filters['values'][$f->slug])){
-						foreach ($cloned_posted_filters['values'][$f->slug] as $k => $v){
-							if($v == $current_value) unset($cloned_posted_filters['values'][$f->slug][$k]);
-							if(empty($cloned_posted_filters['values'][$f->slug])) unset($cloned_posted_filters['values'][$f->slug]);
+					//Getting the current query string WITHOUT the current filter
+					$current_query_string_without_self = call_user_func(function() use($posted_filters,$f,$current_value){
+						$cloned_posted_filters = $posted_filters;
+						if(isset($cloned_posted_filters['values']) && isset($cloned_posted_filters['values'][$f->slug])){
+							foreach ($cloned_posted_filters['values'][$f->slug] as $k => $v){
+								if($v == $current_value) unset($cloned_posted_filters['values'][$f->slug][$k]);
+								if(empty($cloned_posted_filters['values'][$f->slug])) unset($cloned_posted_filters['values'][$f->slug]);
+							}
 						}
-					}
-					$current_query_string_without_self = \WBWPF\includes\Filter_Factory::stringify_from_params($cloned_posted_filters['filters'],$cloned_posted_filters['values'],true);
+						$current_query_string_without_self = \WBWPF\includes\Filter_Factory::stringify_from_params($cloned_posted_filters['filters'],$cloned_posted_filters['values'],true);
+						return $current_query_string_without_self;
+					});
 
 					$breadcrumb[$i] = [
 						'value' => $current_value,
@@ -198,7 +206,8 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 					];
 
 					$breadcrumb[$i]['link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['cumulated_query_string']]);
-					$breadcrumb[$i]['delete_link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['current_query_string_without_self']]);
+					$breadcrumb[$i]['delete_link'] = $breadcrumb[$i]['current_query_string_without_self'] != "" ? add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['current_query_string_without_self']]) : wbwpf_get_base_url();
+					//todo: now if wbf_query is empty, the detected filters are not overridden. Is this the desired behavior?
 
 					$breadcrumb[$i] = apply_filters("wbwpf/breadcrumb/item",$breadcrumb[$i]);
 
