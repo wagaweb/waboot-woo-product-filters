@@ -126,6 +126,9 @@ class Plugin extends TemplatePlugin {
 
 		//Ajax
 		$this->AjaxEndpoint->setup_endpoints();
+
+		//Widgets
+		$this->loader->add_action("widgets_init", $this, "register_widgets");
 	}
 
 	/**
@@ -640,68 +643,11 @@ class Plugin extends TemplatePlugin {
 	}
 
 	/**
-	 * Returns a JSON of products for the frontend
+	 * Register plugins widgets
+	 *
+	 * @hooked 'widgets_init'
 	 */
-	public function get_filtered_products_callback(){
-		/*
-		 * Idea:
-		 * - I vari "filtri" sono dei middleware che modificano l'oggetto query.
-		 * - Quindi si crea un nuovo oggetto query tramite Query_Factory, passandogli tutti i filtri necessari
-		 * - Questi filtri modificano la query
-		 * - Viene restituito un oggetto query finale
-		 * - Viene eseguita la query
-		 * - Vengono restituiti gli ID dei post
-		 */
-		$search_params = isset($_POST['search_params']) ? $_POST['search_params'] : [];
-		$current_page = isset($search_params['page']) ? intval($search_params['page']) : 1;
-		$limit = apply_filters( 'loop_shop_per_page', get_option( 'posts_per_page' ) );
-		$offset = $limit * $current_page;
-
-		if(empty($search_params)){
-			wp_send_json_error();
-		}else{
-			if($current_page == 1){
-				$posts = [
-					[
-						'ID' => 1,
-						'title' => "Hello World!"
-					],
-					[
-						'ID' => 1,
-						'title' => "Hello World!"
-					],
-					[
-						'ID' => 1,
-						'title' => "Hello World!"
-					],
-					[
-						'ID' => 1,
-						'title' => "Hello World!"
-					]
-				];
-				$data = [
-					'total_count' => 5,
-					'current_page' => $current_page,
-					'posts' => $posts
-				];
-				wp_send_json_success($posts);
-			}elseif($current_page == 2){
-				$posts = [
-					[
-						'ID' => 1,
-						'title' => "Hello World 2!"
-					]
-				];
-				$data = [
-					'total_count' => 5,
-					'current_page' => $current_page,
-					'posts' => $posts
-				];
-				wp_send_json_success($posts);
-			}else{
-				$posts = [];
-				wp_send_json_success($posts);
-			}
-		}
+	public function register_widgets(){
+		register_widget(__NAMESPACE__."\\widgets\\Filters");
 	}
 }
