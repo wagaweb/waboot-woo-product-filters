@@ -29,10 +29,23 @@ class Filters extends WBF_Widget {
 		];
 		$instance = wp_parse_args($instance,$default);
 
-		if($instance['use_async']){
-			wbwpf_show_filters_async();
-		}else{
-			wbwpf_show_filters();
+		if(!function_exists("is_shop")) return;
+
+		if(is_shop() || is_product_category()){
+
+			echo $args['before_widget']; ?>
+
+			<h3 class="widget-title"><?php echo $instance['title']; ?></h3>
+
+			<?php
+
+			if($instance['use_async']){
+				wbwpf_show_filters_async();
+			}else{
+				wbwpf_show_filters();
+			}
+
+			echo $args['after_widget'];
 		}
 	}
 
