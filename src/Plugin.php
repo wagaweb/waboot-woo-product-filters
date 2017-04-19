@@ -107,7 +107,9 @@ class Plugin extends TemplatePlugin {
 		$this->loader->add_action("wp_ajax_wbwpf_get_products",$this,"get_filtered_products_callback");
 		$this->loader->add_action("wp_ajax_nopriv_wbwpf_get_products",$this,"get_filtered_products_callback");
 
+		//Query
 		$this->loader->add_action("query_vars",$this,"add_query_vars",1);
+		$this->loader->add_action("parse_tax_query",$this,"remove_tax_query",10,1);
 		$this->loader->add_action("woocommerce_product_query",$this,"alter_product_query",10,2);
 		$this->loader->add_filter("woocommerce_pagination_args",$this,"alter_woocommerce_pagination_args",10,1);
 
@@ -223,6 +225,22 @@ class Plugin extends TemplatePlugin {
 				}
 			}
 		}catch (\Exception $e){}
+	}
+
+	/**
+	 * WooCommerce does not adds variations ids in terms relationship table. So, if we are in a taxonomy page, and have chosen to display variations, they are not retrieved.
+	 * BUT, in our query, we just have the filtered ids, so in that case, we don't need tax_query.
+	 *
+	 * @param \WP_Query $wp_query
+	 *
+	 * @hooked 'parse_tax_query'
+	 */
+	public function remove_tax_query(\WP_Query $wp_query){
+		global $wbwpf_query_instance;
+		global $wp_query;
+		if(is_product_category() && isset($wbwpf_query_instance) && $wbwpf_query_instance->query_variations){
+			$wp_query->tax_query = new \WP_Tax_Query( [] );
+		}
 	}
 
 	/**
