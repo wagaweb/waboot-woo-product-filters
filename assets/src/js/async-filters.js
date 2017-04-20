@@ -2,6 +2,7 @@ import $ from "jquery";
 import _ from "lodash";
 
 import Vue from "vue";
+import UriManager from "./uri-manager";
 
 import {FilterController} from "./async-filter-helpers";
 
@@ -17,6 +18,7 @@ class FiltersApp{
         if(typeof pm !== "undefined"){
             this.ProductManager = pm;
         }
+        this.UriManager = new UriManager();
     }
 
     /**
@@ -186,6 +188,9 @@ class FiltersApp{
                         //Update self:
                         self.products = response.data.products;
                         self.result_count_label = response.data.result_count_label;
+
+                        //Update URI:
+                        _app.UriManager.updateFilters(_app.FiltersManager.getFilters());
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.products = [];
