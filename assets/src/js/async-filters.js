@@ -19,6 +19,7 @@ class FiltersApp{
             this.ProductManager = pm;
         }
         this.UriManager = new UriManager();
+        this.just_started = true;
     }
 
     /**
@@ -77,6 +78,7 @@ class FiltersApp{
                     let $target = $(event.target);
                     _app.FiltersManager.updateFilter(this.slug,this.currentValues);
                     this.$parent.$emit("valueSelected");
+                    _app.just_started = false;
                 }
             }
         });
@@ -190,7 +192,9 @@ class FiltersApp{
                         self.result_count_label = response.data.result_count_label;
 
                         //Update URI:
-                        _app.UriManager.updateFilters(_app.FiltersManager.getFilters());
+                        if(!_app.just_started){
+                            _app.UriManager.updateFilters(_app.FiltersManager.getFilters());
+                        }
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.products = [];

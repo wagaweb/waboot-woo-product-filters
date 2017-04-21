@@ -70,7 +70,7 @@ function getStrippedFiltersSearchParameters(){
  * @param value
  * @param url
  */
-function UpdateQueryString(key, value, url) {
+function GetUpdatedUriWithQueryString(key, value, url) {
     if (!url) url = window.location.href;
     let re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
         hash;
@@ -100,4 +100,4 @@ function UpdateQueryString(key, value, url) {
     }
 }
 
-export {getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters};
+export {getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters, GetUpdatedUriWithQueryString};

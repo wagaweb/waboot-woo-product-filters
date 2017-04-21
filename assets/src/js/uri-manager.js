@@ -1,4 +1,5 @@
 import _ from "lodash";
+import {GetUpdatedUriWithQueryString} from "./utilities";
 
 /**
  * Checks if pushState is available
@@ -46,10 +47,14 @@ export default class{
          * ]
          *
          */
-        let qs = this._generateQueryString(filters);
-        window.location.href = window.location.href.replace(/\?([a-zA-Z0-9])/);
-
-        console.log(filters);
+        if(this.canPushState()){
+            let new_qs = this._generateQueryString(filters);
+            let new_location = GetUpdatedUriWithQueryString("wbwpf_query",new_qs);
+            let state = {
+                qs: new_qs
+            };
+            window.history.pushState(state,document.title,new_location);
+        }
     }
 
     /**
@@ -62,8 +67,9 @@ export default class{
     _generateQueryString(filters){
         let qs = "";
         _.forEach(filters,(filter,key) => {
+            debugger;
             let values = filter.value !== "undefined" ? filter.value.join(",") : "";
-            if(key > 1){
+            if(key > 0){
                 qs += "-";
             }
             qs += filter.slug+"|"+values;
@@ -79,7 +85,7 @@ export default class{
     }
 
     /**
-     *
+     * Perform actions during popstate
      */
     onLocationChange(){
         console.log("URI Updated");
