@@ -16,68 +16,72 @@ class Query_Factory{
 	 * @param string $orderby
 	 * @param string $order
 	 *
-	 * @return Filter_Query
+	 * @return Filter_Query|\WP_Error
 	 */
 	public static function build($filters = [], $orderby = self::DEFAULT_ORDERBY, $order = self::DEFAULT_ORDER, $limit = -1, $offset = -1){
-		global $wpdb;
+		try{
+			global $wpdb;
 
-		$query = new Filter_Query(new DB_Manager(new MYSQL())); //todo: allows multiple backend
+			$query = new Filter_Query(new DB_Manager(new MYSQL())); //todo: allows multiple backend
 
-		//Here we might have the woocommerce ordering and orderby names, we must standardize them to our query system
-		$ordering = self::transform_wc_ordering_params($orderby,$order);
+			//Here we might have the woocommerce ordering and orderby names, we must standardize them to our query system
+			$ordering = self::transform_wc_ordering_params($orderby,$order);
 
-		$query->set_ordering($ordering['orderby'],$ordering['order']);
-		$query->set_pagination($offset,$limit);
-		$query->set_select_statement("product_id");
-		$query->set_from_statement($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
+			$query->set_ordering($ordering['orderby'],$ordering['order']);
+			$query->set_pagination($offset,$limit);
+			$query->set_select_statement("product_id");
+			$query->set_from_statement($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
 
-		//Additional settings:
-		$plugin = Plugin::get_instance_from_global();
-		if($plugin instanceof Plugin){
-			$settings = $plugin->get_plugin_settings();
-			$query_settings = [
-				'show_variations' => $settings['show_variations'],
-				'hide_parent_products' => $settings['hide_parent_products'],
-			];
-			$query_settings = apply_filters("wbwpf/query/settings",$query_settings);
-			$query->query_variations = $query_settings['show_variations'];
-			$query->do_not_query_parent_product = $query_settings['hide_parent_products'];
-		}else{
-			$query->query_variations = false;
-			$query->do_not_query_parent_product = false;
-		}
+			//Additional settings:
+			$plugin = Plugin::get_instance_from_global();
+			if($plugin instanceof Plugin){
+				$settings = $plugin->get_plugin_settings();
+				$query_settings = [
+					'show_variations' => $settings['show_variations'],
+					'hide_parent_products' => $settings['hide_parent_products'],
+				];
+				$query_settings = apply_filters("wbwpf/query/settings",$query_settings);
+				$query->query_variations = $query_settings['show_variations'];
+				$query->do_not_query_parent_product = $query_settings['hide_parent_products'];
+			}else{
+				$query->query_variations = false;
+				$query->do_not_query_parent_product = false;
+			}
 
-		if(!empty($filters)){
-			foreach ($filters as $filter){
-				if($filter instanceof Filter){
-					$filter->parse_query($query);
+			if(!empty($filters)){
+				foreach ($filters as $filter){
+					if($filter instanceof Filter){
+						$filter->parse_query($query);
+					}
+				}
+
+				/*
+				 * We are testing two database structures, see Plugin::populate_products_index()
+				 */
+
+				/*
+				 * This is for the first: (we do not use sub queries)
+				 */
+				//$query->build();
+
+				/*
+				 * This is for the second:
+				 */
+				$query->build_from_sub_queries();
+			}else{
+				//Check if we are in main shop page
+				if(is_shop()){
+					$query->build(); //Build the query for selecting all the products
+				}elseif(defined('DOING_AJAX') && DOING_AJAX){
+					//If we are making a ajax request, and no filters provided, it means we are in the main shop page
+					$query->build();
 				}
 			}
 
-			/*
-			 * We are testing two database structures, see Plugin::populate_products_index()
-			 */
-
-			/*
-			 * This is for the first: (we do not use sub queries)
-			 */
-			//$query->build();
-
-			/*
-			 * This is for the second:
-			 */
-			$query->build_from_sub_queries();
-		}else{
-			//Check if we are in main shop page
-			if(is_shop()){
-				$query->build(); //Build the query for selecting all the products
-			}elseif(defined('DOING_AJAX') && DOING_AJAX){
-				//If we are making a ajax request, and no filters provided, it means we are in the main shop page
-				$query->build();
-			}
+			return $query;
+		}catch(\Exception $e){
+			return new \WP_Error("filter-build-error",$e->getMessage()); //todo: loggin?
 		}
-
-		return $query;
 	}
 
 	/**
