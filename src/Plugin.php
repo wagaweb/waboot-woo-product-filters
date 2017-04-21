@@ -629,21 +629,8 @@ class Plugin extends TemplatePlugin {
 
 		$wrapped_params = $_GET['wbwpf_query'];
 		$unwrapped_filters = Filter_Factory::parse_stringified_params($wrapped_params);
-		foreach ($result_filters['filters'] as $filter_slug => $filter_params){
-			if(!isset($unwrapped_filters['filters'][$filter_slug])){
-				unset($result_filters['filters'][$filter_slug]);
-				if(isset($result_filters['values'][$filter_slug])){
-					unset($result_filters['values'][$filter_slug]);
-				}
-			}
-			if(isset($unwrapped_filters['values'][$filter_slug])){
-				$result_filters['values'][$filter_slug] = $unwrapped_filters['values'][$filter_slug];
-			}else{
-				if(isset($result_filters['values'][$filter_slug])){
-					unset($result_filters['values'][$filter_slug]);
-				}
-			}
-		}
+
+		$result_filters = $unwrapped_filters; //WBWPF Query always override all:
 
 		return $result_filters;
 	}
