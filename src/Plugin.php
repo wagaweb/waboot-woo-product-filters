@@ -209,6 +209,14 @@ class Plugin extends TemplatePlugin {
 		if(!$can_alter_query) return;
 
 		try{
+			/*
+			 * /!\
+			 * ARE YOU TRYING TO DEBUG THIS PLUGIN?
+			 * ARE YOU LOST OR GOING CRAZY? IS YOUR LIFE BEGINNING TO LOSE ITS MEANING?
+			 * DON'T DO THINGS YOU WILL REGRET.
+			 * JUST START HERE, AND EVERYTHING WILL BE OK.
+			 * /!\
+			 */
 			$filter_query = Query_Factory::build_from_available_params();
 
 			$GLOBALS['wbwpf_query_instance'] = &$filter_query;
