@@ -14,47 +14,51 @@ class Filter_Factory{
 	 * @param $uiType_slug
 	 * @param string|array|null $values
 	 *
-	 * @return bool|Filter
+	 * @return \WP_Error|bool|Filter
 	 */
 	public static function build($filterSlug,$dataType_slug,$uiType_slug,$values = null){
-		$plugin = Plugin::get_instance_from_global();
-		$dataTypes = $plugin->get_available_dataTypes();
-		$uiTypes = $plugin->get_available_uiTypes();
+		try{
+			$plugin = Plugin::get_instance_from_global();
+			$dataTypes = $plugin->get_available_dataTypes();
+			$uiTypes = $plugin->get_available_uiTypes();
 
-		if(!isset($dataTypes[$dataType_slug])) return false;
-		$dataTypeClassName = $dataTypes[$dataType_slug];
+			if(!isset($dataTypes[$dataType_slug])) return false; //todo: return WP_Error?
+			$dataTypeClassName = $dataTypes[$dataType_slug];
 
-		if(!isset($uiTypes[$uiType_slug])) return false;
-		$uiTypeClassName = $uiTypes[$uiType_slug];
+			if(!isset($uiTypes[$uiType_slug])) return false; //todo: return WP_Error?
+			$uiTypeClassName = $uiTypes[$uiType_slug];
 
-		$dataType = new $dataTypeClassName();
-		$uiType = new $uiTypeClassName();
+			$dataType = new $dataTypeClassName();
+			$uiType = new $uiTypeClassName();
 
-		$f = new Filter($filterSlug,$dataType,$uiType);
-		$f->uiType->set_name($filterSlug);
+			$f = new Filter($filterSlug,$dataType,$uiType);
+			$f->uiType->set_name($filterSlug);
 
-		if(isset($values)){
-			$f->set_value($values);
-		}else{
-			//Guess the value from $_POST or $_GET
-			if(isset($_GET['wbwpf_query']) && $_GET['wbwpf_query'] != ""){
-				$r = self::parse_stringified_params($_GET['wbwpf_query']);
-			}elseif(isset($_GET['wbwpf_search_by_filters']) || isset($_POST['wbwpf_search_by_filters'])){
-				/*
-				 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
-				 * We are testing the two...
-				 */
-				$r = self::parse_get_or_post_params();
-			}else{
-				$r = self::parse_wp_query_params();
-			}
-			if(isset($r) && isset($r['values']) && isset($r['values'][$filterSlug])){
-				$values = $r['values'][$filterSlug];
+			if(isset($values)){
 				$f->set_value($values);
+			}else{
+				//Guess the value from $_POST or $_GET
+				if(isset($_GET['wbwpf_query']) && $_GET['wbwpf_query'] != ""){
+					$r = self::parse_stringified_params($_GET['wbwpf_query']);
+				}elseif(isset($_GET['wbwpf_search_by_filters']) || isset($_POST['wbwpf_search_by_filters'])){
+					/*
+					 * It is possible to specify filters in $_GET in two formats: one called "stringfied", and one generated directly from the FORM.
+					 * We are testing the two...
+					 */
+					$r = self::parse_get_or_post_params();
+				}else{
+					$r = self::parse_wp_query_params();
+				}
+				if(isset($r) && isset($r['values']) && isset($r['values'][$filterSlug])){
+					$values = $r['values'][$filterSlug];
+					$f->set_value($values);
+				}
 			}
-		}
 
-		return $f;
+			return $f;
+		}catch(\Exception $e){
+			return new \WP_Error("filter-build-error",$e->getMessage()); //todo: loggin?
+		}
 	}
 
 	/**
@@ -448,32 +452,57 @@ class Filter_Factory{
 	public static function parse_stringified_params($params){
 		$stringified_filters = explode("-",$params);
 
+		$plugin = Plugin::get_instance_from_global();
+		$settings = $plugin->get_plugin_settings();
+
 		$active_filters = [];
 		$current_values = [];
 
 		foreach ($stringified_filters as $filter_string){
 			$filter_string_values = explode("|",$filter_string);
-			$active_filters[$filter_string_values[0]] = [
-				'slug' => $filter_string_values[0],
-				'type' => $filter_string_values[1],
-				'dataType' => $filter_string_values[2]
-			];
-			if($filter_string_values[3] == ""){
-				$current_values[$filter_string_values[0]] = null; //todo: move it to another place?
-			}else{
-				$the_filter_value = explode(",",$filter_string_values[3]);
 
+			//Here we can have either (a):
+			//0 => the slug
+			//1 => the UIType
+			//2 => the DataType
+			//3 => the values
+			//-- OR (b):
+			//0 => the slug
+			//2 => the values
+
+			if(count($filter_string_values) > 2){
+				$f_slug = $filter_string_values[0];
+				$f_uiType = $filter_string_values[1];
+				$f_dataType = $filter_string_values[2];
+				$f_value = isset($filter_string_values) ? $filter_string_values : "";
+			}else{
+				//Let's assume we are in the b case
+				$f_slug = $filter_string_values[0];
+				$f_uiType = $settings['filters_params'][$f_slug]['uiType'];
+				$f_dataType = $settings['filters_params'][$f_slug]['dataType'];
+				$f_value = $filter_string_values[1];
+			}
+
+			if($f_value == ""){
+				$f_value = null;
+			}else{
+				$f_value = explode(",",$f_value);
 				//Sanitization:
-				if(is_array($the_filter_value)){
-					foreach ($the_filter_value as $k => $v){
-						$the_filter_value[$k] = sanitize_text_field($v);
+				if(is_array($f_value)){
+					foreach ($f_value as $k => $v){
+						$f_value[$k] = sanitize_text_field($v);
 					}
 				}else{
-					$the_filter_value = sanitize_text_field($the_filter_value);
+					$f_value = sanitize_text_field($f_value);
 				}
-
-				$current_values[$filter_string_values[0]] = $the_filter_value;
 			}
+
+			$current_values[$f_slug] = $f_value;
+			$active_filters[$f_slug] = [
+				'slug' => $f_slug,
+				'type' => $f_uiType,
+				'dataType' => $f_dataType
+			];
 		}
 
 		return [
