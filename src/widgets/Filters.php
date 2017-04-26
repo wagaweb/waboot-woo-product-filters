@@ -76,7 +76,7 @@ class Filters extends WBF_Widget {
 			],
 			'use_async' => [
 				'type' => 'checkbox',
-				'label' => _x("Update filters asynchronously","Widget option",$plugin->get_textdomain()),
+				'label' => sprintf(_x("Update filters asynchronously.<br />If you leave this unchecked, make sure 'Use async product list' is also unchecked in <a href='%s' title='Go to settings'>settings</a>.","Widget option",$plugin->get_textdomain()),admin_url("admin.php?page=wbwpf_settings&tab=options")),
 				'default' => false
 			],
             'display_apply_button' => [
