@@ -474,7 +474,7 @@ class Filter_Factory{
 				$f_slug = $filter_string_values[0];
 				$f_uiType = $filter_string_values[1];
 				$f_dataType = $filter_string_values[2];
-				$f_value = isset($filter_string_values) ? $filter_string_values : "";
+				$f_value = isset($filter_string_values[3]) ? $filter_string_values[3] : "";
 			}else{
 				//Let's assume we are in the b case
 				$f_slug = $filter_string_values[0];
