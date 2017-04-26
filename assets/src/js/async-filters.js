@@ -67,8 +67,8 @@ class FiltersApp{
                         let items = data.data;
                         self.items = items;
                         _.forEach(items,(item,index) => {
-                            if(item.selected){
-                                self.currentValues.push(item.id);
+                            if(item.selected && _.indexOf(self.currentValues,item.id) === -1){
+                                self.currentValues.push(item.id); //Insert into currentValues the items signed ad selected (useful when page loads with wbwpf_query string)
                             }
                         });
                     },(jqXHR, textStatus, errorThrown) => {
@@ -81,8 +81,8 @@ class FiltersApp{
                  * @param {object} event
                  */
                 valueSelected(event){
-                    let $target = $(event.target);
-                    _app.FiltersManager.updateFilter(this.slug,this.currentValues);
+                    let currentValues = this.currentValues;
+                    _app.FiltersManager.updateFilter(this.slug,currentValues);
                     this.$parent.$emit("valueSelected");
                     _app.just_started = false;
                 }
