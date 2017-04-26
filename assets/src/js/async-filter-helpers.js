@@ -12,7 +12,9 @@ class FiltersManager{
      * @param value
      */
     updateFilter(slug,value){
-        let actualIndex = _.findIndex(this.activeFilters,{slug:slug});
+        let actualIndex = _.findIndex(this.activeFilters,(o) => {
+            return o.slug === slug;
+        });
         if(actualIndex !== -1){
             //Update
             this.activeFilters[actualIndex] = {
@@ -33,7 +35,9 @@ class FiltersManager{
      * @param slug
      */
     removeFilter(slug){
-        let actualIndex = _.findIndex(this.activeFilters,{slug:slug});
+        let actualIndex = _.findIndex(this.activeFilters,(o) => {
+            return o.slug === slug;
+        });
         if(actualIndex !== -1){
             this.activeFilters.splice(actualIndex,1);
         }
@@ -43,6 +47,12 @@ class FiltersManager{
      * Update the DOM input with the current filters
      */
     getFilters(){
+        //Clean double values
+        this.activeFilters.map((filter) => {
+            filter.value = _.uniq(filter.value);
+            return filter;
+        });
+        //Then return
         return this.activeFilters
     }
 }
