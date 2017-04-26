@@ -15,5 +15,5 @@
 </div>
 
 <template id="wbwpf-product-template">
-    <div v-html="data.content"></div>
+    <span v-html="data.content"></span>
 </template>
