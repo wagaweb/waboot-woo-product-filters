@@ -67,7 +67,6 @@ export default class{
     _generateQueryString(filters){
         let qs = "";
         _.forEach(filters,(filter,key) => {
-            debugger;
             let values = filter.value !== "undefined" ? filter.value.join(",") : "";
             if(key > 0){
                 qs += "-";
@@ -81,6 +80,6 @@ export default class{
      * Perform actions during popstate
      */
     onLocationChange(){
-        console.log("URI Updated");
+        //console.log("URI Updated");
     }
 }
