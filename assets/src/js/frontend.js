@@ -54,7 +54,11 @@ $(document).ready(function($){
             let fm = new FiltersManager(),
                 pm = new ProductsManager();
             window.FiltersApp = new FiltersApp(fm,pm);
-            window.FiltersApp.start(".wbwpf-filters[data-async]",".wbwpf-product-list[data-async]");
+            if($async_filters.data("has_button")){
+                window.FiltersApp.start(".wbwpf-filters[data-async]",".wbwpf-product-list[data-async]",false);
+            }else{
+                window.FiltersApp.start(".wbwpf-filters[data-async]",".wbwpf-product-list[data-async]",true);
+            }
         }else{
             let fm = new FiltersManager();
             window.FiltersApp = new FiltersApp(fm);

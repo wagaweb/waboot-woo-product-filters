@@ -19,6 +19,7 @@ class FiltersApp{
             this.ProductManager = pm;
         }
         this.UriManager = new UriManager();
+        this.reactiveProductList = false; //whether the product list must respond to filters changes
         this.just_started = true;
     }
 
@@ -27,12 +28,17 @@ class FiltersApp{
      *
      * @param {string} filtersList the vue root element of the filters list
      * @param {string} productsList the vue root element of the products list
+     * @param {boolean} reactiveProductList whether the product list must respond to filters changes
      */
-    start(filtersList,productsList){
+    start(filtersList,productsList,reactiveProductList){
+        if(_.isUndefined(reactiveProductList)){
+            reactiveProductList = this.reactiveProductList; //set to the default
+        }
         if(typeof filtersList !== "undefined"){
             this._startFiltersList(filtersList);
         }
         if(typeof productsList !== "undefined"){
+            this.reactiveProductList = reactiveProductList;
             this._startProductsList(productsList);
         }
     }
@@ -183,16 +189,18 @@ class FiltersApp{
             mounted(){
                 //Getting the current products
                 this.updateProducts(_app.FiltersManager.getFilters());
-                //Listen to filters changes:
-                window.FiltersList.$on("filtersUpdated",function(){
-                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
-                });
-                //Listen to ordering changing
-                //This is a nasty nasty trick to make ordering works without further modifications
-                this.$on("orderingChanged", function(new_order){
-                    this.ordering = new_order;
-                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
-                });
+                if(_app.reactiveProductList){
+                    //Listen to filters changes:
+                    window.FiltersList.$on("filtersUpdated",function(){
+                        window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                    });
+                    //Listen to ordering changing
+                    //This is a nasty nasty trick to make ordering works without further modifications
+                    this.$on("orderingChanged", function(new_order){
+                        this.ordering = new_order;
+                        window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                    });
+                }
             },
             methods: {
                 /**
