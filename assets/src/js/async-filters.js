@@ -164,14 +164,21 @@ class FiltersApp{
                 },
                 /**
                  * Calls "updateValues" on each children.
+                 *
+                 * Called on 'valueSelected' and 'filtersDetected'.
+                 *
+                 * The first is emitted through this instance children,
+                 * the latter is called by this.detectActiveFilters() during mount().
                  */
                 updateChildrenValues(){
                     let updatingPromises = [];
+                    jQuery(this.$el).find("[data-apply_button]").attr("disabled",true);
                     _.each(this.$children,function(filter){
                         updatingPromises.push(filter.updateValues());
                     });
                     Promise.all(updatingPromises).then(() => {
                         this.$emit("filtersUpdated");
+                        jQuery(this.$el).find("[data-apply_button]").attr("disabled",false);
                     });
                 }
             }

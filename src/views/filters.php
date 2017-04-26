@@ -7,7 +7,7 @@
 		    <?php endforeach; ?>
 	    <?php endif; ?>
 	        <?php if($display_apply_button): ?>
-                <button name="wbwpf_search_by_filters" value="1" type="submit"><?php _ex("Search","Filters search button",$textdomain); ?></button>
+                <button name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button><?php _ex("Search","Filters search button",$textdomain); ?></button>
 	        <?php endif; ?>
         </form>
     </div>
