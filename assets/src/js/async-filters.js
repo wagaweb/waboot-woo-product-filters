@@ -67,6 +67,8 @@ class FiltersApp{
                 updateValues(){
                     let self = this,
                         req = this.controller.getValues();
+                    $(this.$el).addClass("loading");
+                    $(this.$el).find("input").attr("disabled",true);
                     req.then((data, textStatus, jqXHR) => {
                         //Resolve
                         let items = data.data;
@@ -83,9 +85,13 @@ class FiltersApp{
                         if(!self.is_current){
                             self.hidden = self.items.length === hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
                         }
+                        $(this.$el).removeClass("loading");
+                        $(this.$el).find("input").attr("disabled",false);
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.items = [];
+                        $(this.$el).removeClass("loading");
+                        $(this.$el).find("input").attr("disabled",false);
                     });
                 },
                 /**
