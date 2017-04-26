@@ -1,10 +1,15 @@
 <?php if($async): ?>
     <div class="wbwpf-filters" data-filters='<?php echo wbwpf_get_current_active_filters(true); ?>' data-async>
-	    <?php if($has_filters): ?>
+        <form method="get" action="<?php echo $form_action_url; ?>" data-filters-form>
+        <?php if($has_filters): ?>
 		    <?php foreach ($filters as $filter): ?>
 			    <?php $filter->display(true); ?>
 		    <?php endforeach; ?>
 	    <?php endif; ?>
+	        <?php if($display_apply_button): ?>
+                <button name="wbwpf_search_by_filters" value="1" type="submit"><?php _ex("Search","Filters search button",$textdomain); ?></button>
+	        <?php endif; ?>
+        </form>
     </div>
 <?php else: ?>
     <div class="wbwpf-filters" data-filters>

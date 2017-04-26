@@ -40,7 +40,8 @@ class Filters extends WBF_Widget {
 			<?php
 
 			if($instance['use_async']){
-				wbwpf_show_filters_async();
+				$display_apply_button = isset($instance['display_apply_button']);
+				wbwpf_show_filters_async([],$display_apply_button);
 			}else{
 				wbwpf_show_filters();
 			}
@@ -77,7 +78,12 @@ class Filters extends WBF_Widget {
 				'type' => 'checkbox',
 				'label' => _x("Update filters asynchronously","Widget option",$plugin->get_textdomain()),
 				'default' => false
-			]
+			],
+            'display_apply_button' => [
+	            'type' => 'checkbox',
+	            'label' => sprintf(_x("Display 'search' button (with async filters).<br />If you choose not to, you have to select 'Use async product list' in <a href='%s' title='Go to settings'>settings</a>.","Widget option",$plugin->get_textdomain()),admin_url("admin.php?page=wbwpf_settings&tab=options")),
+	            'default' => true
+            ]
 		];
 
 		$this->print_options($instance,$form_options);

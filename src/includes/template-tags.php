@@ -55,8 +55,8 @@ if(!function_exists("wbwpf_show_products_async")):
 endif;
 
 if(!function_exists("wbwpf_show_filters_async")):
-	function wbwpf_show_filters_async($args = []){
-		wbwpf_show_filters($args,true);
+	function wbwpf_show_filters_async($args = [], $display_apply_button = true){
+		wbwpf_show_filters($args,true,$display_apply_button);
 	}
 endif;
 
@@ -66,6 +66,7 @@ if(!function_exists("wbwpf_show_filters")):
 	 *
 	 * @param array $args the params for displaying the filters
 	 * @param bool $async
+	 * @param bool $display_apply_button
 	 *
 	 * @example for $args:
 	 *
@@ -82,7 +83,7 @@ if(!function_exists("wbwpf_show_filters")):
 	 * ]
 	 *
 	 */
-	function wbwpf_show_filters($args = [],$async = false){
+	function wbwpf_show_filters($args = [],$async = false,$display_apply_button = true){
 		$plugin = \WBWPF\Plugin::get_instance_from_global();
 		$settings = $plugin->get_plugin_settings();
 		if(!isset($settings['filters_params'])) $settings['filters_params'] = [];
@@ -144,6 +145,7 @@ if(!function_exists("wbwpf_show_filters")):
 			'has_filters' => is_array($filters) && !empty($filters),
 			'has_products' => $has_products,
 			'async' => $async,
+			'display_apply_button' => $display_apply_button,
 			'textdomain' => $plugin->get_textdomain()
 		]);
 	}
