@@ -172,7 +172,7 @@ class FiltersApp{
                  */
                 updateChildrenValues(){
                     let updatingPromises = [];
-                    jQuery(this.$el).find("[data-apply_button]").attr("disabled",true);
+                    jQuery(this.$el).find("[data-apply_button]").attr("disabled",true); //todo: is there a better way?
                     _.each(this.$children,function(filter){
                         updatingPromises.push(filter.updateValues());
                     });
