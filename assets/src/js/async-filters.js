@@ -53,7 +53,12 @@ class FiltersApp{
                     items: []
                 }
             },
-            props: ['label','slug','hidden','update'],
+            props: {
+                'label': String,
+                'slug': String,
+                'hidden': Boolean,
+                'is_current': Boolean
+            },
             mounted(){},
             methods: {
                 /**
@@ -75,7 +80,9 @@ class FiltersApp{
                                 hidden_items.push(item.id);
                             }
                         });
-                        self.hidden = self.items.length === hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
+                        if(!self.is_current){
+                            self.hidden = self.items.length === hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
+                        }
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.items = [];
