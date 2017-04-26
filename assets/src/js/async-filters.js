@@ -65,12 +65,17 @@ class FiltersApp{
                     req.then((data, textStatus, jqXHR) => {
                         //Resolve
                         let items = data.data;
+                        let hidden_items = [];
                         self.items = items;
                         _.forEach(items,(item,index) => {
                             if(item.selected && _.indexOf(self.currentValues,item.id) === -1){
                                 self.currentValues.push(item.id); //Insert into currentValues the items signed ad selected (useful when page loads with wbwpf_query string)
                             }
+                            if(!item.visible){
+                                hidden_items.push(item.id);
+                            }
                         });
+                        self.hidden = self.items.length === hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.items = [];
