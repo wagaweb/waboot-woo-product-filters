@@ -64,9 +64,13 @@ class FiltersApp{
                         req = this.controller.getValues();
                     req.then((data, textStatus, jqXHR) => {
                         //Resolve
-                        debugger;
-                        //todo: WE NEED TO SET ALL THE ITEMS.SELECT AD CURRENT VALUES TO MAKE CHECKBOX SELECTED
-                        self.items = data.data;
+                        let items = data.data;
+                        self.items = items;
+                        _.forEach(items,(item,index) => {
+                            if(item.selected){
+                                self.currentValues.push(item.id);
+                            }
+                        });
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.items = [];
