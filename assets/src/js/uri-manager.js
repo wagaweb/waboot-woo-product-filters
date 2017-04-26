@@ -61,7 +61,7 @@ export default class{
      * Generate a new query string from filters array. This will mimic the "stringified version" managed by the plugin.
      * For more info see: Filter_Factory.php @ stringify_from_params()
      *
-     * @param filters
+     * @param {array} filters
      * @private
      */
     _generateQueryString(filters){
@@ -75,13 +75,6 @@ export default class{
             qs += filter.slug+"|"+values;
         });
         return qs;
-    }
-
-    /**
-     * Retrieve the filters currently in URI
-     */
-    getCurrentFilters(){
-        console.log("Get the current filters");
     }
 
     /**
