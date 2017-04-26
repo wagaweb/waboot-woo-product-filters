@@ -55,6 +55,7 @@ class FiltersApp{
                 let controller = new FilterController(this.slug,_app.FiltersManager);
                 return {
                     controller: controller,
+                    state: "updating",
                     currentValues: [],
                     items: []
                 }
@@ -69,12 +70,15 @@ class FiltersApp{
             methods: {
                 /**
                  * Update displayed values of the filter via ajax.
+                 * return {Promise}
                  */
                 updateValues(){
                     let self = this,
                         req = this.controller.getValues();
                     $(this.$el).addClass("loading");
                     $(this.$el).find("input").attr("disabled",true);
+                    this.state = "updating";
+                    this.$parent.updatingFilters.push(this.slug);
                     req.then((data, textStatus, jqXHR) => {
                         //Resolve
                         let items = data.data;
@@ -93,12 +97,17 @@ class FiltersApp{
                         }
                         $(this.$el).removeClass("loading");
                         $(this.$el).find("input").attr("disabled",false);
+                        self.state = "updated";
+                        self.$parent.updatingFilters.splice(_.indexOf(self.$parent.updatingFilters,self.slug),1); //Remove the filters from the updating filters
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.items = [];
                         $(this.$el).removeClass("loading");
                         $(this.$el).find("input").attr("disabled",false);
+                        self.state = "updated";
+                        self.$parent.updatingFilters.splice(_.indexOf(self.$parent.updatingFilters,self.slug),1); //Remove the filters from the updating filters
                     });
+                    return req;
                 },
                 /**
                  * Callback for currentValues changes.
@@ -116,6 +125,14 @@ class FiltersApp{
         //Init a new Vue instance for the filters
         window.FiltersList = new Vue({
             el: el,
+            data: {
+                updatingFilters: []
+            },
+            computed: {
+                updated: function(){
+                    return _.isEmpty(this.updatingFilters); //whether all filters are updated or not
+                }
+            },
             mounted(){
                 this.$on("valueSelected",function(){
                     this.updateChildrenValues(); //Every time a value is selected in a child, then "valueSelected" is emitted
@@ -149,10 +166,13 @@ class FiltersApp{
                  * Calls "updateValues" on each children.
                  */
                 updateChildrenValues(){
+                    let updatingPromises = [];
                     _.each(this.$children,function(filter){
-                        filter.updateValues();
+                        updatingPromises.push(filter.updateValues());
                     });
-                    this.$emit("filtersUpdated");
+                    Promise.all(updatingPromises).then(() => {
+                        this.$emit("filtersUpdated");
+                    });
                 }
             }
         });
