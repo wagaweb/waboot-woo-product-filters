@@ -60,13 +60,15 @@ class AjaxEndpoint{
 			}
 		}
 
-		if($filter_query instanceof Filter_Query){
-			$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
-			if(is_array($ids) && count($ids) > 0){
-				$get_posts_args['post__in'] = $ids;
-			}else{
-				$get_posts_args['post__in'] = [0];
-			}
+		if(!$filter_query instanceof Filter_Query){
+			wp_send_json_error(['error' => "Unable to build Filter_Query"]);
+		}
+
+		$ids = $filter_query->get_results(Filter_Query::RESULT_FORMAT_IDS);
+		if(is_array($ids) && count($ids) > 0){
+			$get_posts_args['post__in'] = $ids;
+		}else{
+			$get_posts_args['post__in'] = [0];
 		}
 
 		if($filter_query->query_variations){
@@ -120,6 +122,7 @@ class AjaxEndpoint{
 		}
 
 		//Additional data
+		$total_pages = ceil(count($ids) / $posts_per_page);
 		$found_products = isset($filter_query) ? count($filter_query->found_products) : 0;
 		$showing_from = ( $posts_per_page * $page ) - $posts_per_page + 1; //See: result-count.php
 		$showing_to = min($found_products, $posts_per_page * $page); //See: result-count.php
@@ -134,6 +137,7 @@ class AjaxEndpoint{
 			'products' => $products,
 			'found_products' => $found_products,
 			'current_page' => $page,
+			'total_pages' => $total_pages,
 			'showing_from' => $showing_from,
 			'showing_to' => $showing_to,
 			'products_per_page' => $posts_per_page,

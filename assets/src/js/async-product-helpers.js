@@ -2,21 +2,17 @@ import $ from "jquery";
 import _ from 'lodash';
 
 class ProductsManager{
-    constructor(){
-        this.total_products = 0;
-        this.current_page = 1;
-        this.showing_to = 0;
-        this.showing_from = 0;
-    }
-    getProducts(filters,ordering){
+    getProducts(filters,ordering,page){
         if(typeof ordering === "undefined") ordering = "menu_order";
+        if(typeof page === "undefined") page = 1;
 
         return $.ajax({
             url: wbwpf.ajax_url,
             data: {
                 action: "get_products_for_filters",
                 filters: filters,
-                ordering: ordering
+                ordering: ordering,
+                page: page
             },
             method: "POST",
             dataType: "json"

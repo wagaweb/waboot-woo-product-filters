@@ -205,11 +205,100 @@ class FiltersApp{
             props: ['data']
         });
 
+        Vue.component('wbwpf-pagination',{
+            data(){
+                return {
+                    outerWrapper: "ul",
+                    innerWrapper: "li"
+                }
+            },
+            props: ['current_page','total_pages','mid_size'],
+            computed: {
+                pages: function(){
+                    /*let pages = [];
+                    if(this.current_page != 1){
+                        for(let i = this.mid_size; i > 0; i--){
+                            if(this.current_page - i >= 1){
+                                pages.push({n: i, current: false});
+                            }
+                        }
+                        for(let i = 0; i == this.mid_size; i++){
+                            if(this.current_page + i <= this.total_pages){
+                                pages.push({n: i, current: false});
+                            }
+                        }
+                    }*/
+                    return [];
+                },
+                next_page: function(){
+                    if(this.current_page == this.total_pages){
+                        return this.total_pages;
+                    }else{
+                        return this.current_page - 1;
+                    }
+                },
+                prev_page: function(){
+                    if(this.current_page == 1 || this.total_pages == 1){
+                        return 1;
+                    }else{
+                        return this.current_page + 1;
+                    }
+                }
+            },
+            created(){},
+            mounted(){},
+            render(createElement){
+                let output,
+                    innerElements = [];
+                for(let i = 1; i <= this.total_pages; i++){
+                    innerElements.push(createElement(this.innerWrapper,{
+                        'class': {
+                            'wbwpf-navigation-item': true
+                        }
+                    },[
+                        createElement("a",{
+                            domProps: {
+                                innerHTML: i
+                            },
+                            attrs: {
+                                href: "#page"+i,
+                                title: "Go to page "+i,
+                                'data-goto': i
+                            },
+                            on: {
+                                click: this.changePage
+                            }
+                        })
+                    ]))
+                }
+                output = createElement(this.outerWrapper,{
+                    'class': {
+                        'wbwpf-navigation-wrapper': true
+                    }
+                },innerElements);
+                return output;
+            },
+            methods: {
+                /**
+                 * Handles the click event on a page link. Emits "pageChanged" from window.ProductList, which in turn force the product update.
+                 * @param event
+                 */
+                changePage(event){
+                    event.preventDefault();
+                    let $clickedLink = $(event.target);
+                    let pageToGo = $clickedLink.data('goto');
+                    window.ProductList.$emit("pageChanged",pageToGo);
+                }
+            }
+        });
+
         window.ProductList = new Vue({
             el: el,
             data: {
                 products: [],
-                ordering: $("select.orderby").val() || "menu_order",
+                current_page: 1,
+                total_pages: 1,
+                ordering: $("select.orderby").val() || "menu_order", //This is a nasty nasty trick to make ordering works without further modifications
                 result_count_label: ""
             },
             created(){},
@@ -221,13 +310,17 @@ class FiltersApp{
                     window.FiltersList.$on("filtersUpdated",function(){
                         window.ProductList.updateProducts(_app.FiltersManager.getFilters());
                     });
-                    //Listen to ordering changing
-                    //This is a nasty nasty trick to make ordering works without further modifications
-                    this.$on("orderingChanged", function(new_order){
-                        this.ordering = new_order;
-                        window.ProductList.updateProducts(_app.FiltersManager.getFilters());
-                    });
                 }
+                //Listen to ordering changing. This is emitted by jQuery click event.
+                this.$on("orderingChanged", function(new_order){
+                    this.ordering = new_order;
+                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                });
+                //Listen to page changing. This is emitted by <wbwpf-pagination> component.
+                this.$on('pageChanged', function(new_page){
+                    this.current_page = new_page;
+                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                });
             },
             methods: {
                 /**
@@ -236,18 +329,21 @@ class FiltersApp{
                  */
                 updateProducts(currentFilters){
                     let self = this,
-                        req = _app.ProductManager.getProducts(currentFilters,this.ordering);
+                        req = _app.ProductManager.getProducts(currentFilters,this.ordering,this.current_page);
                     req.then((response, textStatus, jqXHR) => {
                         //Resolve
 
                         //Update app:
-                        _app.total_products = response.data.found_produts;
+                        _app.total_products = response.data.found_products;
+                        _app.total_pages = response.data.total_pages;
                         _app.current_page = response.data.current_page;
                         _app.showing_from = response.data.showing_from;
                         _app.showing_to = response.data.showing_to;
 
                         //Update self:
                         self.products = response.data.products;
+                        self.current_page = response.data.current_page;
+                        self.total_pages = response.data.total_pages;
                         self.result_count_label = response.data.result_count_label;
 
                         //Update URI:
