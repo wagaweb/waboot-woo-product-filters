@@ -32,8 +32,12 @@ export default class{
      * Inject the filters in URI
      *
      * @param {array} filters
+     * @param {integer} page
      */
-    updateFilters(filters){
+    updateFilters(filters,page){
+        if(_.isUndefined(page)){
+            page = 1;
+        }
         /*
          * Here we receive filters from window.ProductList in an array of obkects like:
          * [
@@ -48,12 +52,21 @@ export default class{
          *
          */
         if(this.canPushState()){
-            let new_qs = this._generateQueryString(filters);
-            let new_location = GetUpdatedUriWithQueryString("wbwpf_query",new_qs);
-            let state = {
-                qs: new_qs
-            };
-            window.history.pushState(state,document.title,new_location);
+            let new_qs = this._generateQueryString(filters),
+                new_location = "";
+            if(new_qs !== ""){
+                new_location = GetUpdatedUriWithQueryString("wbwpf_query",new_qs);
+                new_location = GetUpdatedUriWithQueryString("page",page,new_location);
+            }else{
+                new_location = GetUpdatedUriWithQueryString("page",page);
+            }
+            if(new_location !== ""){
+                let state = {
+                    qs: new_qs,
+                    page: page
+                };
+                window.history.pushState(state,document.title,new_location);
+            }
         }
     }
 

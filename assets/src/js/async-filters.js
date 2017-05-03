@@ -287,6 +287,7 @@ class FiltersApp{
                     event.preventDefault();
                     let $clickedLink = $(event.target);
                     let pageToGo = $clickedLink.data('goto');
+                    _app.just_started = false;
                     window.ProductList.$emit("pageChanged",pageToGo);
                 }
             }
@@ -349,7 +350,7 @@ class FiltersApp{
 
                         //Update URI:
                         if(!_app.just_started){
-                            _app.UriManager.updateFilters(_app.FiltersManager.getFilters());
+                            _app.UriManager.updateFilters(_app.FiltersManager.getFilters(),self.current_page);
                         }
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
