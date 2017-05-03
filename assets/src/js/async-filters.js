@@ -251,26 +251,65 @@ class FiltersApp{
             render(createElement){
                 let output,
                     innerElements = [];
-                for(let i = 1; i <= this.total_pages; i++){
-                    innerElements.push(createElement(this.innerWrapper,{
+
+                /**
+                 * @param {number} number
+                 */
+                Array.prototype.pushPage = function(number,innerWrapper){
+                    return this.push(createElement(innerWrapper,{
                         'class': {
                             'wbwpf-navigation-item': true
                         }
                     },[
                         createElement("a",{
                             domProps: {
-                                innerHTML: i
+                                innerHTML: number
                             },
                             attrs: {
-                                href: "#page"+i,
-                                title: "Go to page "+i,
-                                'data-goto': i
+                                href: "#page"+number,
+                                title: "Go to page "+number,
+                                'data-goto': number
                             },
                             on: {
                                 click: this.changePage
                             }
                         })
-                    ]))
+                    ]));
+                };
+
+                Array.prototype.pushDots = function(innerWrapper){
+                    return this.push(createElement(innerWrapper,{
+                        'class': {
+                            'wbwpf-navigation-item': true
+                        }
+                    },[
+                        createElement("span",{
+                            domProps: {
+                                innerHTML: "..."
+                            }
+                        })
+                    ]));
+                };
+
+                let can_push_dots = true;
+
+                for(let i = 1; i <= this.total_pages; i++){
+                    let is_first_half = 1 <= this.current_page && this.current_page <= this.mid_size;
+                    let is_last_half = (this.total_pages - this.mid_size) <= this.current_page && this.current_page <= this.total_pages;
+
+                    if( (is_first_half && i <= this.mid_size) || i === 1){
+                        innerElements.pushPage(i,this.innerWrapper);
+                    }else if( (is_last_half && i >= this.total_pages - this.mid_size) || i === this.total_pages){
+                        innerElements.pushPage(i,this.innerWrapper);
+                    }else if(i === this.current_page - 1 || i === this.current_page || i === this.current_page + 1){ //todo: check if i is in the mid range dinamically based on this.mid_size
+                        innerElements.pushPage(i,this.innerWrapper);
+                        can_push_dots = true;
+                    }else{
+                        if(can_push_dots){
+                            innerElements.pushDots(this.innerWrapper);
+                            can_push_dots = false;
+                        }
+                    }
                 }
                 output = createElement(this.outerWrapper,{
                     'class': {
