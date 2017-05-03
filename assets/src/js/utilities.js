@@ -51,6 +51,19 @@ function getFiltersSearchParameters(){
 }
 
 /**
+ * Return the current page from URI
+ * @returns {number}
+ */
+function getPageParameter(){
+    let query_parameters = getSearchParameters();
+    if(query_parameters.page !== "undefined"){
+        return query_parameters.page;
+    }else{
+        return 1;
+    }
+}
+
+/**
  * Get filters search params without "wbwpf_" prefix
  * @returns {object}
  */
@@ -100,4 +113,4 @@ function GetUpdatedUriWithQueryString(key, value, url) {
     }
 }
 
-export {getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters, GetUpdatedUriWithQueryString};
+export {getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters, GetUpdatedUriWithQueryString, getPageParameter};

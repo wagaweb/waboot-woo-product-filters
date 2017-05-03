@@ -3,6 +3,7 @@ import _ from "lodash";
 
 import Vue from "vue";
 import UriManager from "./uri-manager";
+import { getPageParameter } from "./utilities";
 
 import {FilterController} from "./async-filter-helpers";
 
@@ -323,13 +324,24 @@ class FiltersApp{
                     this.current_page = new_page;
                     window.ProductList.updateProducts(_app.FiltersManager.getFilters());
                 });
+                this.updateCurrentPageFromUri();
             },
             methods: {
+                /**
+                 * Update the current page from URI
+                 */
+                updateCurrentPageFromUri(){
+                    let uriPage = getPageParameter();
+                    if(parseInt(uriPage) > 1){
+                        this.current_page = uriPage;
+                    }
+                },
                 /**
                  * Update the current product list via ajax
                  * @param {array} currentFilters
                  */
                 updateProducts(currentFilters){
+                    this.updateCurrentPageFromUri();
                     let self = this,
                         req = _app.ProductManager.getProducts(currentFilters,this.ordering,this.current_page);
                     req.then((response, textStatus, jqXHR) => {
