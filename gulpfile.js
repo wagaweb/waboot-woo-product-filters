@@ -24,7 +24,7 @@ var gulp = require('gulp'),
     sort = require('gulp-sort'),
     merge  = require('merge-stream');
 
-var plugin_slug = "waboot-woo-product-importer";
+var plugin_slug = "waboot-woo-product-filters";
 
 var paths = {
     builddir: "./builds",
@@ -50,6 +50,23 @@ var paths = {
         "!{vendor,vendor/**}",
     ]
 };
+
+/**
+ * Compile .css into <pluginslug>.min.css
+ */
+gulp.task('compile_css',function(){
+    var processors = [
+        autoprefixer({browsers: ['last 1 version']}),
+        cssnano()
+    ];
+    return gulp.src(paths.mainscss)
+        .pipe(sourcemaps.init())
+        .pipe(sass().on('error', sass.logError))
+        .pipe(postcss(processors))
+        .pipe(rename(plugin_slug+'.min.css'))
+        .pipe(sourcemaps.write("."))
+        .pipe(gulp.dest('./assets/dist/css'));
+});
 
 /**
  * Browserify magic! Creates bundle.js
