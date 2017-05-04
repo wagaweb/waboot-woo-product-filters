@@ -207,13 +207,22 @@ class FiltersApp{
         });
 
         Vue.component('wbwpf-pagination',{
-            data(){
-                return {
-                    outerWrapper: "ul",
-                    innerWrapper: "li"
+            props: {
+                'outerWrapper': {
+                    type: String,
+                    default: 'ul'
+                },
+                'innerWrapper': {
+                    type: String,
+                    default: 'li'
+                },
+                'current_page': Number,
+                'total_pages': Number,
+                'mid_size': {
+                    type: [String,Number],
+                    default: 3
                 }
             },
-            props: ['current_page','total_pages','mid_size'],
             computed: {
                 pages: function(){
                     /*let pages = [];
