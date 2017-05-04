@@ -12,7 +12,7 @@
 	<?php wc_get_template( 'loop/loop-start.php' ); ?>
 		<wbwpf-product v-for="product in products" :key="product.ID" :data="product"></wbwpf-product>
 	<?php wc_get_template( 'loop/loop-end.php' ); ?>
-    <wbwpf-pagination :current_page="current_page" :total_pages="total_pages" :mid_size="2"></wbwpf-pagination>
+    <wbwpf-pagination :current_page="current_page" :total_pages="total_pages" :mid_size="3"></wbwpf-pagination>
 </div>
 
 <template id="wbwpf-product-template">
