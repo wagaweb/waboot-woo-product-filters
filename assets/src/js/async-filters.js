@@ -255,7 +255,8 @@ class FiltersApp{
                     to.push(createElement(this.innerWrapper,{
                         'class': {
                             'wbwpf-navigation-item': true,
-                            'current': is_current
+                            'current': is_current,
+                            'page-link': true
                         }
                     },[
                         createElement("a",{
@@ -282,7 +283,8 @@ class FiltersApp{
                 let pushDots = (to) => {
                     to.push(createElement(this.innerWrapper,{
                         'class': {
-                            'wbwpf-navigation-item': true
+                            'wbwpf-navigation-item': true,
+                            'separator': true
                         }
                     },[
                         createElement("span",{
