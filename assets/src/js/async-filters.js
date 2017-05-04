@@ -255,8 +255,8 @@ class FiltersApp{
                 /**
                  * @param {number} number
                  */
-                Array.prototype.pushPage = function(number,innerWrapper){
-                    return this.push(createElement(innerWrapper,{
+                let pushPage = (number,to) => {
+                    to.push(createElement(this.innerWrapper,{
                         'class': {
                             'wbwpf-navigation-item': true
                         }
@@ -275,10 +275,11 @@ class FiltersApp{
                             }
                         })
                     ]));
+                    return to;
                 };
 
-                Array.prototype.pushDots = function(innerWrapper){
-                    return this.push(createElement(innerWrapper,{
+                let pushDots = (to) => {
+                    to.push(createElement(this.innerWrapper,{
                         'class': {
                             'wbwpf-navigation-item': true
                         }
@@ -289,24 +290,26 @@ class FiltersApp{
                             }
                         })
                     ]));
+                    return to;
                 };
 
                 let can_push_dots = true;
+                let midrange = this.getMidRange(this.mid_size,this.current_page);
 
                 for(let i = 1; i <= this.total_pages; i++){
                     let is_first_half = 1 <= this.current_page && this.current_page <= this.mid_size;
                     let is_last_half = (this.total_pages - this.mid_size) <= this.current_page && this.current_page <= this.total_pages;
 
                     if( (is_first_half && i <= this.mid_size) || i === 1){
-                        innerElements.pushPage(i,this.innerWrapper);
+                        innerElements = pushPage(i,innerElements);
                     }else if( (is_last_half && i >= this.total_pages - this.mid_size) || i === this.total_pages){
-                        innerElements.pushPage(i,this.innerWrapper);
-                    }else if(i === this.current_page - 1 || i === this.current_page || i === this.current_page + 1){ //todo: check if i is in the mid range dinamically based on this.mid_size
-                        innerElements.pushPage(i,this.innerWrapper);
+                        innerElements = pushPage(i,innerElements);
+                    }else if(_.indexOf(midrange,i) !== -1){
+                        innerElements = pushPage(i,innerElements);
                         can_push_dots = true;
                     }else{
                         if(can_push_dots){
-                            innerElements.pushDots(this.innerWrapper);
+                            innerElements = pushDots(innerElements);
                             can_push_dots = false;
                         }
                     }
@@ -329,6 +332,35 @@ class FiltersApp{
                     let pageToGo = $clickedLink.data('goto');
                     _app.just_started = false;
                     window.ProductList.$emit("pageChanged",pageToGo);
+                },
+                /**
+                 * Detects the mid range for pagination.
+                 *
+                 * @param {number} range_size
+                 * @param {number} range_pivot
+                 *
+                 * @example: put range_size = 3, range_pivot = 25 => [24,25,26]
+                 * @example: put range_size = 4, range_pivot = 25 => [23,24,25,26]
+                 */
+                getMidRange(range_size,range_pivot){
+                    if(range_size % 2 === 0){
+                        var tmp = range_size / 2;
+                        var tail_size_left = tmp;
+                        var tail_size_right = tail_size_left - 1;
+                    }else{
+                        var tmp = range_size - 1;
+                        var tail_size_left = tmp / 2;
+                        var tail_size_right = tmp / 2;
+                    }
+                    let range = [];
+                    for(let i = tail_size_left; i >= 1; i--){
+                        range.push(range_pivot-i);
+                    }
+                    range.push(range_pivot);
+                    for(let i = 1; i <= tail_size_right; i++){
+                        range.push(range_pivot+i);
+                    }
+                    return range;
                 }
             }
         });
@@ -361,7 +393,7 @@ class FiltersApp{
                 //Listen to page changing. This is emitted by <wbwpf-pagination> component.
                 this.$on('pageChanged', function(new_page){
                     this.current_page = new_page;
-                    window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                    window.ProductList.updateProducts(_app.FiltersManager.getFilters(),false);
                 });
                 this.updateCurrentPageFromUri();
             },
@@ -378,9 +410,12 @@ class FiltersApp{
                 /**
                  * Update the current product list via ajax
                  * @param {array} currentFilters
+                 * @param {boolean} get_page_from_uri
                  */
-                updateProducts(currentFilters){
-                    this.updateCurrentPageFromUri();
+                updateProducts(currentFilters,get_page_from_uri = true){
+                    if(get_page_from_uri){
+                        this.updateCurrentPageFromUri();
+                    }
                     let self = this,
                         req = _app.ProductManager.getProducts(currentFilters,this.ordering,this.current_page);
                     req.then((response, textStatus, jqXHR) => {
