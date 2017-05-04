@@ -399,7 +399,7 @@ class FiltersApp{
                     //Listen to filters changes:
                     window.FiltersList.$on("filtersUpdated",function(){
                         window.ProductList.current_page = 1; //Reset the page when filters are updated
-                        window.ProductList.updateProducts(_app.FiltersManager.getFilters());
+                        window.ProductList.updateProducts(_app.FiltersManager.getFilters(),false);
                     });
                 }
                 //Listen to ordering changing. This is emitted by jQuery click event.
