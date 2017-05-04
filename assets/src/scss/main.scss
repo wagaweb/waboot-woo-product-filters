@@ -1,8 +1,29 @@
-.wbwpf-product-wrapper{
-  float: left;
-  margin: 0 3.8% 2.992em 0;
-  padding: 0;
-  position: relative;
-  width: 22.05%;
-  margin-left: 0;
+ul.products{
+  .wbwpf-product-wrapper{
+    float: left;
+    margin: 0 3.8% 2.992em 0;
+    padding: 0;
+    position: relative;
+    width: 22.05%;
+    margin-left: 0;
+  }
 }
+
+.wbwpf-navigation-wrapper{
+  .page-link{
+    display: inline;
+    margin-left: 5px;
+    border: 1px solid #ccc;
+    padding: 3px 5px;
+  }
+  .separator{
+    display: inline;
+    margin-left: 5px;
+    padding: 3px 5px;
+  }
+  .current{
+    font-weight: bold;
+    font-style: italic;
+  }
+}
+
