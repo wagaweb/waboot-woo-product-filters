@@ -254,11 +254,15 @@ class FiltersApp{
 
                 /**
                  * @param {number} number
+                 * @param {Array} to
+                 * @param {Boolean} is_current
+                 * @returns {Array}
                  */
-                let pushPage = (number,to) => {
+                let pushPage = (number,to,is_current = false) => {
                     to.push(createElement(this.innerWrapper,{
                         'class': {
-                            'wbwpf-navigation-item': true
+                            'wbwpf-navigation-item': true,
+                            'current': is_current
                         }
                     },[
                         createElement("a",{
@@ -278,6 +282,10 @@ class FiltersApp{
                     return to;
                 };
 
+                /**
+                 * @param {Array} to
+                 * @returns {Array}
+                 */
                 let pushDots = (to) => {
                     to.push(createElement(this.innerWrapper,{
                         'class': {
@@ -300,15 +308,15 @@ class FiltersApp{
                     let is_first_half = 1 <= this.current_page && this.current_page <= this.mid_size;
                     let is_last_half = (this.total_pages - this.mid_size) <= this.current_page && this.current_page <= this.total_pages;
 
-                    if( (is_first_half && i <= this.mid_size) || i === 1){
-                        innerElements = pushPage(i,innerElements);
-                    }else if( (is_last_half && i >= this.total_pages - this.mid_size) || i === this.total_pages){
-                        innerElements = pushPage(i,innerElements);
-                    }else if(_.indexOf(midrange,i) !== -1){
-                        innerElements = pushPage(i,innerElements);
+                    if( (is_first_half && i <= this.mid_size) || i === 1){ //We are in the head part of the pagination (current page is below mid size)
+                        innerElements = pushPage(i,innerElements, i === this.current_page);
+                    }else if( (is_last_half && i >= this.total_pages - this.mid_size) || i === this.total_pages){ //We are in the last part of the pagination (current page is between total pages and total pages - mid size)
+                        innerElements = pushPage(i,innerElements, i === this.current_page);
+                    }else if(_.indexOf(midrange,i) !== -1){ //We are in the mid range
+                        innerElements = pushPage(i,innerElements, i === this.current_page);
                         can_push_dots = true;
                     }else{
-                        if(can_push_dots){
+                        if(can_push_dots){ //Otherwise, put separator
                             innerElements = pushDots(innerElements);
                             can_push_dots = false;
                         }
