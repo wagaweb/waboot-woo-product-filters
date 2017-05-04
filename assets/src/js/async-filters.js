@@ -224,34 +224,18 @@ class FiltersApp{
                 }
             },
             computed: {
-                pages: function(){
-                    /*let pages = [];
-                    if(this.current_page != 1){
-                        for(let i = this.mid_size; i > 0; i--){
-                            if(this.current_page - i >= 1){
-                                pages.push({n: i, current: false});
-                            }
-                        }
-                        for(let i = 0; i == this.mid_size; i++){
-                            if(this.current_page + i <= this.total_pages){
-                                pages.push({n: i, current: false});
-                            }
-                        }
-                    }*/
-                    return [];
-                },
                 next_page: function(){
-                    if(this.current_page == this.total_pages){
+                    if(this.current_page === this.total_pages){
                         return this.total_pages;
                     }else{
-                        return this.current_page - 1;
+                        return this.current_page + 1;
                     }
                 },
                 prev_page: function(){
-                    if(this.current_page == 1 || this.total_pages == 1){
+                    if(this.current_page === 1 || this.total_pages === 1){
                         return 1;
                     }else{
-                        return this.current_page + 1;
+                        return this.current_page - 1;
                     }
                 }
             },
