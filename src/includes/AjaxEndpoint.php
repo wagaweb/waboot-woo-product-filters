@@ -92,10 +92,12 @@ class AjaxEndpoint{
 					//Retrieve a full html output
 
 					$content = $this->get_content_product_ouput($wc_product);
+					$content = apply_filters("wbwpf/ajax/get_products/content",$content);
 
 					$products[] = [
 						'ID' => $raw_product->ID,
-						'content' => $content
+						'content' => $content,
+						'wrapper_class' => implode(" ",get_post_class('wbwpf-product-wrapper',$raw_product->ID))
 					];
 				}else{
 					//Retrieve specific fields to display later

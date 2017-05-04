@@ -16,5 +16,5 @@
 </div>
 
 <template id="wbwpf-product-template">
-    <span v-html="data.content"></span>
+    <li :class="data.wrapper_class" v-html="data.content"></li>
 </template>

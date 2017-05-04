@@ -128,6 +128,7 @@ class Plugin extends TemplatePlugin {
 
 		//Ajax
 		$this->AjaxEndpoint->setup_endpoints();
+		$this->loader->add_filter("wbwpf/ajax/get_products/content",$this,"alter_single_product_content",10,1);
 
 		//Widgets
 		$this->loader->add_action("widgets_init", $this, "register_widgets");
@@ -173,6 +174,11 @@ class Plugin extends TemplatePlugin {
 					]
 				],
 				'deps' => ['jquery','underscore']
+			],
+			'wbwpf-css' => [
+				'uri' => $this->get_uri()."/assets/dist/css/waboot-woo-product-filters.min.css",
+				'path' => $this->get_dir()."/assets/dist/css/waboot-woo-product-filters.min.css",
+				'type' => 'css',
 			]
 		];
 
@@ -617,6 +623,26 @@ class Plugin extends TemplatePlugin {
 		if(!$parent_title || !is_string($parent_title) || $parent_title == "") return $title; //Do nothing if it is not a valid title
 
 		return $parent_title;
+	}
+
+	/**
+	 * Remove the li wrapper around the content-single in loop (during ajax retrieving)
+	 *
+	 * @hooked 'wbwpf/ajax/get_products/content'
+	 *
+	 * @param $content
+	 *
+	 * @return string
+	 */
+	public function alter_single_product_content($content){
+		//Remove <li></li>
+		$strip_single_tag = function($str,$tag){
+			$str=preg_replace('/<'.$tag.'[^>]*>/i', '', $str);
+			$str=preg_replace('/<\/'.$tag.'>/i', '', $str);
+			return $str;
+		};
+		$content = $strip_single_tag($content,"li");
+		return $content;
 	}
 
 	/**
