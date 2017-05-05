@@ -42,6 +42,7 @@ class FiltersApp{
             this.reactiveProductList = reactiveProductList;
             this._startProductsList(productsList);
         }
+        $(window).trigger("filtersAppStarted");
     }
 
     /**
@@ -179,6 +180,7 @@ class FiltersApp{
                     });
                     Promise.all(updatingPromises).then(() => {
                         this.$emit("filtersUpdated");
+                        $(window).trigger("filtersUpdated");
                         jQuery(this.$el).find("[data-apply_button]").attr("disabled",false);
                     });
                 }
@@ -441,6 +443,7 @@ class FiltersApp{
                         if(!_app.just_started){
                             _app.UriManager.updateFilters(_app.FiltersManager.getFilters(),self.current_page);
                         }
+                        $(window).trigger("filteredProductsUpdated");
                     },(jqXHR, textStatus, errorThrown) => {
                         //Reject
                         self.products = [];

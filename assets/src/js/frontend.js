@@ -40,14 +40,12 @@ class WooCommerce_Ordering_Form_Injection{
     }
 }
 
-$(document).ready(function($){
-    let $wc_ordering = $("form.woocommerce-ordering"),
-        $async_filters = $(".wbwpf-filters[data-async]"),
+/**
+ * Initialize the filters vue application
+ */
+function filters_app_startup(){
+    let $async_filters = $(".wbwpf-filters[data-async]"),
         $async_product_list = $(".wbwpf-product-list[data-async]");
-
-    if($wc_ordering.length > 0 && $async_product_list.length === 0){
-        new WooCommerce_Ordering_Form_Injection($wc_ordering);
-    }
 
     if($async_filters.length > 0){
         if($async_product_list.length > 0){
@@ -65,4 +63,18 @@ $(document).ready(function($){
             window.FiltersApp.start(".wbwpf-filters[data-async]")
         }
     }
+}
+
+$(document).ready(function($){
+    let $wc_ordering = $("form.woocommerce-ordering"),
+        $async_product_list = $(".wbwpf-product-list[data-async]");
+
+    if($wc_ordering.length > 0 && $async_product_list.length === 0){
+        new WooCommerce_Ordering_Form_Injection($wc_ordering);
+    }
+
+    filters_app_startup();
+    $(window).on("startupFiltersApp",function(){
+        filters_app_startup();
+    })
 });
