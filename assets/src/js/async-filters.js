@@ -59,7 +59,8 @@ class FiltersApp{
                     controller: controller,
                     state: "updating",
                     currentValues: [],
-                    items: []
+                    items: [],
+                    hidden_items: []
                 }
             },
             props: {
@@ -67,6 +68,12 @@ class FiltersApp{
                 'slug': String,
                 'hidden': Boolean,
                 'is_current': Boolean
+            },
+            watch: {
+                hidden_items: function(new_hidden_items){
+                    let is_hidden =  this.items.length === new_hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
+                    this.hidden = is_hidden;
+                }
             },
             mounted(){},
             methods: {
@@ -94,9 +101,7 @@ class FiltersApp{
                                 hidden_items.push(item.id);
                             }
                         });
-                        if(!self.is_current){
-                            self.hidden = self.items.length === hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
-                        }
+                        self.hidden_items = hidden_items;
                         $(this.$el).removeClass("loading");
                         $(this.$el).find("input").attr("disabled",false);
                         self.state = "updated";
