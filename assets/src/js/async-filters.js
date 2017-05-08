@@ -69,10 +69,19 @@ class FiltersApp{
                 'hidden': Boolean,
                 'is_current': Boolean
             },
-            watch: {
-                hidden_items: function(new_hidden_items){
-                    let is_hidden =  this.items.length === new_hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
+            computed: {
+                hidden: function(){
+                    let is_hidden =  this.items.length === this.hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
                     this.hidden = is_hidden;
+                    return is_hidden;
+                }
+            },
+            watch: {
+                state: function(new_state){
+                    if(new_state === "updated"){
+                        let is_hidden =  this.items.length === this.hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
+                        this.hidden = is_hidden;
+                    }
                 }
             },
             mounted(){},
