@@ -72,7 +72,6 @@ class FiltersApp{
             computed: {
                 hidden: function(){
                     let is_hidden =  this.items.length === this.hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
-                    this.hidden = is_hidden;
                     return is_hidden;
                 }
             },
