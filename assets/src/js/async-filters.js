@@ -66,7 +66,6 @@ class FiltersApp{
             props: {
                 'label': String,
                 'slug': String,
-                'hidden': Boolean,
                 'is_current': Boolean
             },
             computed: {
