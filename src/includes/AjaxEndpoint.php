@@ -194,6 +194,7 @@ class AjaxEndpoint{
 
 			if($f instanceof \WBWPF\includes\Filter){
 				$all_values = $f->dataType->getAvailableValuesFor($f->slug);
+				$all_values = apply_filters("wbwpf/filter/available_values",$all_values,$f);
 
 				//Now we need to instantiate a new Filter_Query and then retrieve the available_col_values for current filter
 				if(isset($_POST['current_filters'])){
