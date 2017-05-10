@@ -68,10 +68,20 @@ gulp.task('compile_css',function(){
         .pipe(gulp.dest('./assets/dist/css'));
 });
 
+gulp.task('set-dev-node-env', function() {
+    return process.env.NODE_ENV = 'development';
+});
+
+gulp.task('set-prod-node-env', function() {
+    return process.env.NODE_ENV = 'production';
+});
+
 /**
  * Browserify magic! Creates bundle.js
  */
 gulp.task('browserify', function(){
+    console.log("Building for: "+process.env.NODE_ENV);
+
     var dashboard = browserify(paths.admin_mainjs,{
         insertGlobals : true,
         debug: true
@@ -121,6 +131,13 @@ gulp.task('compile_js', ['browserify'] ,function(){
  */
 gulp.task('watch', function() {
     gulp.watch(paths.scripts, ['compile_js']);
+});
+
+/**
+ * Building!
+ */
+gulp.task('build', function(callback){
+    runSequence(['set-prod-node-env','compile_js'], callback);
 });
 
 /**
