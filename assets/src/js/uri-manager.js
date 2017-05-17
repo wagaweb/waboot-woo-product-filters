@@ -82,7 +82,7 @@ export default class{
         _.forEach(filters,(filter,key) => {
             let values = filter.value !== "undefined" ? filter.value.join(",") : "";
             if(key > 0){
-                qs += "-";
+                qs += wbwpf.wbwpf_query_separator; //wbwpf is provided by WordPress
             }
             qs += filter.slug+"|"+values;
         });

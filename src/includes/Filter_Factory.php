@@ -5,6 +5,7 @@ namespace WBWPF\includes;
 use WBWPF\Plugin;
 
 class Filter_Factory{
+	const WPWPF_QUERY_SEPARATOR = ";";
 
 	/**
 	 * Build a new filter instance
@@ -450,7 +451,7 @@ class Filter_Factory{
 	 * @return array
 	 */
 	public static function parse_stringified_params($params){
-		$stringified_filters = explode("-",$params);
+		$stringified_filters = explode(self::WPWPF_QUERY_SEPARATOR,$params);
 
 		$plugin = Plugin::get_instance_from_global();
 		$settings = $plugin->get_plugin_settings();
@@ -470,7 +471,9 @@ class Filter_Factory{
 			//0 => the slug
 			//2 => the values
 
-			if(count($filter_string_values) > 2){
+			if(count($filter_string_values) < 2 || count($filter_string_values) > 4){
+				continue; //It is neither of the above case
+			}elseif(count($filter_string_values) > 2){
 				$f_slug = $filter_string_values[0];
 				$f_uiType = $filter_string_values[1];
 				$f_dataType = $filter_string_values[2];
@@ -612,7 +615,7 @@ class Filter_Factory{
 				}
 			}
 			if($i > 0){
-				$out .= "-";
+				$out .= ";";
 			}
 			$out .= $filter_slug."|".$filter_params['type']."|".$filter_params['dataType']."|";
 			if(isset($filter_values[$filter_slug])){
@@ -633,15 +636,17 @@ class Filter_Factory{
 	public static function stringify_from_available_params(){
 		$string = "";
 
-		$strings_from_post = explode("-",self::stringify_from_post_params());
-		$strings_from_get = explode("-",self::stringify_from_get_params());
+		$strings_from_post = explode(self::WPWPF_QUERY_SEPARATOR,self::stringify_from_post_params());
+		$strings_from_get = explode(self::WPWPF_QUERY_SEPARATOR,self::stringify_from_get_params());
 
 		$strings = array_merge((array) $strings_from_post, (array) $strings_from_get);
 		$strings = array_filter(array_unique($strings));
 
 		if(is_array($strings)){
-			$string = implode("-",$strings);
-			$string = ltrim($string,"-");
+			$string = implode(self::WPWPF_QUERY_SEPARATOR,$strings);
+			$string = ltrim($string,self::WPWPF_QUERY_SEPARATOR);
+			//$string = ltrim($string,"-");
+			//$string = ltrim($string,"-");
 		}
 
 		return $string;

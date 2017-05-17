@@ -149,6 +149,7 @@ class Plugin extends TemplatePlugin {
 					'name' => "wbwpf",
 					'params' => [
 						'ajax_url' => admin_url('admin-ajax.php'),
+						'wbwpf_query_separator' => Filter_Factory::WPWPF_QUERY_SEPARATOR
 					]
 				],
 				'deps' => ['jquery','underscore']
@@ -170,7 +171,8 @@ class Plugin extends TemplatePlugin {
 				'i10n' => [
 					'name' => "wbwpf",
 					'params' => [
-						'ajax_url' => admin_url('admin-ajax.php')
+						'ajax_url' => admin_url('admin-ajax.php'),
+						'wbwpf_query_separator' => Filter_Factory::WPWPF_QUERY_SEPARATOR
 					]
 				],
 				'deps' => ['jquery','underscore']

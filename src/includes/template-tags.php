@@ -204,7 +204,7 @@ if(!function_exists("wbwpf_filters_breadcrumb")):
 						'label' => $f->dataType->getPublicItemLabelOf($current_value,$f),
 						'single_query_string' => $single_query_string,
 						'current_query_string_without_self' => $current_query_string_without_self,
-						'cumulated_query_string' => $i > 0 ? $breadcrumb[$i-1]['cumulated_query_string']."-".$single_query_string : $single_query_string
+						'cumulated_query_string' => $i > 0 ? $breadcrumb[$i-1]['cumulated_query_string'].\WBWPF\includes\Filter_Factory::WPWPF_QUERY_SEPARATOR.$single_query_string : $single_query_string
 					];
 
 					$breadcrumb[$i]['link'] = add_query_arg(["wbwpf_query"=>$breadcrumb[$i]['cumulated_query_string']]);
