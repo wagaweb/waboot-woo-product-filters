@@ -21,4 +21,4 @@ class ProductsManager{
 }
 
 
-export { ProductsManager }
+export { ProductsManager };

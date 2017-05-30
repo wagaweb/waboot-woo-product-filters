@@ -53,7 +53,7 @@ class FiltersManager{
             return filter;
         });
         //Then return
-        return this.activeFilters
+        return this.activeFilters;
     }
 }
 

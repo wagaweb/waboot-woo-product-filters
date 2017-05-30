@@ -10,33 +10,23 @@ import {FiltersApp} from './async-filters';
 import {FiltersManager} from "./async-filter-helpers";
 import {ProductsManager} from "./async-product-helpers";
 
-class WooCommerce_Ordering_Form_Injection{
-    /**
-     * Class constructor
-     * @param $form_el
-     */
-    constructor($form_el){
-        this.$form_el = $form_el;
-        this.inject_inputs();
-    }
+/**
+ * Injects current filters data (obtained from query string) into the woocommerce ordering form
+ */
+function inject_woocommerce_ordering($form_el){
+    "use strict";
+    let current_query = getFiltersSearchParameters(),
+        tpl = _.template("<input type='hidden' name='<%= name %>' value='<%= value %>'>");
 
-    /**
-     * Injects current filters data (obtained from query string) into the woocommerce ordering form
-     */
-    inject_inputs(){
-        let current_query = getFiltersSearchParameters(),
-            tpl = _.template("<input type='hidden' name='<%= name %>' value='<%= value %>'>");
-
-        if(!_.isEmpty(current_query)){
-            _.each(current_query,(value,key,list) => {
-                let new_el = tpl({
-                    name: key,
-                    value: value
-                });
-                let $new_el = $(new_el);
-                this.$form_el.append($new_el);
+    if(!_.isEmpty(current_query)){
+        _.each(current_query,(value,key,list) => {
+            let new_el = tpl({
+                name: key,
+                value: value
             });
-        }
+            let $new_el = $(new_el);
+            $form_el.append($new_el);
+        });
     }
 }
 
@@ -44,6 +34,7 @@ class WooCommerce_Ordering_Form_Injection{
  * Initialize the filters vue application
  */
 function filters_app_startup(){
+    "use strict";
     let $async_filters = $(".wbwpf-filters[data-async]"),
         $async_product_list = $(".wbwpf-product-list[data-async]");
 
@@ -66,15 +57,16 @@ function filters_app_startup(){
 }
 
 $(document).ready(function($){
+    "use strict";
     let $wc_ordering = $("form.woocommerce-ordering"),
         $async_product_list = $(".wbwpf-product-list[data-async]");
 
     if($wc_ordering.length > 0 && $async_product_list.length === 0){
-        new WooCommerce_Ordering_Form_Injection($wc_ordering);
+        inject_woocommerce_ordering($wc_ordering);
     }
 
     filters_app_startup();
     $(window).on("startupFiltersApp",function(){
         filters_app_startup();
-    })
+    });
 });

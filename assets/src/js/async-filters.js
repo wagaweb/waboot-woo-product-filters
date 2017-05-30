@@ -171,7 +171,7 @@ class FiltersApp{
                                 let filter_value = activeFilters.values[filter_slug];
                                 _app.FiltersManager.updateFilter(filter_slug,filter_value);
                             }
-                        })
+                        });
                     }
 
                     this.$emit("filtersDetected");
