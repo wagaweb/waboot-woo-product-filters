@@ -31,7 +31,7 @@ class AjaxEndpoint{
 		];
 
 		//Detect ordering (see: class-wc-query.php)
-		$ordering = isset($_POST['ordering']) ? $_POST['ordering'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
+		$ordering = isset($_POST['ordering']) && !empty($_POST['ordering']) ? $_POST['ordering'] : apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby' ) );
 		$orderby_value = $ordering;
 		$orderby_value = explode( '-', $orderby_value );
 		$orderby = esc_attr( $orderby_value[0] );
