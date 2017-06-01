@@ -83,6 +83,10 @@ class AjaxEndpoint{
 			$products = [];
 
 			$use_custom_product_loop_template = $plugin->Settings->use_custom_product_loop_template;
+			//Above setting can be overridden:
+			if(isset($_POST['use_custom_product_loop_template']) && !empty($_POST['use_custom_product_loop_template'])){
+				$use_custom_product_loop_template = $_POST['use_custom_product_loop_template'] == "1";
+			}
 
 			foreach ($raw_products as $raw_product){
 				$wc_product = wc_get_product($raw_product->ID);
