@@ -8,8 +8,8 @@ class FiltersManager{
 
     /**
      * Adds or update a filter
-     * @param slug
-     * @param value
+     * @param {String} slug
+     * @param {Array} value
      */
     updateFilter(slug,value){
         let actualIndex = _.findIndex(this.activeFilters,(o) => {
@@ -32,7 +32,7 @@ class FiltersManager{
 
     /**
      * Remove a filter
-     * @param slug
+     * @param {String} slug
      */
     removeFilter(slug){
         let actualIndex = _.findIndex(this.activeFilters,(o) => {
@@ -44,7 +44,19 @@ class FiltersManager{
     }
 
     /**
-     * Update the DOM input with the current filters
+     * Get the current active filters.
+     *
+     * Returns an array of objects like that:
+     * [
+     *  {
+     *      slug: "product_cat"
+     *      value: [12]
+     *  }
+     *  ...
+     * ]
+     *
+     *
+     * @return Array
      */
     getFilters(){
         //Clean double values
