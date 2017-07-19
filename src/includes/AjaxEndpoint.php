@@ -77,6 +77,8 @@ class AjaxEndpoint{
 			$get_posts_args['post_type'] = ['product'];
 		}
 
+		$get_posts_args = apply_filters('wbwpf/ajax/get_products_for_filters/args', $get_posts_args);
+
 		$raw_products = get_posts($get_posts_args);
 
 		if(is_array($raw_products) && !empty($raw_products)){
