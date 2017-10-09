@@ -219,10 +219,7 @@ class Plugin extends TemplatePlugin {
 		try{
 			/*
 			 * /!\
-			 * ARE YOU TRYING TO DEBUG THIS PLUGIN?
-			 * ARE YOU LOST OR GOING CRAZY? IS YOUR LIFE BEGINNING TO LOSE ITS MEANING?
-			 * DON'T DO THINGS YOU WILL REGRET.
-			 * JUST START HERE, AND EVERYTHING WILL BE OK.
+			 * THE CORE FUNCTIONALITY OF THIS PLUGIN STARTS HERE ;)
 			 * /!\
 			 */
 			$filter_query = Query_Factory::build_from_available_params();
