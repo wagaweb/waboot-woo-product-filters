@@ -39,6 +39,7 @@ if(!function_exists("wbwpf_show_products_async")):
 
 		$tpl = "src/views/async-loops/".$theme->get_template().".php"; //search for a standard template
 		try{
+			//Search for a loop template with the name of the current template within the plugin (this is intended to fail most of the time)
 			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
 			$v->display();
 		}catch (Exception $e){
