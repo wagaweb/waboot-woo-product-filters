@@ -45,6 +45,10 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function __construct() {
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
+
+		//Setting the update server:
+		//$this->set_update_server("http://update.waboot.org/?action=get_metadata&slug={$this->plugin_name}&type=plugin");
+
 		$this->add_wc_template("loop/orderby.php");
 		if($this->Settings->use_async_product_list){
 			$this->add_wc_template("archive-product.php");
