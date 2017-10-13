@@ -51,7 +51,11 @@ class Plugin extends TemplatePlugin {
 
 		$this->add_wc_template("loop/orderby.php");
 		if($this->Settings->use_async_product_list){
-			$this->add_wc_template("archive-product.php");
+			if(wp_get_theme()->get_template() === 'waboot'){
+				$this->loader->add_action('init',$this,'waboot_wc_async_compatibility',14);
+			}else{
+				$this->add_wc_template("archive-product.php");
+			}
 		}
 		$this->hooks();
 	}
@@ -368,9 +372,9 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function get_available_dataTypes(){
 		$datatypes = [
-			'meta' => __NAMESPACE__."\\datatypes\\Meta",
+			'attributes' => __NAMESPACE__."\\datatypes\\Attribute",
 			'taxonomies' => __NAMESPACE__."\\datatypes\\Taxonomy",
-			'attributes' => __NAMESPACE__."\\datatypes\\Attribute"
+			'meta' => __NAMESPACE__."\\datatypes\\Meta"
 		];
 		$datatypes = apply_filters("wbwpf/datatypes/available",$datatypes);
 		return $datatypes;
@@ -691,5 +695,24 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function register_widgets(){
 		register_widget(__NAMESPACE__."\\widgets\\Filters");
+	}
+
+	/**
+	 * Compatibility layer for Waboot Themes
+	 *
+	 * @hooked 'init,14'
+	 */
+	public function waboot_wc_async_compatibility(){
+		remove_action('waboot/woocommerce/loop','Waboot\woocommerce\loop_template');
+		add_action('waboot/woocommerce/loop',[$this,'waboot_wc_async_loop']);
+	}
+
+	/**
+	 * Override default Waboot product loop template
+	 *
+	 * @hooked 'waboot/woocommerce/loop'
+	 */
+	public function waboot_wc_async_loop(){
+		wbwpf_show_products_async();
 	}
 }
