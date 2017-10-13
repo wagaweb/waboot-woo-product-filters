@@ -106,4 +106,6 @@ The only thing that needs to be done is the following:
 
 The plugin already support the [Waboot](https://github.com/wagaweb/waboot) template system. You do not need to make any changes in your `archive-product.php`, unless you have overwritten it in your child theme and you have removed the `<?php do_action('waboot/woocommerce/loop'); ?>` line.
 
+This is valid only for Waboot v2.1.5 or higher.
+
 
