@@ -8,7 +8,7 @@ The plugin can be set to apply the filters without reloading the page.
 
 Download the last compiled version [here](http://update.waboot.org/?action=get_metadata&slug=waboot-woo-product-filters&type=plugin) (coming soon). 
 
-This plugin **is not yet ready for a full release**. We use it successfully in various production site, but we need more time to fine-tune the settings part of the plugin and to make as easy as possible to implement it in the majority of the WordPress themes.
+This plugin **is not yet ready for a full release**. We use it successfully in various production sites, but we need more time to fine-tune the settings part of the plugin and to make as easy as possible to implement it in the majority of the WordPress themes.
 
 ## Usage
 
