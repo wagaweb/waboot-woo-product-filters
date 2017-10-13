@@ -113,11 +113,11 @@ class AjaxEndpoint{
 						'post_class' => implode(" ",get_post_class('',$raw_product->ID)),
 						'img_html' => $wc_product->get_image(),
 						'title' => $wc_product->get_title(),
-						'price' => $wc_product->get_display_price(),
+						'price' => function_exists('wc_get_price_to_display') ? wc_get_price_to_display($wc_product) : $wc_product->get_display_price(),
 						'price_html' => $wc_product->get_price_html(),
 						'image' => $wc_product->get_image(),
 						'add_to_cart' => "",
-						'rating_html' => $wc_product->get_rating_html()
+						'rating_html' => function_exists('wc_get_rating_html') ? wc_get_rating_html(null,$wc_product->get_rating_count()) : $wc_product->get_rating_html()
 					];
 				}
 			}
