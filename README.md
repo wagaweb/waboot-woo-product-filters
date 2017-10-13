@@ -10,6 +10,31 @@ Download the last compiled version [here](http://update.waboot.org/?action=get_m
 
 ## Usage
 
-Once activated, you need to create the product index. You can do this by going to "Filters settings" section under "WooCommerce" menu in dashboard.
+- Activate the plugin.
 
-Here you can select which data should be indexed for each product. After you done it, click the "Create table" button.
+- Create the product index. You can do this by going to "Filters settings" section under "WooCommerce" menu in dashboard.
+
+    Here you can select which data should be indexed for each product. After you done it, click the "Create table" button.
+
+- Put the "Waboot Product Filters" widget where do you want to be displayed. It must be displayed in the same page of the product listing.
+
+- If you don't have chose to use async filters, then the setup is now completed.
+
+## Setup async filters
+
+If you want to filter the products without reloading the page, some additional steps must be done.
+
+- In the "Filters Settings" section under "WooCommerce" menu, click the "Options" tab and check "Use async product list".
+
+- In the "Waboot Product Filters" widget options, make sure "Update filters asynchronously" is checked.
+
+- If do not have overwritten the `archive-product.php` file in your theme, the setup is completed.
+
+## Setup async filters with custom `archive-product.php`
+
+If you have overwritten the default WooCommerce `archive-product.php` template and you want to use the filters async feature, you must edit this template.
+
+The only thing that needs to be done is the following:
+
+- Replace the entire product loop with the function: `wbwpf_show_products_async()`
+
