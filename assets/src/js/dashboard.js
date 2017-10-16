@@ -77,7 +77,8 @@ class Dashboard{
                     action: this.ajax_create_filters_table_action,
                     params: data,
                 },
-                method: "POST"
+                method: "POST",
+                dataType: "json"
             })
                 .then(function(result,textStatus,jqX){
                     let progress_html = progress_tpl({
