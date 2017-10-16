@@ -70,14 +70,6 @@ gulp.task('compile_css',function(){
         .pipe(gulp.dest('./assets/dist/css'));
 });
 
-gulp.task('set-dev-node-env', function() {
-    return process.env.NODE_ENV = 'development';
-});
-
-gulp.task('set-prod-node-env', function() {
-    return process.env.NODE_ENV = 'production';
-});
-
 /**
  * Browserify magic! Creates bundle.js
  */
@@ -133,6 +125,37 @@ gulp.task('compile_js', ['browserify'] ,function(){
 });
 
 /**
+ * Creates the plugin package
+ */
+gulp.task('make-package', function(){
+    return gulp.src(paths.build)
+        .pipe(copy(paths.builddir+"/pkg/"+"waboot-woo-product-filters"));
+});
+
+/**
+ * Compress che package directory
+ */
+gulp.task('archive', function(){
+    return gulp.src(paths.builddir+"/pkg/**")
+        .pipe(zip("waboot-woo-product-filters"+'-'+pkg.version+'.zip'))
+        .pipe(gulp.dest("./builds"));
+});
+
+/*
+  * Make the pot file
+ */
+gulp.task('make-pot', function () {
+    return gulp.src(['*.php', 'src/**/*.php'])
+        .pipe(sort())
+        .pipe(wpPot( {
+            domain: "waboot-woo-product-filters",
+            destFile: 'waboot-woo-product-filters.pot',
+            team: 'Waga <info@waga.it>'
+        } ))
+        .pipe(gulp.dest('languages/'));
+});
+
+/**
  * Rerun the task when a file changes
  */
 gulp.task('watch', function() {
@@ -140,10 +163,17 @@ gulp.task('watch', function() {
 });
 
 /**
+ * Runs a setup
+ */
+gulp.task('setup', function(callback) {
+    runSequence(['compile_js', 'compile_css'], callback);
+});
+
+/**
  * Building!
  */
 gulp.task('build', function(callback){
-    runSequence(['set-prod-node-env','compile_js'], callback);
+    runSequence(['compile_js', 'compile_css'],'make-package', 'archive', callback);
 });
 
 /**
