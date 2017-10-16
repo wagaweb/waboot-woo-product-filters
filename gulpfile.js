@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     uglify = require('gulp-uglify'),
     sass = require('gulp-sass'),
     browserify = require('browserify'),
+    envify = require('envify/custom'), //@see: https://vuejs.org/v2/guide/deployment.html
     vueify = require('vueify'),
     source = require('vinyl-source-stream'), //https://www.npmjs.com/package/vinyl-source-stream
     buffer = require('vinyl-buffer'), //https://www.npmjs.com/package/vinyl-buffer
@@ -27,29 +28,30 @@ var gulp = require('gulp'),
 var plugin_slug = "waboot-woo-product-filters";
 
 var paths = {
-    builddir: "./builds",
-    scripts: ['./assets/src/js/**/*.js'],
-    admin_mainjs: ['./assets/src/js/dashboard.js'],
-    front_mainjs: ['./assets/src/js/frontend.js'],
-    admin_pkgjs: ['./assets/dist/js/dashboard.pkg.js'],
-    front_pkgjs: ['./assets/dist/js/frontend.pkg.js'],
-    mainscss: './assets/src/scss/main.scss',
-    maincss: './assets/src/css/main.css',
-    build: [
-        "**/*", 
-        "!.*" ,
-        "!gulpfile.js", 
-        "!package.json",
-        "!yarn.lock",
-        "!bower.json",
-        "!composer.json",
-        "!composer.lock",
-        "!{builds,builds/**}",
-        "!{node_modules,node_modules/**}",
-        "!{bower_components,bower_components/**}",
-        "!{vendor,vendor/**}",
-    ]
-};
+        builddir: "./builds",
+        scripts: ['./assets/src/js/**/*.js'],
+        admin_mainjs: ['./assets/src/js/dashboard.js'],
+        front_mainjs: ['./assets/src/js/frontend.js'],
+        admin_pkgjs: ['./assets/dist/js/dashboard.pkg.js'],
+        front_pkgjs: ['./assets/dist/js/frontend.pkg.js'],
+        mainscss: './assets/src/scss/main.scss',
+        maincss: './assets/src/css/main.css',
+        build: [
+            "**/*",
+            "!.*" ,
+            "!gulpfile.js",
+            "!package.json",
+            "!yarn.lock",
+            "!bower.json",
+            "!composer.json",
+            "!composer.lock",
+            "!{builds,builds/**}",
+            "!{node_modules,node_modules/**}",
+            "!{bower_components,bower_components/**}",
+            "!{vendor,vendor/**}",
+        ],
+    },
+    node_env = 'production';
 
 /**
  * Compile .css into <pluginslug>.min.css
@@ -80,13 +82,12 @@ gulp.task('set-prod-node-env', function() {
  * Browserify magic! Creates bundle.js
  */
 gulp.task('browserify', function(){
-    console.log("Building for: "+process.env.NODE_ENV);
-
     var dashboard = browserify(paths.admin_mainjs,{
         insertGlobals : true,
         debug: true
     })
-        .transform("babelify", {presets: ["latest"]}).bundle()
+        .transform("babelify", {presets: ["latest"]})
+        .bundle()
         .pipe(source('dashboard.pkg.js'))
         .pipe(buffer()) //This might be not required, it works even if commented
         .pipe(gulp.dest('./assets/dist/js'));
@@ -97,6 +98,11 @@ gulp.task('browserify', function(){
     })
         .transform("babelify", {presets: ["latest"]})
         .transform(vueify)
+        .transform(
+            // Required in order to process node_modules files
+            { global: true },
+            envify({ NODE_ENV: node_env })
+        ) //@see: https://vuejs.org/v2/guide/deployment.html
         .bundle()
         .pipe(source('frontend.pkg.js'))
         .pipe(buffer()) //This might be not required, it works even if commented

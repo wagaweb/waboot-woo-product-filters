@@ -24,6 +24,7 @@
     "browserify": "^14.1.0",
     "browserify-shim": "^3.8.6",
     "cssnano": "^3.5.2",
+    "envify": "^4.1.0",
     "gulp": "^3.8.11",
     "gulp-bower": "0.0.13",
     "gulp-concat": "^2.5.2",
