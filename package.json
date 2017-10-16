@@ -1,11 +1,14 @@
 {
   "name": "WBWPF",
-  "version": "0.1.0",
-  "author": "Waga",
-  "homepage": "http://www.waga.it/",
+  "version": "1.0.0",
+  "author": "WAGA",
+  "homepage": "https://www.waboot.io/",
   "repository": {
     "type": "git",
-    "url": "https://bitbucket.org/waga/wb-woo-eut"
+    "url": "https://github.com/wagaweb/waboot-woo-product-filters"
+  },
+  "bugs": {
+    "url": "https://github.com/wagaweb/waboot-woo-product-filters/issues/new"
   },
   "licenses": [
     {
