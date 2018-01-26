@@ -255,6 +255,8 @@ class AjaxEndpoint{
 					];
 				}
 
+				$values = apply_filters("wbwpf/filter/async/available_values/pre_response",$values,$f);
+
 				wp_send_json_success($values);
 			}
 		}
