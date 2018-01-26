@@ -10,6 +10,7 @@
 	        <?php if($display_apply_button): ?>
                 <button name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button><?php _ex("Search","Filters search button",$textdomain); ?></button>
 	        <?php endif; ?>
+            <?php do_action("wbwpf/form/async/after_submit"); ?>
         </form>
     </div>
 <?php else: ?>
@@ -25,6 +26,7 @@
             <?php if($has_products): ?>
             <button name="wbwpf_search_by_filters" value="1" type="submit"><?php _ex("Search","Filters search button",$textdomain); ?></button>
             <?php endif; ?>
+	        <?php do_action("wbwpf/form/after_submit"); ?>
         </form>
     </div>
 <?php endif; ?>
