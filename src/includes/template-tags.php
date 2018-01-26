@@ -95,6 +95,8 @@ if(!function_exists("wbwpf_show_filters")):
 			}
 		}
 
+		$args = apply_filters("wbwpf/filters/available",$args);
+
 		$filters = [];
 
 		foreach ($args as $filter_slug => $filter_params){
