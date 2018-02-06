@@ -318,11 +318,11 @@ class Filter_Query{
 
 		$this->set_available_col_values($available_col_values);
 
-		do_action_ref_array("wbwpf/query/parse_results",[$result,&$this,$format]);
-
 		if($format == self::RESULT_FORMAT_IDS){
 			$result = array_unique($result);
 		}
+
+		do_action_ref_array("wbwpf/query/parse_results",[&$result,&$this,$format]);
 
 		return $result;
 	}
