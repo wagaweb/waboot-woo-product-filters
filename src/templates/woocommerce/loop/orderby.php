@@ -13,7 +13,7 @@
  * @see 	    https://docs.woocommerce.com/document/template-structure/
  * @author 		WooThemes
  * @package 	WooCommerce/Templates
- * @version     2.2.0
+ * @version     3.3.0
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -27,21 +27,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<option value="<?php echo esc_attr( $id ); ?>" <?php selected( $orderby, $id ); ?>><?php echo esc_html( $name ); ?></option>
 		<?php endforeach; ?>
 	</select>
-	<?php
-	// Keep query string vars intact
-	foreach ( $_GET as $key => $val ) {
-		if(preg_match("/wbwpf_/",$key)) continue; //WAGA MOD: Do not parse our get variables:
-
-		if ( 'orderby' === $key || 'submit' === $key ) {
-			continue;
-		}
-		if ( is_array( $val ) ) {
-			foreach( $val as $innerVal ) {
-				echo '<input type="hidden" name="' . esc_attr( $key ) . '[]" value="' . esc_attr( $innerVal ) . '" />';
-			}
-		} else {
-			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '" />';
-		}
-	}
-	?>
+    <input type="hidden" name="paged" value="1" />
+    <?php
+    //Plugin mod:
+    $q_string_values = [];
+    foreach ( $_GET as $key => $val ) {
+	    if(preg_match("/wbwpf_/",$key)) continue; //Do not parse our get variables:
+        $q_string_values[$key] = $val;
+    }
+    ?>
+	<?php wc_query_string_form_fields( $q_string_values, array( 'orderby', 'submit', 'paged', 'product-page' ) ); ?>
 </form>
