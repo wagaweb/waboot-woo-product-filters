@@ -25,6 +25,7 @@
         <input type="checkbox" value="1" name="wbwpf_options[hide_parent_products]" <?php if($checked): ?>checked<?php endif; ?>>
 	    <?php _e("Hide parent products when variations are displayed.",$textdomain); ?>
     </label>
+    <h3><?php _e("Layout settings",$textdomain); ?></h3>
     <label style="display: block; margin-bottom: 1em;">
 		<?php $checked = isset($current_settings['use_async_product_list']) && $current_settings['use_async_product_list']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[use_async_product_list]" <?php if($checked): ?>checked<?php endif; ?>>
@@ -37,6 +38,12 @@
         <input type="checkbox" value="1" name="wbwpf_options[use_custom_product_loop_template]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Use a custom product loop template instead of content-product.php",$textdomain); ?>
         <p><?php _e('Enable this setting if you want to use a custom template for products loop within the <code>wbwpf_show_products_async()</code> function. The custom loop template can be created at <em>/waboot-woo-product-filters/async-loops/base-custom.php</em> within your theme directory.'); ?></p>
+    </label>
+    <h3><?php _e("Widget settings",$textdomain); ?></h3>
+    <label style="display: block; margin-bottom: 1em;">
+		<?php $checked = isset($current_settings['widget_display_apply_button']) && $current_settings['widget_display_apply_button']; ?>
+        <input type="checkbox" value="1" name="wbwpf_options[widget_display_apply_button]" <?php if($checked): ?>checked<?php endif; ?>>
+		<?php _e("Display the apply button",$textdomain); ?>
     </label>
     <button type="submit" class="button button-primary" name="wbwpf_save_settings" value="1"><?php _e("Save settings",$textdomain); ?></button>
 </form>
