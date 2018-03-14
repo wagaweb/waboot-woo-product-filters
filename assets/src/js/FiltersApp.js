@@ -54,6 +54,7 @@ class FiltersApp{
      */
     _startFiltersList(el){
 
+        Vue.component("wbwpf-filters-list", FiltersList);
         Vue.component("wbwpf-filter",Filter);
 
         //Init a new Vue instance for the filters

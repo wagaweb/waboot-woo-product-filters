@@ -1,17 +1,19 @@
 <?php if($async): ?>
-    <div class="wbwpf-filters" data-filters='<?php echo wbwpf_get_current_active_filters(true); ?>' data-has_button="<?php echo $display_apply_button; ?>" data-async>
-        <div class="filters-loading" v-show="!updated"><?php _e("Loading...",$textdomain); ?></div>
-        <form method="get" action="<?php echo $form_action_url; ?>" data-filters-form v-show="updated">
-        <?php if($has_filters): ?>
-		    <?php foreach ($filters as $filter): ?>
-			    <?php $filter->display(true); ?>
-		    <?php endforeach; ?>
-	    <?php endif; ?>
-	        <?php if($display_apply_button): ?>
-                <button name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button><?php _ex("Search","Filters search button",$textdomain); ?></button>
-	        <?php endif; ?>
-            <?php do_action("wbwpf/form/async/after_submit"); ?>
-        </form>
+    <div class="wbwpf-filters" data-async>
+        <wbwpf-filter-list inline-template data-filters='<?php echo wbwpf_get_current_active_filters(true); ?>' data-has_button="<?php echo $display_apply_button; ?>">
+            <div class="filters-loading" v-show="!updated"><?php _e("Loading...",$textdomain); ?></div>
+            <form method="get" action="<?php echo $form_action_url; ?>" data-filters-form v-show="updated">
+		        <?php if($has_filters): ?>
+			        <?php foreach ($filters as $filter): ?>
+				        <?php $filter->display(true); ?>
+			        <?php endforeach; ?>
+		        <?php endif; ?>
+		        <?php if($display_apply_button): ?>
+                    <button name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button><?php _ex("Search","Filters search button",$textdomain); ?></button>
+		        <?php endif; ?>
+		        <?php do_action("wbwpf/form/async/after_submit"); ?>
+            </form>
+        </wbwpf-filter-list>
     </div>
 <?php else: ?>
     <div class="wbwpf-filters" data-filters>

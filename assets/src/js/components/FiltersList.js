@@ -10,10 +10,6 @@ export default {
         }
     },
     mounted(){
-        this.$on("valueSelected",function(){
-            this.updateChildrenValues(); //Every time a value is selected in a child, then "valueSelected" is emitted
-        });
-
         this.$on("filtersDetected",function(){
             this.updateChildrenValues();
         });

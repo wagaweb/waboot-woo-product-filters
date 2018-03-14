@@ -51,7 +51,7 @@ var paths = {
             "!{vendor,vendor/**}",
         ],
     },
-    node_env = 'production';
+    node_env = 'development';
 
 /**
  * Compile .css into <pluginslug>.min.css

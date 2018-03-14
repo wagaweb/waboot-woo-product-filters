@@ -73,13 +73,13 @@ export default {
             return req;
         },
         /**
-         * Callback for currentValues changes.
+         * Callback for currentValues changes. This is binded via v-on on filter template (eg: async-checkbox.php)
          * @param {object} event
          */
         valueSelected(event){
             let currentValues = this.currentValues;
             InstancesStore.FiltersApp().FiltersManager.updateFilter(this.slug,currentValues);
-            this.$parent.$emit("valueSelected");
+            this.$emit("value-selected");
             InstancesStore.FiltersApp().just_started = false;
         }
     }
