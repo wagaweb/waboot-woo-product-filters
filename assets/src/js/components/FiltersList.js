@@ -1,3 +1,5 @@
+import InstancesStore from '../InstancesStore.js';
+
 export default {
     data: {
         updatingFilters: []
@@ -29,7 +31,7 @@ export default {
                 _.forEach(activeFilters.filters,function(filter_params,filter_slug){
                     if(typeof activeFilters.values === "object" && !_.isUndefined(activeFilters.values[filter_slug])){
                         let filter_value = activeFilters.values[filter_slug];
-                        window.FiltersApp.FiltersManager.updateFilter(filter_slug,filter_value);
+                        InstancesStore.FiltersApp().FiltersManager.updateFilter(filter_slug,filter_value);
                     }
                 });
             }

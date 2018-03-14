@@ -1,4 +1,5 @@
 import {getPageParameter} from "../utilities";
+import InstancesStore from '../InstancesStore.js';
 
 export default {
     data: {
@@ -10,26 +11,30 @@ export default {
     },
     created(){},
     mounted(){
-        //Getting the current products
-        this.updateProducts(window.FiltersApp.FiltersManager.getFilters());
-        if(window.FiltersApp.reactiveProductList){
-            //Listen to filters changes:
-            window.FiltersList.$on("filtersUpdated",function(){
-                window.ProductList.current_page = 1; //Reset the page when filters are updated
-                window.ProductList.updateProducts(window.FiltersApp.FiltersManager.getFilters(),false);
+        try{
+            //Getting the current products
+            this.updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters());
+            if(InstancesStore.FiltersApp().reactiveProductList){
+                //Listen to filters changes:
+                InstancesStore.FiltersList().$on("filtersUpdated",function(){
+                    InstancesStore.ProductsList().current_page = 1; //Reset the page when filters are updated
+                    InstancesStore.ProductsList().updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters(),false);
+                });
+            }
+            //Listen to ordering changing. This is emitted by jQuery click event.
+            this.$on("orderingChanged", function(new_order){
+                this.ordering = new_order;
+                InstancesStore.ProductsList().updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters());
             });
+            //Listen to page changing. This is emitted by <wbwpf-pagination> component.
+            this.$on('pageChanged', function(new_page){
+                this.current_page = new_page;
+                InstancesStore.ProductsList().updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters(),false);
+            });
+            this.updateCurrentPageFromUri();    
+        }catch(err){
+            console.log(err);
         }
-        //Listen to ordering changing. This is emitted by jQuery click event.
-        this.$on("orderingChanged", function(new_order){
-            this.ordering = new_order;
-            window.ProductList.updateProducts(window.FiltersApp.FiltersManager.getFilters());
-        });
-        //Listen to page changing. This is emitted by <wbwpf-pagination> component.
-        this.$on('pageChanged', function(new_page){
-            this.current_page = new_page;
-            window.ProductList.updateProducts(window.FiltersApp.FiltersManager.getFilters(),false);
-        });
-        this.updateCurrentPageFromUri();
     },
     methods: {
         /**
@@ -51,16 +56,16 @@ export default {
                 this.updateCurrentPageFromUri();
             }
             let self = this,
-                req = window.FiltersApp.ProductManager.getProducts(currentFilters,this.ordering,this.current_page);
+                req = InstancesStore.FiltersApp().ProductManager.getProducts(currentFilters,this.ordering,this.current_page);
             req.then((response, textStatus, jqXHR) => {
                 //Resolve
 
                 //Update app:
-                window.FiltersApp.total_products = response.data.found_products;
-                window.FiltersApp.total_pages = response.data.total_pages;
-                window.FiltersApp.current_page = response.data.current_page;
-                window.FiltersApp.showing_from = response.data.showing_from;
-                window.FiltersApp.showing_to = response.data.showing_to;
+                InstancesStore.FiltersApp().total_products = response.data.found_products;
+                InstancesStore.FiltersApp().total_pages = response.data.total_pages;
+                InstancesStore.FiltersApp().current_page = response.data.current_page;
+                InstancesStore.FiltersApp().showing_from = response.data.showing_from;
+                InstancesStore.FiltersApp().showing_to = response.data.showing_to;
 
                 //Update self:
                 self.products = response.data.products;
@@ -69,8 +74,8 @@ export default {
                 self.result_count_label = response.data.result_count_label;
 
                 //Update URI:
-                if(!window.FiltersApp.just_started){
-                    window.FiltersApp.UriManager.updateFilters(window.FiltersApp.FiltersManager.getFilters(),self.current_page);
+                if(!InstancesStore.FiltersApp().just_started){
+                    InstancesStore.FiltersApp().UriManager.updateFilters(InstancesStore.FiltersApp().FiltersManager.getFilters(),self.current_page);
                 }
                 jQuery(window).trigger("filteredProductsUpdated");
             },(jqXHR, textStatus, errorThrown) => {

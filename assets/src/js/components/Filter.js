@@ -1,8 +1,9 @@
-import {FilterController} from "../async-filter-helpers";
+import InstancesStore from '../InstancesStore.js';
+import {FilterController} from "../Helpers.js";
 
 export default {
     data(){
-        let controller = new FilterController(this.slug,window.FiltersApp.FiltersManager);
+        let controller = new FilterController(this.slug,InstancesStore.FiltersApp().FiltersManager);
         return {
             controller: controller,
             state: "updating",
@@ -77,9 +78,9 @@ export default {
          */
         valueSelected(event){
             let currentValues = this.currentValues;
-            window.FiltersApp.FiltersManager.updateFilter(this.slug,currentValues);
+            InstancesStore.FiltersApp().FiltersManager.updateFilter(this.slug,currentValues);
             this.$parent.$emit("valueSelected");
-            window.FiltersApp.just_started = false;
+            InstancesStore.FiltersApp().just_started = false;
         }
     }
 }

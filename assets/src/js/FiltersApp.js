@@ -8,6 +8,7 @@ import FiltersList from './components/FiltersList.js'
 import Product from './components/Product.js'
 import ProductsList from './components/ProductsList.js'
 import Pagination from './components/Pagination.js'
+import InstancesStore from './InstancesStore.js';
 
 class FiltersApp{
     /**
@@ -56,7 +57,7 @@ class FiltersApp{
         Vue.component("wbwpf-filter",Filter);
 
         //Init a new Vue instance for the filters
-        window.FiltersList = new Vue(jQuery.extend({ el: el },FiltersList));
+        InstancesStore.setFiltersList(new Vue(jQuery.extend({ el: el },FiltersList)));
     }
 
     /**
@@ -68,8 +69,10 @@ class FiltersApp{
         //Re-bind ordering
         $("select.orderby").closest("form").removeClass("woocommerce-ordering").addClass("wbwpf-woocommerce-ordering");
         $("body").on( 'change', '.wbwpf-woocommerce-ordering select.orderby', function() {
-            if(window.ProductList !== "undefined"){
-                window.ProductList.$emit("orderingChanged",$(this).val());
+            try{
+                InstancesStore.ProductsList().$emit("orderingChanged",$(this).val());
+            }catch(err){
+                console.log(err);
             }
         });
 
@@ -77,7 +80,7 @@ class FiltersApp{
 
         Vue.component('wbwpf-pagination',Pagination);
 
-        window.ProductList = new Vue(jQuery.extend({ el: el },ProductsList));
+        InstancesStore.setProductsList(new Vue(jQuery.extend({ el: el },ProductsList)));
     }
 }
 
