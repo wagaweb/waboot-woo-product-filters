@@ -161,6 +161,11 @@ class Plugin extends TemplatePlugin {
 					]
 				],
 				'deps' => ['jquery','underscore']
+			],
+			'wbwpf-css' => [
+				'uri' => $this->get_uri()."/assets/dist/css/waboot-woo-product-filters.min.css",
+				'path' => $this->get_dir()."/assets/dist/css/waboot-woo-product-filters.min.css",
+				'type' => 'css',
 			]
 		];
 

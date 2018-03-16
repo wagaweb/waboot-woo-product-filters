@@ -47,6 +47,7 @@ class Settings_Manager{
 		$settings['show_variations'] = isset($settings['show_variations']) ? (bool) $settings['show_variations'] : false;
 		$settings['hide_parent_products'] = isset($settings['hide_parent_products']) ? (bool) $settings['hide_parent_products'] : false;
 		$settings['use_async_product_list'] = isset($settings['use_async_product_list']) ? (bool) $settings['use_async_product_list'] : false;
+		$settings['widget_display_apply_button'] = isset($settings['widget_display_apply_button']) ? (bool) $settings['widget_display_apply_button'] : false;
 		$settings['use_custom_product_loop_template'] = isset($settings['use_custom_product_loop_template']) ? (bool) $settings['use_custom_product_loop_template'] : false;
 
 		//Merge the differences

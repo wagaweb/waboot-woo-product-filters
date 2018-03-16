@@ -15,32 +15,32 @@
         <input type="hidden" name="wbwpf_options[filters_params][<?php echo $filter_slug; ?>][dataType]" value="<?php echo $filter_params['dataType']; ?>">
     <?php endforeach; ?>
     <h3><?php _e("Catalog settings",$textdomain); ?></h3>
-    <label style="display: block; margin-bottom: 1em;">
+    <label class="option">
         <?php $checked = isset($current_settings['show_variations']) && $current_settings['show_variations']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[show_variations]" <?php if($checked): ?>checked<?php endif; ?>>
 	    <?php _e("Show variations alongside products.",$textdomain); ?>
     </label>
-    <label style="display: block; margin-bottom: 1em;">
+    <label class="option">
 	    <?php $checked = isset($current_settings['hide_parent_products']) && $current_settings['hide_parent_products']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[hide_parent_products]" <?php if($checked): ?>checked<?php endif; ?>>
 	    <?php _e("Hide parent products when variations are displayed.",$textdomain); ?>
     </label>
     <h3><?php _e("Layout settings",$textdomain); ?></h3>
-    <label style="display: block; margin-bottom: 1em;">
+    <label class="option">
 		<?php $checked = isset($current_settings['use_async_product_list']) && $current_settings['use_async_product_list']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[use_async_product_list]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Use async product list.",$textdomain); ?>
         <p><?php _e('With this setting enabled, the <code>archive-product.php</code> template within the plugin will be used. If your theme already override this template, you will need to change your template to make it work.'); ?></p>
         <p><?php _e('To customize your template to support the async product list, you have to insert the function <code>wbwpf_show_products_async()</code> where do you want to display the products.') ?></p>
     </label>
-    <label style="display: block; margin-bottom: 1em;">
+    <label class="option">
 		<?php $checked = isset($current_settings['use_custom_product_loop_template']) && $current_settings['use_custom_product_loop_template']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[use_custom_product_loop_template]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Use a custom product loop template instead of content-product.php",$textdomain); ?>
         <p><?php _e('Enable this setting if you want to use a custom template for products loop within the <code>wbwpf_show_products_async()</code> function. The custom loop template can be created at <em>/waboot-woo-product-filters/async-loops/base-custom.php</em> within your theme directory.'); ?></p>
     </label>
     <h3><?php _e("Widget settings",$textdomain); ?></h3>
-    <label style="display: block; margin-bottom: 1em;">
+    <label class="option">
 		<?php $checked = isset($current_settings['widget_display_apply_button']) && $current_settings['widget_display_apply_button']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[widget_display_apply_button]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Display the apply button",$textdomain); ?>
