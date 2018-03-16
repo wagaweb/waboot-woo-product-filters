@@ -1,8 +1,19 @@
 import InstancesStore from '../InstancesStore.js';
+import SingleFilter from './Filter.js'
 
 export default {
-    data: {
-        updatingFilters: []
+    components: {
+        SingleFilter
+    },
+    data() {
+        return {
+            updatingFilters: [],
+            submitOnSelect: window.wbwpf.components.filtersList.submitOnSelect,
+            hasSubmitButton: window.wbwpf.components.filtersList.hasSubmitButton,
+            reloadFiltersOnSelect: window.wbwpf.components.filtersList.hasSubmitButton,
+            reloadProductsListOnSubmit: window.wbwpf.components.filtersList.reloadProductsListOnSubmit,
+            $form: undefined,
+        };
     },
     computed: {
         updated: function(){
@@ -11,8 +22,10 @@ export default {
     },
     mounted(){
         this.$on("filtersDetected",function(){
-            this.updateChildrenValues();
+            this.updateFiltersValues();
         });
+
+        this.$form = jQuery(this.$el).find('form');
 
         this.detectActiveFilters();
     },
@@ -35,6 +48,18 @@ export default {
             this.$emit("filtersDetected");
         },
         /**
+         * Called when a filter has been selected.
+         */
+        onFilterSelected(){
+            if(this.submitOnSelect){
+                this.$form.submit();
+            }else if(this.reloadFiltersOnSelect){
+                this.updateFiltersValues();
+            }else if(this.reloadProductsListOnSubmit){
+                this.updateFiltersValues();
+            }
+        },
+        /**
          * Calls "updateValues" on each children.
          *
          * Called on 'valueSelected' and 'filtersDetected'.
@@ -42,14 +67,14 @@ export default {
          * The first is emitted through this instance children,
          * the latter is called by this.detectActiveFilters() during mount().
          */
-        updateChildrenValues(){
+        updateFiltersValues(){
             let updatingPromises = [];
             jQuery(this.$el).find("[data-apply_button]").attr("disabled",true); //todo: is there a better way?
             _.each(this.$children,function(filter){
                 updatingPromises.push(filter.updateValues());
             });
             Promise.all(updatingPromises).then(() => {
-                this.$emit("filtersUpdated");
+                this.$parent.$emit("filtersUpdated");
                 jQuery(window).trigger("filtersUpdated");
                 jQuery(this.$el).find("[data-apply_button]").attr("disabled",false);
             });

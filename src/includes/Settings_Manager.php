@@ -28,6 +28,7 @@ class Settings_Manager{
 			'hide_parent_products' => true,
 			'use_async_product_list' => false,
 			'use_custom_product_loop_template' => false,
+			'widget_display_apply_button' => false,
 		];
 		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
 		return $defaults;

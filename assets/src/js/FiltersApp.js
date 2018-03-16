@@ -3,7 +3,6 @@ import _ from "lodash";
 
 import Vue from "vue";
 import UriManager from "./uri-manager";
-import Filter from './components/Filter.js'
 import FiltersList from './components/FiltersList.js'
 import Product from './components/Product.js'
 import ProductsList from './components/ProductsList.js'
@@ -23,7 +22,7 @@ class FiltersApp{
             this.ProductManager = pm;
         }
         this.UriManager = new UriManager();
-        this.reactiveProductList = false; //whether the product list must respond to filters changes
+        this.reactiveProductList = wbwpf.reloadProductsListOnSubmit; //whether the product list must respond to filters changes
         this.just_started = true;
     }
 
@@ -32,17 +31,12 @@ class FiltersApp{
      *
      * @param {string} filtersList the vue root element of the filters list
      * @param {string} productsList the vue root element of the products list
-     * @param {boolean} reactiveProductList whether the product list must respond to filters changes
      */
-    start(filtersList,productsList,reactiveProductList){
-        if(_.isUndefined(reactiveProductList)){
-            reactiveProductList = this.reactiveProductList; //set to the default
-        }
+    start(filtersList,productsList){
         if(typeof filtersList !== "undefined"){
             this._startFiltersList(filtersList);
         }
         if(typeof productsList !== "undefined"){
-            this.reactiveProductList = reactiveProductList;
             this._startProductsList(productsList);
         }
         $(window).trigger("filtersAppStarted");
@@ -54,11 +48,13 @@ class FiltersApp{
      */
     _startFiltersList(el){
 
-        Vue.component("wbwpf-filters-list", FiltersList);
-        Vue.component("wbwpf-filter",Filter);
-
         //Init a new Vue instance for the filters
-        InstancesStore.setFiltersList(new Vue(jQuery.extend({ el: el },FiltersList)));
+        InstancesStore.setFiltersList(new Vue({
+            el: el,
+            components : {
+                FiltersList
+            }
+        }));
     }
 
     /**

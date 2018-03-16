@@ -1,17 +1,17 @@
 <?php if($async): ?>
-    <wbwpf-filter
+    <single-filter
         inline-template
         label="<?php echo $label; ?>"
         slug="<?php echo $slug; ?>"
         v-bind:hidden="<?php echo $display_hidden ? "true" : "false"; ?>"
         v-bind:is_current="<?php echo $display_hidden ? "true" : "false"; ?>"
-        v-on:value-selected="updateChildrenValues"
+        v-on:value-selected="onFilterSelected"
     >
         <div class="wbwpf-filter-wrapper" data-filter='<?php echo $slug; ?>' v-if="!hidden">
             <h3><?php echo $label; ?></h3>
             <?php echo $content; ?>
         </div>
-    </wbwpf-filter>
+    </single-filter>
 <?php else: ?>
     <div class="wbwpf-filter-wrapper" data-filter='<?php echo $slug; ?>'<?php if($display_hidden): ?> style="display: none;"<?php endif; ?>>
         <h3><?php echo $label; ?></h3>

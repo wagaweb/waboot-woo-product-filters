@@ -55,15 +55,11 @@ function filters_app_startup(){
             let fm = new FiltersManager(),
                 pm = new ProductsManager();
             InstancesStore.setFiltersApp(new FiltersApp(fm,pm));
-            if($async_filters.data("has_button")){
-                InstancesStore.FiltersApp().start(ConfigsStore.filtersListSelector,ConfigsStore.productsListSelector,false);
-            }else{
-                InstancesStore.FiltersApp().start(ConfigsStore.filtersListSelector,ConfigsStore.productsListSelector,true);
-            }
+            InstancesStore.FiltersApp().start(ConfigsStore.filtersListSelector,ConfigsStore.productsListSelector);
         }else{
             let fm = new FiltersManager();
             InstancesStore.setFiltersApp(new FiltersApp(fm));
-            InstancesStore.FiltersApp().start(".wbwpf-filters[data-async]")
+            InstancesStore.FiltersApp().start(ConfigsStore.filtersListSelector);
         }
     }
 }

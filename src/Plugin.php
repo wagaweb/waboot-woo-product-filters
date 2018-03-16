@@ -157,7 +157,7 @@ class Plugin extends TemplatePlugin {
 					'name' => "wbwpf",
 					'params' => [
 						'ajax_url' => admin_url('admin-ajax.php'),
-						'wbwpf_query_separator' => Filter_Factory::WPWPF_QUERY_SEPARATOR
+						'wbwpf_query_separator' => Filter_Factory::WPWPF_QUERY_SEPARATOR,
 					]
 				],
 				'deps' => ['jquery','underscore']
@@ -171,6 +171,7 @@ class Plugin extends TemplatePlugin {
 	 * Enqueue public assets
 	 */
 	public function public_assets(){
+		$settings = $this->get_plugin_settings();
 		$assets = [
 			'wbwpf-public' => [
 				'uri' => defined("SCRIPT_DEBUG") && SCRIPT_DEBUG ? $this->get_uri()."/assets/dist/js/frontend.pkg.js" : $this->get_uri()."/assets/dist/js/frontend.min.js",
@@ -180,7 +181,14 @@ class Plugin extends TemplatePlugin {
 					'name' => "wbwpf",
 					'params' => [
 						'ajax_url' => admin_url('admin-ajax.php'),
-						'wbwpf_query_separator' => Filter_Factory::WPWPF_QUERY_SEPARATOR
+						'wbwpf_query_separator' => Filter_Factory::WPWPF_QUERY_SEPARATOR,
+						'components' => [
+							'filtersList' => [
+								'submitOnSelect' => (bool) !$settings['widget_display_apply_button'],
+								'hasSubmitButton' => (bool) $settings['widget_display_apply_button'],
+								'reloadProductsListOnSubmit' => $settings['use_async_product_list']
+							]
+						]
 					]
 				],
 				'deps' => ['jquery','underscore']
