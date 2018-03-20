@@ -2,12 +2,15 @@ import $ from "jquery";
 import _ from "lodash";
 
 import Vue from "vue";
+import Vuex from 'vuex';
 import UriManager from "./uri-manager";
 import FiltersList from './components/FiltersList.js'
 import Product from './components/Product.js'
 import ProductsList from './components/ProductsList.js'
 import Pagination from './components/Pagination.js'
 import InstancesStore from './InstancesStore.js';
+
+Vue.use(Vuex);
 
 class FiltersApp{
     /**
