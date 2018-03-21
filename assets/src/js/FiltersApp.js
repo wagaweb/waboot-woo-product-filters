@@ -3,6 +3,7 @@ import _ from "lodash";
 
 import Vue from "vue";
 import Vuex from 'vuex';
+import store from './store/index.js';
 import UriManager from "./uri-manager";
 import FiltersList from './components/FiltersList.js'
 import Product from './components/Product.js'
@@ -26,7 +27,6 @@ class FiltersApp{
         }
         this.UriManager = new UriManager();
         this.reactiveProductList = wbwpf.reloadProductsListOnSubmit; //whether the product list must respond to filters changes
-        this.just_started = true;
     }
 
     /**
@@ -54,6 +54,7 @@ class FiltersApp{
         //Init a new Vue instance for the filters
         InstancesStore.setFiltersList(new Vue({
             el: el,
+            store,
             components : {
                 FiltersList
             }
@@ -80,7 +81,7 @@ class FiltersApp{
 
         Vue.component('wbwpf-pagination',Pagination);
 
-        InstancesStore.setProductsList(new Vue(jQuery.extend({ el: el },ProductsList)));
+        InstancesStore.setProductsList(new Vue(jQuery.extend({ el: el, store },ProductsList)));
     }
 }
 

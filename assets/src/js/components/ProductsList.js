@@ -74,7 +74,7 @@ export default {
                 self.result_count_label = response.data.result_count_label;
 
                 //Update URI:
-                if(!InstancesStore.FiltersApp().just_started){
+                if(!this.$store.just_started){
                     InstancesStore.FiltersApp().UriManager.updateFilters(InstancesStore.FiltersApp().FiltersManager.getFilters(),self.current_page);
                 }
                 jQuery(window).trigger("filteredProductsUpdated");

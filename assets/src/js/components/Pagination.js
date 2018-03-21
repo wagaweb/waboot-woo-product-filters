@@ -127,7 +127,7 @@ export default {
             event.preventDefault();
             let $clickedLink = jQuery(event.target);
             let pageToGo = $clickedLink.data('goto');
-            InstancesStore.FiltersApp().just_started = false;
+            this.$store.commit('appIsNotJustStarted');
             InstancesStore.ProductsList().$emit("pageChanged",pageToGo);
         },
         /**

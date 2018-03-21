@@ -32,6 +32,7 @@ export default {
     methods: {
         /**
          * Detect current active filters based on data- attribute of root element.
+         * "Active filters" means filters with selected values.
          */
         detectActiveFilters(){
             let activeFilters = jQuery(this.$el).data("filters"); //detect the active filters (thanks jQuery! :))
@@ -40,7 +41,7 @@ export default {
                 _.forEach(activeFilters.filters,function(filter_params,filter_slug){
                     if(typeof activeFilters.values === "object" && !_.isUndefined(activeFilters.values[filter_slug])){
                         let filter_value = activeFilters.values[filter_slug];
-                        InstancesStore.FiltersApp().FiltersManager.updateFilter(filter_slug,filter_value);
+                        this.$store.updateFilter({slug: filter_slug, value: filter_value});
                     }
                 });
             }
@@ -51,13 +52,13 @@ export default {
          * Called when a filter has been selected.
          */
         onFilterSelected(){
-            if(this.submitOnSelect){
+            /*if(this.submitOnSelect){
                 this.$form.submit();
             }else if(this.reloadFiltersOnSelect){
                 this.updateFiltersValues();
             }else if(this.reloadProductsListOnSubmit){
                 this.updateFiltersValues();
-            }
+            }*/
         },
         /**
          * Calls "updateValues" on each children.

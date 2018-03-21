@@ -3,9 +3,7 @@ import {FilterController} from "../Helpers.js";
 
 export default {
     data(){
-        let controller = new FilterController(this.slug,InstancesStore.FiltersApp().FiltersManager);
         return {
-            controller: controller,
             state: "updating",
             currentValues: [],
             items: [],
@@ -34,12 +32,28 @@ export default {
     mounted(){},
     methods: {
         /**
+         * Ajax to make the update values request
+         * @returns {Promise}
+         */
+        getValues(){
+            return jQuery.ajax({
+                url: wbwpf.ajax_url,
+                data: {
+                    action: "get_values_for_filter",
+                    slug: this.slug,
+                    current_filters: this.$store.getters.filters
+                },
+                method: "POST",
+                dataType: "json"
+            });
+        },
+        /**
          * Update displayed values of the filter via ajax.
          * return {Promise}
          */
         updateValues(){
             let self = this,
-                req = this.controller.getValues();
+                req = this.getValues();
             jQuery(this.$el).addClass("loading");
             jQuery(this.$el).find("input").attr("disabled",true);
             this.state = "updating";
@@ -77,10 +91,9 @@ export default {
          * @param {object} event
          */
         valueSelected(event){
-            let currentValues = this.currentValues;
-            InstancesStore.FiltersApp().FiltersManager.updateFilter(this.slug,currentValues);
+            this.$store.commit('updateFilter',{slug: this.slug, value: this.currentValues});
             this.$emit("value-selected");
-            InstancesStore.FiltersApp().just_started = false;
+            this.$store.commit('appIsNotJustStarted');
         }
     }
 }
