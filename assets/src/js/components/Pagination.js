@@ -126,6 +126,7 @@ export default {
             let $clickedLink = jQuery(event.target);
             let pageToGo = $clickedLink.data('goto');
             this.$store.commit('appIsNotJustStarted');
+            this.$store.commit('setCurrentPage',pageToGo);
             this.$emit("pageChanged",pageToGo);
             jQuery(window).trigger("pageChanged");
         },

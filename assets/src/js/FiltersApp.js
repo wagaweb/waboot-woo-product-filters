@@ -55,15 +55,6 @@ class FiltersApp{
      * Startup the products list vue instance
      */
     _startProductsList(){
-        //Re-bind ordering
-        $("select.orderby").closest("form").removeClass("woocommerce-ordering").addClass("wbwpf-woocommerce-ordering");
-        $("body").on( 'change', '.wbwpf-woocommerce-ordering select.orderby', function() {
-            try{
-                jQuery(window).trigger("orderingChanged",$(this).val());
-            }catch(err){
-                console.log(err);
-            }
-        });
         new Vue({
             el: this.productsList,
             store,

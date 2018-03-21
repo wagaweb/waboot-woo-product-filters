@@ -11,7 +11,7 @@ export default {
     data() {
         return {
             products: [],
-            ordering: jQuery("select.orderby").val() || "menu_order", //This is a nasty nasty trick to make ordering works without further modifications
+            ordering: "menu_order",
             result_count_label: ""
         }
     },
@@ -32,6 +32,12 @@ export default {
                 this.$store.commit('setCurrentPage',1); //Reset the page when filters are updated
                 this.updateProducts(this.currentFilters,false);
             }
+        },
+        current_page: function(){
+            this.updateProducts(this.currentFilters,false);
+        },
+        ordering: function(){
+            this.updateProducts(this.currentFilters);
         }
     },
     created(){
@@ -40,15 +46,20 @@ export default {
     },
     mounted(){
         try{
-            //Listen to ordering changing. This is emitted by jQuery click event.
-            jQuery(window).on("orderingChanged", (new_order) => {
-                this.ordering = new_order;
-                this.updateProducts(this.currentFilters);
-            });
-            //Listen to page changing. This is emitted by <wbwpf-pagination> component.
-            jQuery(window).on('pageChanged', (new_page) => {
-                this.$store.commit('setCurrentPage',new_page);
-                this.updateProducts(this.currentFilters,false);
+            let $orderby = jQuery("select.orderby");
+            if($orderby.length > 0){
+                this.ordering = $orderby.val();
+            }
+            //Re-bind ordering
+            $orderby.closest("form").removeClass("woocommerce-ordering").addClass("wbwpf-woocommerce-ordering");
+            jQuery("body").on( 'change', '.wbwpf-woocommerce-ordering select.orderby', (e) => {
+                try{
+                    let newOrdering = jQuery(e.currentTarget).val();
+                    jQuery(window).trigger("orderingChanged",newOrdering);
+                    this.ordering = newOrdering;
+                }catch(err){
+                    console.log(err);
+                }
             });
             this.updateCurrentPageFromUri();
         }catch(err){
