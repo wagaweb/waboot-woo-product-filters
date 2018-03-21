@@ -1,4 +1,3 @@
-import InstancesStore from '../InstancesStore.js';
 import SingleFilter from './Filter.js'
 
 export default {

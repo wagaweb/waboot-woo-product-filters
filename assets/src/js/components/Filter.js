@@ -1,6 +1,3 @@
-import InstancesStore from '../InstancesStore.js';
-import {FilterController} from "../Helpers.js";
-
 export default {
     data(){
         return {
