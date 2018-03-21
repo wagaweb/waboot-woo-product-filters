@@ -1,6 +1,7 @@
 export default {
     state: {
-        activeFilters: []
+        activeFilters: [],
+        updatingFilters: []
     },
     getters: {
         /**
@@ -63,6 +64,22 @@ export default {
             if(actualIndex !== -1){
                 state.activeFilters.splice(actualIndex,1);
             }
+        },
+        /**
+         * Adds a filter to the updating filters
+         * @param state
+         * @param slug
+         */
+        addUpdatingFilter(state,slug){
+            state.updatingFilters.push(slug)
+        },
+        /**
+         * Remove a filter from the updating filters
+         * @param state
+         * @param slug
+         */
+        removeUpdatingFilter(state,slug){
+            state.updatingFilters.splice(_.indexOf(state.updatingFilters,slug),1);
         }
     }
 }

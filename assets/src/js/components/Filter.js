@@ -57,7 +57,7 @@ export default {
             jQuery(this.$el).addClass("loading");
             jQuery(this.$el).find("input").attr("disabled",true);
             this.state = "updating";
-            this.$parent.updatingFilters.push(this.slug);
+            this.$store.commit('addUpdatingFilter',this.slug);
             req.then((data, textStatus, jqXHR) => {
                 //Resolve
                 let items = data.data;
@@ -75,14 +75,14 @@ export default {
                 jQuery(this.$el).removeClass("loading");
                 jQuery(this.$el).find("input").attr("disabled",false);
                 self.state = "updated";
-                self.$parent.updatingFilters.splice(_.indexOf(self.$parent.updatingFilters,self.slug),1); //Remove the filters from the updating filters
+                self.$store.commit('removeUpdatingFilter',self.slug); //Remove the filters from the updating filters
             },(jqXHR, textStatus, errorThrown) => {
                 //Reject
                 self.items = [];
                 jQuery(this.$el).removeClass("loading");
                 jQuery(this.$el).find("input").attr("disabled",false);
                 self.state = "updated";
-                self.$parent.updatingFilters.splice(_.indexOf(self.$parent.updatingFilters,self.slug),1); //Remove the filters from the updating filters
+                self.$store.commit('removeUpdatingFilter',self.slug); //Remove the filters from the updating filters
             });
             return req;
         },
