@@ -26,19 +26,20 @@ export default {
             return this.$store.getters.filters;
         }
     },
+    watch: {
+        currentFilters: function(){
+            if(this.$store.state.app.reactiveProductList){
+                this.$store.commit('setCurrentPage',1); //Reset the page when filters are updated
+                this.updateProducts(this.currentFilters,false);
+            }
+        }
+    },
     created(){
         //Getting the current products
         this.updateProducts(this.currentFilters);
     },
     mounted(){
         try{
-            //Listen to filters changes:
-            if(this.$store.state.app.reactiveProductList){
-                jQuery(window).on('filtersUpdated', () => {
-                    this.$store.commit('setCurrentPage',1); //Reset the page when filters are updated
-                    this.updateProducts(this.currentFilters,false);
-                });
-            }
             //Listen to ordering changing. This is emitted by jQuery click event.
             jQuery(window).on("orderingChanged", (new_order) => {
                 this.ordering = new_order;
