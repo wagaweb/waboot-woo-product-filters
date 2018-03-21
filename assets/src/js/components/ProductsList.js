@@ -123,7 +123,7 @@ export default {
                 self.result_count_label = response.data.result_count_label;
 
                 //Update URI:
-                if(!this.$store.just_started){
+                if(!self.$store.state.app.just_started){
                     let um = new UriManager();
                     um.updateFilters(self.currentFilters,self.current_page);
                 }
