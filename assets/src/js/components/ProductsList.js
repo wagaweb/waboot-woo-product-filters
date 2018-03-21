@@ -1,49 +1,85 @@
 import {getPageParameter} from "../utilities";
-import InstancesStore from '../InstancesStore.js';
+import UriManager from "../uri-manager.js";
+import Product from './Product.js'
+import Pagination from './Pagination.js'
 
 export default {
+    components: {
+        'wbwpf-product': Product,
+        'wbwpf-pagination': Pagination
+    },
     data: {
         products: [],
-        current_page: 1,
-        total_pages: 1,
         ordering: jQuery("select.orderby").val() || "menu_order", //This is a nasty nasty trick to make ordering works without further modifications
         result_count_label: ""
+    },
+    computed: {
+        current_page: function(){
+            return this.$store.state.products.current_page;
+        },
+        total_pages: function(){
+            return this.$store.state.products.total_pages;
+        },
+        currentFilters: function(){
+            return this.$store.getters.filters;
+        }
     },
     created(){},
     mounted(){
         try{
             //Getting the current products
-            this.updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters());
-            if(InstancesStore.FiltersApp().reactiveProductList){
-                //Listen to filters changes:
-                InstancesStore.FiltersList().$on("filtersUpdated",function(){
-                    InstancesStore.ProductsList().current_page = 1; //Reset the page when filters are updated
-                    InstancesStore.ProductsList().updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters(),false);
+            this.updateProducts(this.currentFilters);
+            //Listen to filters changes:
+            if(this.$store.state.app.reactiveProductList){
+                jQuery(window).on('filtersUpdated', () => {
+                    this.$store.commit('setCurrentPage',1); //Reset the page when filters are updated
+                    this.updateProducts(this.currentFilters,false);
                 });
             }
             //Listen to ordering changing. This is emitted by jQuery click event.
-            this.$on("orderingChanged", function(new_order){
+            jQuery(window).on("orderingChanged", (new_order) => {
                 this.ordering = new_order;
-                InstancesStore.ProductsList().updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters());
+                this.updateProducts(this.currentFilters);
             });
             //Listen to page changing. This is emitted by <wbwpf-pagination> component.
-            this.$on('pageChanged', function(new_page){
-                this.current_page = new_page;
-                InstancesStore.ProductsList().updateProducts(InstancesStore.FiltersApp().FiltersManager.getFilters(),false);
+            jQuery(window).on('pageChanged', (new_page) => {
+                this.$store.commit('setCurrentPage',new_page);
+                this.updateProducts(this.currentFilters,false);
             });
-            this.updateCurrentPageFromUri();    
+            this.updateCurrentPageFromUri();
         }catch(err){
             console.log(err);
         }
     },
     methods: {
         /**
+         * Gets a products request
+         * @param payload
+         * @returns {Promise}
+         */
+        getProductsRequest(payload){
+            if(typeof payload.ordering === "undefined") payload.ordering = "menu_order";
+            if(typeof payload.page === "undefined") payload.page = 1;
+
+            return jQuery.ajax({
+                url: wbwpf.ajax_url,
+                data: {
+                    action: "get_products_for_filters",
+                    filters: payload.filters,
+                    ordering: payload.ordering,
+                    page: payload.page
+                },
+                method: "POST",
+                dataType: "json"
+            });
+        },
+        /**
          * Update the current page from URI
          */
         updateCurrentPageFromUri(){
             let uriPage = getPageParameter();
             if(parseInt(uriPage) > 1){
-                this.current_page = uriPage;
+                this.$store.commit('setCurrentPage',uriPage);
             }
         },
         /**
@@ -56,31 +92,27 @@ export default {
                 this.updateCurrentPageFromUri();
             }
             let self = this,
-                req = InstancesStore.FiltersApp().ProductManager.getProducts(currentFilters,this.ordering,this.current_page);
+                req = this.getProductsRequest({filters: currentFilters, ordering: this.ordering, page: this.current_page});
             req.then((response, textStatus, jqXHR) => {
                 //Resolve
 
-                //Update app:
-                InstancesStore.FiltersApp().total_products = response.data.found_products;
-                InstancesStore.FiltersApp().total_pages = response.data.total_pages;
-                InstancesStore.FiltersApp().current_page = response.data.current_page;
-                InstancesStore.FiltersApp().showing_from = response.data.showing_from;
-                InstancesStore.FiltersApp().showing_to = response.data.showing_to;
+                //Update store
+                this.$store.commit('setTotalProducts',response.data.found_products);
+                this.$store.commit('setTotalPages',response.data.total_pages);
+                this.$store.commit('setCurrentPage',response.data.current_page);
+                this.$store.commit('setShowingFrom',response.data.showing_from);
+                this.$store.commit('setShowingTo',response.data.showing_to);
 
                 //Update self:
                 self.products = response.data.products;
-                self.current_page = response.data.current_page;
-                self.total_pages = response.data.total_pages;
                 self.result_count_label = response.data.result_count_label;
 
                 //Update URI:
                 if(!this.$store.just_started){
-                    InstancesStore.FiltersApp().UriManager.updateFilters(InstancesStore.FiltersApp().FiltersManager.getFilters(),self.current_page);
+                    let um = new UriManager();
+                    um.updateFilters(self.currentFilters,self.current_page);
                 }
                 jQuery(window).trigger("filteredProductsUpdated");
-            },(jqXHR, textStatus, errorThrown) => {
-                //Reject
-                self.products = [];
             });
         }
     }

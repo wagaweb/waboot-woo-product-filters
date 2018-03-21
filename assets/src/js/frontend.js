@@ -52,14 +52,9 @@ function filters_app_startup(){
 
     if($async_filters.length > 0){
         if($async_product_list.length > 0){
-            let fm = new FiltersManager(),
-                pm = new ProductsManager();
-            InstancesStore.setFiltersApp(new FiltersApp(fm,pm));
-            InstancesStore.FiltersApp().start(ConfigsStore.filtersListSelector,ConfigsStore.productsListSelector);
+            new FiltersApp(ConfigsStore.filtersListSelector,ConfigsStore.productsListSelector);
         }else{
-            let fm = new FiltersManager();
-            InstancesStore.setFiltersApp(new FiltersApp(fm));
-            InstancesStore.FiltersApp().start(ConfigsStore.filtersListSelector);
+            new FiltersApp(ConfigsStore.filtersListSelector);
         }
     }
 }

@@ -9,8 +9,12 @@ class AjaxEndpoint{
 		add_action("wp_ajax_"."get_values_for_filter",[$this,"get_values_for_filter"]);
 		add_action("wp_ajax_nopriv_"."get_values_for_filter",[$this,"get_values_for_filter"]);
 
-		add_action("wp_ajax_"."get_products_for_filters",[$this,"get_products_for_filters"]);
-		add_action("wp_ajax_nopriv_"."get_products_for_filters",[$this,"get_products_for_filters"]);
+		add_action("wp_ajax_"."get_products_for_filters",function(){
+			$this->get_products_for_filters(); //For some reason, if we do not do this, the ajax request will fail
+		});
+		add_action("wp_ajax_nopriv_"."get_products_for_filters",function(){
+			$this->get_products_for_filters(); //For some reason, if we do not do this, the ajax request will fail
+		});
 	}
 
 	/**

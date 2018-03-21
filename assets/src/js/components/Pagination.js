@@ -1,5 +1,3 @@
-import InstancesStore from '../InstancesStore.js';
-
 export default {
     props: {
         'outerWrapper': {
@@ -128,7 +126,8 @@ export default {
             let $clickedLink = jQuery(event.target);
             let pageToGo = $clickedLink.data('goto');
             this.$store.commit('appIsNotJustStarted');
-            InstancesStore.ProductsList().$emit("pageChanged",pageToGo);
+            this.$emit("pageChanged",pageToGo);
+            jQuery(window).trigger("pageChanged");
         },
         /**
          * Detects the mid range for pagination.

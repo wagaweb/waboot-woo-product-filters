@@ -1,15 +1,10 @@
 import $ from "jquery";
-import _ from "lodash";
 
 import Vue from "vue";
 import Vuex from 'vuex';
 import store from './store/index.js';
-import UriManager from "./uri-manager";
 import FiltersList from './components/FiltersList.js'
-import Product from './components/Product.js'
 import ProductsList from './components/ProductsList.js'
-import Pagination from './components/Pagination.js'
-import InstancesStore from './InstancesStore.js';
 
 Vue.use(Vuex);
 
@@ -17,71 +12,57 @@ class FiltersApp{
     /**
      * Build up the application
      *
-     * @param {FiltersManager} fm
-     * @param {ProductsManager} pm
+     * @param {string} filtersList the vue root element of the filters list
+     * @param {string} productsList the vue root element of the products list
      */
-    constructor(fm,pm){
-        this.FiltersManager = fm;
-        if(typeof pm !== "undefined"){
-            this.ProductManager = pm;
-        }
-        this.UriManager = new UriManager();
-        this.reactiveProductList = wbwpf.reloadProductsListOnSubmit; //whether the product list must respond to filters changes
+    constructor(filtersList,productsList){
+        this.filtersList = filtersList;
+        this.productsList = productsList;
+        store.state.app.reactiveProductList = wbwpf.reloadProductsListOnSubmit; //whether the product list must respond to filters changes
+        this.start();
     }
 
     /**
      * Startup the application
-     *
-     * @param {string} filtersList the vue root element of the filters list
-     * @param {string} productsList the vue root element of the products list
      */
-    start(filtersList,productsList){
-        if(typeof filtersList !== "undefined"){
-            this._startFiltersList(filtersList);
+    start(){
+        if(typeof this.filtersList !== "undefined"){
+            this._startFiltersList(this.filtersList);
         }
-        if(typeof productsList !== "undefined"){
-            this._startProductsList(productsList);
+        if(typeof this.productsList !== "undefined"){
+            this._startProductsList(this.productsList);
         }
         $(window).trigger("filtersAppStarted");
     }
 
     /**
      * Startup the filters list vue instance
-     * @param {string} el the root element
      */
-    _startFiltersList(el){
-
+    _startFiltersList(){
         //Init a new Vue instance for the filters
-        InstancesStore.setFiltersList(new Vue({
-            el: el,
+        new Vue({
+            el: this.filtersList,
             store,
             components : {
                 FiltersList
             }
-        }));
+        });
     }
 
     /**
      * Startup the products list vue instance
-     * @param {string} el the root element
      */
-    _startProductsList(el){
-
+    _startProductsList(){
         //Re-bind ordering
         $("select.orderby").closest("form").removeClass("woocommerce-ordering").addClass("wbwpf-woocommerce-ordering");
         $("body").on( 'change', '.wbwpf-woocommerce-ordering select.orderby', function() {
             try{
-                InstancesStore.ProductsList().$emit("orderingChanged",$(this).val());
+                jQuery(window).trigger("orderingChanged",$(this).val());
             }catch(err){
                 console.log(err);
             }
         });
-
-        Vue.component('wbwpf-product',Product);
-
-        Vue.component('wbwpf-pagination',Pagination);
-
-        InstancesStore.setProductsList(new Vue(jQuery.extend({ el: el, store },ProductsList)));
+        new Vue(jQuery.extend({ el: this.productsList, store },ProductsList));
     }
 }
 
