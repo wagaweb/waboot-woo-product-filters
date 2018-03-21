@@ -2,9 +2,7 @@ import $ from "jquery";
 import _ from "lodash";
 import { getQueryString, getSearchParameters, getFiltersSearchParameters, getStrippedFiltersSearchParameters } from './utilities';
 import "./jquery_addons";
-import {FiltersApp} from './FiltersApp';
-import {FiltersManager,ProductsManager} from "./Helpers.js";
-import InstancesStore from './InstancesStore.js';
+import {FiltersApp} from './FiltersApp';;
 import ConfigsStore from './ConfigsStore.js';
 
 $(document).ready(function($){
