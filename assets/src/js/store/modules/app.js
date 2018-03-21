@@ -6,6 +6,9 @@ export default {
     mutations: {
         appIsNotJustStarted(state){
             state.just_started = false;
+        },
+        appHasReactiveProductList(state){
+            state.reactiveProductList = true;
         }
     }
 }

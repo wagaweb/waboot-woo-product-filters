@@ -54,7 +54,7 @@ export default {
          * Called when a filter has been selected.
          */
         onFilterSelected(){
-            if(this.submitOnSelect){
+            if(this.submitOnSelect && !this.reloadProductsListOnSubmit){
                 this.$form.submit();
             }else if(this.reloadFiltersOnSelect){
                 this.updateFiltersValues();

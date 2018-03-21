@@ -18,7 +18,9 @@ class FiltersApp{
     constructor(filtersList,productsList){
         this.filtersList = filtersList;
         this.productsList = productsList;
-        store.state.app.reactiveProductList = wbwpf.reloadProductsListOnSubmit; //whether the product list must respond to filters changes
+        if(wbwpf.components.filtersList.reloadProductsListOnSubmit){
+            store.commit('appHasReactiveProductList'); //whether the product list must respond to filters changes
+        }
         this.start();
     }
 
