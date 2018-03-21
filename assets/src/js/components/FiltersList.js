@@ -70,14 +70,12 @@ export default {
          */
         updateFiltersValues(){
             let updatingPromises = [];
-            jQuery(this.$el).find("[data-apply_button]").attr("disabled",true); //todo: is there a better way?
             _.each(this.$children,function(filter){
                 updatingPromises.push(filter.updateValues());
             });
             Promise.all(updatingPromises).then(() => {
                 this.$parent.$emit("filtersUpdated");
                 jQuery(window).trigger("filtersUpdated");
-                jQuery(this.$el).find("[data-apply_button]").attr("disabled",false);
             });
         }
     }

@@ -12,7 +12,7 @@
 				            <?php $filter->display(true); ?>
 			            <?php endforeach; ?>
 		            <?php endif; ?>
-                    <button v-if="hasSubmitButton" name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button><?php _ex("Search","Filters search button",$textdomain); ?></button>
+                    <button v-if="hasSubmitButton" name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button :disabled="!updated"><?php _ex("Search","Filters search button",$textdomain); ?></button>
 		            <input type="hidden" v-if="!hasSubmitButton" name="wbwpf_search_by_filters" value="1">
                     <?php do_action("wbwpf/form/async/after_submit"); ?>
                 </form>
