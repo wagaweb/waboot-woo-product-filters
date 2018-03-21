@@ -8,10 +8,12 @@ export default {
         'wbwpf-product': Product,
         'wbwpf-pagination': Pagination
     },
-    data: {
-        products: [],
-        ordering: jQuery("select.orderby").val() || "menu_order", //This is a nasty nasty trick to make ordering works without further modifications
-        result_count_label: ""
+    data() {
+        return {
+            products: [],
+            ordering: jQuery("select.orderby").val() || "menu_order", //This is a nasty nasty trick to make ordering works without further modifications
+            result_count_label: ""
+        }
     },
     computed: {
         current_page: function(){
@@ -24,11 +26,12 @@ export default {
             return this.$store.getters.filters;
         }
     },
-    created(){},
+    created(){
+        //Getting the current products
+        this.updateProducts(this.currentFilters);
+    },
     mounted(){
         try{
-            //Getting the current products
-            this.updateProducts(this.currentFilters);
             //Listen to filters changes:
             if(this.$store.state.app.reactiveProductList){
                 jQuery(window).on('filtersUpdated', () => {

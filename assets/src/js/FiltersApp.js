@@ -62,7 +62,13 @@ class FiltersApp{
                 console.log(err);
             }
         });
-        new Vue(jQuery.extend({ el: this.productsList, store },ProductsList));
+        new Vue({
+            el: this.productsList,
+            store,
+            components: {
+                ProductsList
+            }
+        })
     }
 }
 
