@@ -39,11 +39,12 @@ export default {
         detectActiveFilters(){
             let activeFilters = jQuery(this.$el).data("filters"); //detect the active filters
             if(typeof activeFilters.filters === "object"){
+                let self = this;
                 //Update the store with the currently active filters
                 _.forEach(activeFilters.filters,function(filter_params,filter_slug){
                     if(typeof activeFilters.values === "object" && !_.isUndefined(activeFilters.values[filter_slug])){
                         let filter_value = activeFilters.values[filter_slug];
-                        this.$store.commit('updateFilter',{slug: filter_slug, value: filter_value});
+                        self.$store.commit('updateFilter',{slug: filter_slug, value: filter_value});
                     }
                 });
             }

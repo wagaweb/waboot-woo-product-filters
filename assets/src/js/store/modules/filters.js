@@ -34,7 +34,6 @@ export default {
          * @param payload
          */
         updateFilter(state,payload){
-            debugger;
             let actualIndex = _.findIndex(state.activeFilters,(o) => {
                 return o.slug === payload.slug;
             });
