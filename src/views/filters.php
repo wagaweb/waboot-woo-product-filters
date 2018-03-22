@@ -13,7 +13,7 @@
 			            <?php endforeach; ?>
 		            <?php endif; ?>
                     <button v-if="hasSubmitButton" name="wbwpf_search_by_filters" value="1" type="submit" data-apply_button :disabled="!updated"><?php _ex("Search","Filters search button",$textdomain); ?></button>
-		            <input type="hidden" v-if="!hasSubmitButton" name="wbwpf_search_by_filters" value="1">
+		                <input type="hidden" v-if="!hasSubmitButton" name="wbwpf_search_by_filters" value="1">
                     <?php do_action("wbwpf/form/async/after_submit"); ?>
                 </form>
             </div>
@@ -29,7 +29,7 @@
         <?php else: ?>
             <?php _e("No filters defined in calling function.",$textdomain); ?>
         <?php endif; ?>
-            <?php if($has_products): ?>
+            <?php if($has_products && $display_apply_button): ?>
             <button name="wbwpf_search_by_filters" value="1" type="submit"><?php _ex("Search","Filters search button",$textdomain); ?></button>
             <?php endif; ?>
 	        <?php do_action("wbwpf/form/after_submit"); ?>

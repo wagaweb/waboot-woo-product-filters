@@ -39,9 +39,9 @@ class Filters extends WBF_Widget {
 			<h3 class="widget-title"><?php echo $instance['title']; ?></h3>
 
 			<?php
+			$display_apply_button = $settings['widget_display_apply_button'];
 
 			if($settings['widget_use_js']){
-				$display_apply_button = $settings['widget_display_apply_button'];
 				wbwpf_show_filters([],true,$display_apply_button);
 			}else{
 				wbwpf_show_filters([],false,$display_apply_button);
