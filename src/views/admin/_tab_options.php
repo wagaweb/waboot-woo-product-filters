@@ -41,6 +41,11 @@
     </label>
     <h3><?php _e("Widget settings",$textdomain); ?></h3>
     <label class="option">
+		<?php $checked = isset($current_settings['widget_use_js']) && $current_settings['widget_use_js']; ?>
+        <input type="checkbox" value="1" name="wbwpf_options[widget_use_js]" <?php if($checked): ?>checked<?php endif; ?>>
+		<?php _e("Use Javascript",$textdomain); ?>
+    </label>
+    <label class="option">
 		<?php $checked = isset($current_settings['widget_display_apply_button']) && $current_settings['widget_display_apply_button']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[widget_display_apply_button]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Display the apply button",$textdomain); ?>

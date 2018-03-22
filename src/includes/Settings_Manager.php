@@ -29,6 +29,7 @@ class Settings_Manager{
 			'use_async_product_list' => false,
 			'use_custom_product_loop_template' => false,
 			'widget_display_apply_button' => false,
+			'widget_use_js' => true,
 		];
 		$defaults = apply_filters("wbwpf/settings/defaults",$defaults);
 		return $defaults;
@@ -48,6 +49,7 @@ class Settings_Manager{
 		$settings['hide_parent_products'] = isset($settings['hide_parent_products']) ? (bool) $settings['hide_parent_products'] : false;
 		$settings['use_async_product_list'] = isset($settings['use_async_product_list']) ? (bool) $settings['use_async_product_list'] : false;
 		$settings['widget_display_apply_button'] = isset($settings['widget_display_apply_button']) ? (bool) $settings['widget_display_apply_button'] : false;
+		$settings['widget_use_js'] = isset($settings['widget_use_js']) ? (bool) $settings['widget_use_js'] : true;
 		$settings['use_custom_product_loop_template'] = isset($settings['use_custom_product_loop_template']) ? (bool) $settings['use_custom_product_loop_template'] : false;
 
 		//Merge the differences

@@ -1,4 +1,4 @@
-<?php if($async): ?>
+<?php if($use_js): ?>
     <div class="wbwpf-filters" data-async>
         <filters-list
                 inline-template
