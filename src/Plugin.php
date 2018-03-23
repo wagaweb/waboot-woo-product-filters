@@ -104,6 +104,8 @@ class Plugin extends TemplatePlugin {
 	 * Define plugins hooks
 	 */
 	public function hooks(){
+		$settings = $this->get_plugin_settings();
+
 		$this->loader->add_action("admin_enqueue_scripts", $this, "admin_assets");
 		$this->loader->add_action("wp_enqueue_scripts", $this, "public_assets");
 		$this->loader->add_action("admin_menu",$this,"display_admin_page");
@@ -133,6 +135,13 @@ class Plugin extends TemplatePlugin {
 
 		//Catalog visualizations hooks
 		$this->loader->add_filter("the_title",$this,"alter_variations_title",10,2);
+		if($settings['use_async_product_list']){
+			add_action('init', function(){
+				remove_action('woocommerce_before_shop_loop','woocommerce_result_count',20);
+				remove_action('woocommerce_before_shop_loop','woocommerce_catalog_ordering',30);
+				remove_action('woocommerce_after_shop_loop','woocommerce_pagination',10);
+			},20);
+		}
 
 		//Ajax
 		$this->AjaxEndpoint->setup_endpoints();
@@ -726,6 +735,6 @@ class Plugin extends TemplatePlugin {
 	 * @hooked 'waboot/woocommerce/loop'
 	 */
 	public function waboot_wc_async_loop(){
-		wbwpf_show_products_async();
+		(new HTMLView('templates/woocommerce/loop/waboot-loop.php',$this))->display();
 	}
 }

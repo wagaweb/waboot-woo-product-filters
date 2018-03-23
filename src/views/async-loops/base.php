@@ -10,8 +10,8 @@
     <products-list inline-template>
         <div class="wbwpf-product-list-wrapper">
             <div class="products-loading" v-show="!updated"></div>
-	        <?php woocommerce_catalog_ordering(); ?>
             <p class="woocommerce-result-count" v-html="result_count_label"></p>
+	        <?php woocommerce_catalog_ordering(); ?>
 	        <?php wc_get_template( 'loop/loop-start.php' ); ?>
             <wbwpf-product v-for="product in products" :key="product.ID" :data="product"></wbwpf-product>
 	        <?php wc_get_template( 'loop/loop-end.php' ); ?>
