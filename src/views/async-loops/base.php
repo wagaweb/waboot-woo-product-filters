@@ -9,6 +9,7 @@
 <div class="wbwpf-product-list" data-async>
     <products-list inline-template>
         <div class="wbwpf-product-list-wrapper">
+            <div class="products-loading" v-show="!updated"></div>
 	        <?php woocommerce_catalog_ordering(); ?>
             <p class="woocommerce-result-count" v-html="result_count_label"></p>
 	        <?php wc_get_template( 'loop/loop-start.php' ); ?>

@@ -11,6 +11,7 @@ export default {
     data() {
         return {
             products: [],
+            updated: false,
             ordering: "menu_order",
             result_count_label: ""
         }
@@ -108,6 +109,9 @@ export default {
             }
             let self = this,
                 req = this.getProductsRequest({filters: currentFilters, ordering: this.ordering, page: this.current_page});
+
+            this.updated = false;
+
             req.then((response, textStatus, jqXHR) => {
                 //Resolve
 
@@ -128,6 +132,7 @@ export default {
                     um.updateFilters(self.currentFilters,self.current_page);
                 }
                 jQuery(window).trigger("filteredProductsUpdated");
+                self.updated = true;
             });
         }
     }

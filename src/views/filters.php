@@ -4,9 +4,9 @@
                 inline-template
                 data-filters='<?php echo wbwpf_get_current_active_filters(true); ?>'
         >
-            <div class="filters-list">
-                <div class="filters-loading" v-show="!updated"><?php _e("Loading...",$textdomain); ?></div>
-                <form method="get" action="<?php echo $form_action_url; ?>" data-filters-form v-show="updated">
+            <div class="filters-list" :class="{ loading: !updated }">
+                <div class="filters-loading" v-show="!updated"></div>
+                <form method="get" action="<?php echo $form_action_url; ?>" data-filters-form>
 		            <?php if($has_filters): ?>
 			            <?php foreach ($filters as $filter): ?>
 				            <?php $filter->display(true); ?>
