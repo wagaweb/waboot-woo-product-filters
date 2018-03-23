@@ -39,10 +39,15 @@ export default {
             });
             if(actualIndex !== -1){
                 //Update
-                state.activeFilters[actualIndex] = {
-                    slug: payload.slug,
-                    value: payload.value
-                };
+                if(payload.value.length <= 0 || payload.value === ''){
+                    //Remove
+                    state.activeFilters.splice(actualIndex,1);
+                }else{
+                    state.activeFilters[actualIndex] = {
+                        slug: payload.slug,
+                        value: payload.value
+                    };
+                }
             }else{
                 //Push
                 state.activeFilters.push({

@@ -22,15 +22,17 @@ export default {
         }
     },
     mounted(){
-        this.$on("filtersDetected",function(){
-            this.updateFiltersValues(); //The filters values are not present from the start, here we get them.
-        });
-
         this.$form = jQuery(this.$el).find('form');
-
-        this.detectActiveFilters(); //Detect the "Active Filters", namely the filters with selected values.
+        this.loadFilters();
     },
     methods: {
+        /**
+         * Detect active filters (namely the filters with selected values) and load their values
+         */
+        loadFilters(){
+            this.detectActiveFilters();
+            this.loadFiltersValues();
+        },
         /**
          * Detect current active filters based on data- attribute of root element, then update the store.
          * "Active filters" means filters with selected values.
@@ -47,27 +49,15 @@ export default {
                     }
                 });
             }
-
             this.$emit("filtersDetected");
-        },
-        /**
-         * Called when a filter has been selected.
-         */
-        onFilterSelected(){
-            if(this.submitOnSelect && !this.reloadProductsListOnSubmit){
-                this.$form.submit();
-            }else if(this.reloadFiltersOnSelect){
-                this.updateFiltersValues();
-            }else if(this.reloadProductsListOnSubmit){
-                this.updateFiltersValues();
-            }
+            jQuery(window).trigger("filtersDetected");
         },
         /**
          * Calls "updateValues" on each children.
          *
          * Called on 'filtersDetected' and in when this.reloadFiltersOnSelect || this.reloadProductsListOnSubmit
          */
-        updateFiltersValues(){
+        loadFiltersValues(){
             let updatingPromises = [];
             _.each(this.$children,function(filter){
                 updatingPromises.push(filter.updateValues());
@@ -76,6 +66,18 @@ export default {
                 this.$parent.$emit("filtersUpdated");
                 jQuery(window).trigger("filtersUpdated");
             });
+        },
+        /**
+         * Called when a filter has been selected.
+         */
+        onFilterSelected(){
+            if(this.submitOnSelect && !this.reloadProductsListOnSubmit){
+                this.$form.submit();
+            }else if(this.reloadFiltersOnSelect){
+                this.loadFiltersValues();
+            }else if(this.reloadProductsListOnSubmit){
+                this.loadFiltersValues();
+            }
         }
     }
 }

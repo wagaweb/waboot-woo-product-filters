@@ -61,8 +61,10 @@ export default {
                 let hidden_items = [];
                 self.items = items;
                 _.forEach(items,(item,index) => {
-                    if(item.selected && _.indexOf(self.currentValues,item.id) === -1){
-                        self.currentValues.push(item.id); //Insert into currentValues the items signed ad selected (useful when page loads with wbwpf_query string)
+                    if(this.$store.state.app.just_started){
+                        if(item.selected && _.indexOf(self.currentValues,item.id) === -1){
+                            self.currentValues.push(item.id); //Insert into currentValues the items signed ad selected (useful when page loads with wbwpf_query string)
+                        }
                     }
                     if(!item.visible){
                         hidden_items.push(item.id);
@@ -72,6 +74,7 @@ export default {
                 jQuery(this.$el).removeClass("loading");
                 jQuery(this.$el).find("input").attr("disabled",false);
                 self.state = "updated";
+                self.$store.commit('updateFilter',{slug: this.slug, value: this.currentValues});
                 self.$store.commit('removeUpdatingFilter',self.slug); //Remove the filters from the updating filters
             },(jqXHR, textStatus, errorThrown) => {
                 //Reject
@@ -89,8 +92,8 @@ export default {
          */
         valueSelected(event){
             this.$store.commit('updateFilter',{slug: this.slug, value: this.currentValues});
-            this.$emit("value-selected");
             this.$store.commit('appIsNotJustStarted');
+            this.$emit("value-selected");
         }
     }
 }
