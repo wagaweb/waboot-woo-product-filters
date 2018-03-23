@@ -21,5 +21,5 @@
 </div>
 
 <template id="wbwpf-product-template">
-    <li :class="data.wrapper_class" v-html="data.content"></li>
+    <?php do_action('wbwpf/woocommerce/single-product/async/display'); ?>
 </template>

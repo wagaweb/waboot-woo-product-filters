@@ -142,6 +142,7 @@ class Plugin extends TemplatePlugin {
 				remove_action('woocommerce_after_shop_loop','woocommerce_pagination',10);
 			},20);
 		}
+		$this->loader->add_action("wbwpf/woocommerce/single-product/async/display",$this,'display_single_product_async_template');
 
 		//Ajax
 		$this->AjaxEndpoint->setup_endpoints();
@@ -717,6 +718,19 @@ class Plugin extends TemplatePlugin {
 	 */
 	public function register_widgets(){
 		register_widget(__NAMESPACE__."\\widgets\\Filters");
+	}
+
+	/**
+	 * Display the single product template in async loops
+	 *
+	 * @hooked 'wbwpf/woocommerce/single-product/async/display'
+	 */
+	public function display_single_product_async_template(){
+		if(wp_get_theme()->get_template() === 'waboot'): ?>
+			<div :class="data.wrapper_class" v-html="data.content"></div>
+		<?php else: ?>
+			<ul :class="data.wrapper_class" v-html="data.content"></ul>
+		<?php endif;
 	}
 
 	/**
