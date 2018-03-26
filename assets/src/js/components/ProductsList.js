@@ -23,27 +23,18 @@ export default {
         total_pages: function(){
             return this.$store.state.products.total_pages;
         },
-        currentFilters: function(){
-            return this.$store.getters.filters;
-        }
     },
     watch: {
-        currentFilters: function(){
-            if(this.$store.state.app.reactiveProductList){
-                this.$store.commit('setCurrentPage',1); //Reset the page when filters are updated
-                this.updateProducts(this.currentFilters,false);
-            }
-        },
         current_page: function(){
-            this.updateProducts(this.currentFilters,false);
+            this.updateProducts(this.$store.getters.filters,false);
         },
         ordering: function(){
-            this.updateProducts(this.currentFilters);
+            this.updateProducts(this.$store.getters.filters);
         }
     },
     created(){
         //Getting the current products
-        this.updateProducts(this.currentFilters);
+        this.updateProducts(this.$store.getters.filters);
     },
     mounted(){
         try{
@@ -60,6 +51,12 @@ export default {
                     this.ordering = newOrdering;
                 }catch(err){
                     console.log(err);
+                }
+            });
+            jQuery(window).on('filtersUpdating', () => {
+                if(this.$store.state.app.reactiveProductList){
+                    this.$store.commit('setCurrentPage',1); //Reset the page when filters are updated
+                    this.updateProducts(this.$store.getters.filters,false);
                 }
             });
             this.updateCurrentPageFromUri();
@@ -129,7 +126,7 @@ export default {
                 //Update URI:
                 if(!self.$store.state.app.just_started){
                     let um = new UriManager();
-                    um.updateFilters(self.currentFilters,self.current_page);
+                    um.updateFilters(self.$store.getters.filters,self.current_page);
                 }
                 jQuery(window).trigger("filteredProductsUpdated");
                 self.updated = true;

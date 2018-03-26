@@ -54,6 +54,7 @@ export default {
             jQuery(this.$el).addClass("loading");
             jQuery(this.$el).find("input").attr("disabled",true);
             this.state = "updating";
+            this.$store.commit('updateFilter',{slug: this.slug, value: this.currentValues}); //This is very important
             this.$store.commit('addUpdatingFilter',this.slug);
             req.then((data, textStatus, jqXHR) => {
                 //Resolve
@@ -93,7 +94,7 @@ export default {
         valueSelected(event){
             this.$store.commit('updateFilter',{slug: this.slug, value: this.currentValues});
             this.$store.commit('appIsNotJustStarted');
-            this.$emit("value-selected");
+            this.$emit("value-selected"); //This will trigger FiltersLists->onFilterSelected()
         }
     }
 }

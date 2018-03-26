@@ -38,6 +38,9 @@ export default class{
         if(_.isUndefined(page)){
             page = 1;
         }
+        if(_.isUndefined(filters)){
+            filters = [];
+        }
         /*
          * Here we receive filters from window.ProductList in an array of obkects like:
          * [
@@ -52,20 +55,29 @@ export default class{
          *
          */
         if(this.canPushState()){
-            let new_qs = this._generateQueryString(filters),
-                new_location = "";
-            if(new_qs !== ""){
-                new_location = GetUpdatedUriWithQueryString("wbwpf_query",new_qs);
-                new_location = GetUpdatedUriWithQueryString("page",page,new_location);
-            }else{
-                new_location = GetUpdatedUriWithQueryString("page",page);
-            }
-            if(new_location !== ""){
+            if(filters.length <= 0){
                 let state = {
-                    qs: new_qs,
+                    qs: "",
                     page: page
                 };
+                let new_location = window.location.href.split(/[?#]/)[0];
                 window.history.pushState(state,document.title,new_location);
+            }else{
+                let new_qs = this._generateQueryString(filters),
+                    new_location = "";
+                if(new_qs !== ""){
+                    new_location = GetUpdatedUriWithQueryString("wbwpf_query",new_qs);
+                    new_location = GetUpdatedUriWithQueryString("page",page,new_location);
+                }else{
+                    new_location = GetUpdatedUriWithQueryString("page",page);
+                }
+                if(new_location !== ""){
+                    let state = {
+                        qs: new_qs,
+                        page: page
+                    };
+                    window.history.pushState(state,document.title,new_location);
+                }
             }
         }
     }

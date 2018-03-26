@@ -49,7 +49,7 @@ export default {
                     }
                 });
             }
-            this.$emit("filtersDetected");
+            this.$emit("filters-detected");
             jQuery(window).trigger("filtersDetected");
         },
         /**
@@ -62,13 +62,15 @@ export default {
             _.each(this.$children,function(filter){
                 updatingPromises.push(filter.updateValues());
             });
+            this.$emit("filters-updating");
+            jQuery(window).trigger("filtersUpdating");
             Promise.all(updatingPromises).then(() => {
-                this.$parent.$emit("filtersUpdated");
+                this.$emit("filters-updated");
                 jQuery(window).trigger("filtersUpdated");
             });
         },
         /**
-         * Called when a filter has been selected.
+         * Called when a filter has been selected, namely AFTER "value-selected" event.
          */
         onFilterSelected(){
             if(this.submitOnSelect && !this.reloadProductsListOnSubmit){

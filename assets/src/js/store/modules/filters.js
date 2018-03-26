@@ -21,10 +21,17 @@ export default {
          */
         filters(state){
             //Clean double values and return
-            return state.activeFilters.map((filter) => {
+            let parsed = state.activeFilters.map((filter) => {
                 filter.value = _.uniq(filter.value);
                 return filter;
             });
+            let result = [];
+            _.each(parsed,(filter, index, list) => {
+                if(filter.value !== '' && filter.value.length > 0){
+                    result.push(filter);
+                }
+            });
+            return result;
         }
     },
     mutations: {
