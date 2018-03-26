@@ -8,7 +8,7 @@ namespace WBWPF;
  * Plugin Name:       Waboot Product Filters for WooCommerce
  * Plugin URI:        https://www.waboot.io/
  * Description:       Enhanced product filters for WooCommerce
- * Version:           1.0.0
+ * Version:           1.1.0
  * Author:            WAGA
  * Author URI:        https://www.waga.it/
  * License:           GPL-2.0+
