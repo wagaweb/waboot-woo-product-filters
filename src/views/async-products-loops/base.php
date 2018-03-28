@@ -20,6 +20,6 @@
     </products-list>
 </div>
 
-<template id="wbwpf-product-template">
+<script type="text/x-template" id="wbwpf-product-template">
     <?php do_action('wbwpf/woocommerce/single-product/async/display'); ?>
-</template>
+</script>

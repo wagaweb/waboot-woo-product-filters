@@ -726,11 +726,7 @@ class Plugin extends TemplatePlugin {
 	 * @hooked 'wbwpf/woocommerce/single-product/async/display'
 	 */
 	public function display_single_product_async_template(){
-		if(wp_get_theme()->get_template() === 'waboot'): ?>
-			<div :class="data.wrapper_class" v-html="data.content"></div>
-		<?php else: ?>
-			<ul :class="data.wrapper_class" v-html="data.content"></ul>
-		<?php endif;
+        (new HTMLView("views/single-product.php",$this))->display();
 	}
 
 	/**

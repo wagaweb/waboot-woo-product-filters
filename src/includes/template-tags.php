@@ -37,7 +37,7 @@ if(!function_exists("wbwpf_show_products_async")):
 	function wbwpf_show_products_async(){
 		$theme = wp_get_theme();
 
-		$tpl = "src/views/async-loops/".$theme->get_template().".php"; //search for a standard template
+		$tpl = "src/views/async-products-loops/".$theme->get_template().".php"; //search for a standard template
 		try{
 			//Search for a loop template with the name of the current template within the plugin (this is intended to fail most of the time)
 			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
@@ -45,9 +45,9 @@ if(!function_exists("wbwpf_show_products_async")):
 		}catch (Exception $e){
 			$plugin = \WBWPF\Plugin::get_instance_from_global();
 			if($plugin->Settings->use_custom_product_loop_template){
-				$tpl = "src/views/async-loops/base-custom.php";
+				$tpl = "src/views/async-products-loops/base-custom.php";
 			}else{
-				$tpl = "src/views/async-loops/base.php";
+				$tpl = "src/views/async-products-loops/base.php";
 			}
 			$v = new \WBF\components\mvc\HTMLView($tpl,"waboot-woo-product-filters");
 			$v->display();
@@ -140,7 +140,7 @@ if(!function_exists("wbwpf_show_filters")):
 		if(!$has_products) $container_classes[] = "no-products";
 		$container_classes = apply_filters("wbwpf/filters/container/classes",$container_classes);
 
-		$v = new \WBF\components\mvc\HTMLView("views/filters.php",$plugin);
+		$v = new \WBF\components\mvc\HTMLView("views/filters-list.php",$plugin);
 		$v->display([
 			'container_classes' => implode(" ",$container_classes),
 			'filters' => $filters,

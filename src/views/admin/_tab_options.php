@@ -37,7 +37,7 @@
 		<?php $checked = isset($current_settings['use_custom_product_loop_template']) && $current_settings['use_custom_product_loop_template']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[use_custom_product_loop_template]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Use a custom product loop template instead of content-product.php",$textdomain); ?>
-        <p><?php _e('Enable this setting if you want to use a custom template for products loop within the <code>wbwpf_show_products_async()</code> function. The custom loop template can be created at <em>/waboot-woo-product-filters/async-loops/base-custom.php</em> within your theme directory.'); ?></p>
+        <p><?php _e('Enable this setting if you want to use a custom template for products loop within the <code>wbwpf_show_products_async()</code> function. The custom loop template can be created at <em>/waboot-woo-product-filters/async-products-loops/base-custom.php</em> within your theme directory.'); ?></p>
     </label>
     <h3><?php _e("Widget settings",$textdomain); ?></h3>
     <label class="option">
