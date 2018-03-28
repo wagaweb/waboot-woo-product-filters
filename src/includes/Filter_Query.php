@@ -262,6 +262,38 @@ class Filter_Query implements Filter_Query_Interface {
 	}
 
 	/**
+	 * Completes the query by parsing an array of filters
+	 *
+	 * @param $filters
+	 */
+	public function parse_filters($filters){
+		foreach ($filters as $filter){
+			if(!$filter instanceof Filter){
+				continue;
+			}
+			if(is_array($filter->current_values) && !empty($filter->current_values)){
+				$value_placeholder = $this->get_placeholder_for_value_of_type($filter->dataType->value_type);
+
+				//Replace all values with placeholders
+				$placeholder_values = array_map(function($el) use($value_placeholder){ return $value_placeholder; },$filter->current_values);
+
+				//Build up the statement
+				$statement = implode(" OR `$filter->slug` = ",$placeholder_values);
+				$statement = "`$filter->slug` = ".$statement;
+
+				//Prepare the statement with actual values
+				$statement = $this->prepare($statement,$filter->current_values);
+
+				//Add the statement to the query
+				//$query->where_statements[] = $statement;
+				$new_query = Query_Factory::build();
+				$new_query->add_condition($statement);
+				$this->add_sub_query($new_query);
+			}
+		}
+	}
+
+	/**
 	 * Performs the query and return the result
 	 *
 	 * @param int $result_format

@@ -70,11 +70,7 @@ class Query_Factory{
 			}
 
 			if(!empty($filters)){
-				foreach ($filters as $filter){
-					if($filter instanceof Filter){
-						$filter->parse_query($query);
-					}
-				}
+				$query->parse_filters($filters);
 
 				/*
 				 * We are testing two database structures, see Plugin::populate_products_index()

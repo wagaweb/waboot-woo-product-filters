@@ -13,8 +13,8 @@ interface Filter_Query_Interface{
 	public function add_condition($condition);
 	public function add_sub_query(Filter_Query_Interface $query);
 	public function prepare($statement,$values);
-	public function get_placeholder_for_value_of_type($type);
 	public function perform($result_format);
+	public function parse_filters($filters);
 	public function get_results($result_format);
 	public function has_query();
 	public function has_products();
