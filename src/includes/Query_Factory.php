@@ -96,7 +96,7 @@ class Query_Factory{
 	 * @param array $active_filters
 	 * @param array $current_values
 	 *
-	 * @return Filter_Query
+	 * @return Filter_Query_Interface
 	 */
 	public static function build_from_params($active_filters,$current_values){
 		$filters = Filter_Factory::build_from_params($active_filters,$current_values);
@@ -108,7 +108,7 @@ class Query_Factory{
 	/**
 	 * Build a Filter_Query from any available params. At the moment we use this builder mainly.
 	 *
-	 * @return Filter_Query
+	 * @return Filter_Query_Interface
 	 */
 	public static function build_from_available_params(){
 		$filters = Filter_Factory::build_from_available_params();
@@ -120,7 +120,7 @@ class Query_Factory{
 	/**
 	 * Build a Filter_Query from $_GET params (it looks for a specific-predefined get params)
 	 *
-	 * @return Filter_Query
+	 * @return Filter_Query_Interface
 	 */
 	public static function build_from_get_params(){
 		$filters = Filter_Factory::build_from_get_params();
@@ -132,7 +132,7 @@ class Query_Factory{
 	/**
 	 * Setup a Filter_Query starting from current $_POST params (it looks for specific-predefined post params)
 	 *
-	 * @return Filter_Query
+	 * @return Filter_Query_Interface
 	 */
 	public static function build_from_post_params(){
 		$filters =  Filter_Factory::build_from_post_params();
@@ -146,7 +146,7 @@ class Query_Factory{
 	 *
 	 * @param \WP_Query|null $query
 	 *
-	 * @return bool|Filter_Query
+	 * @return bool|Filter_Query_Interface
 	 */
 	public static function build_from_wp_query(\WP_Query $query = null){
 		if(!isset($query)){
