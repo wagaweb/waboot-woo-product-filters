@@ -29,10 +29,6 @@ class Attribute extends Taxonomy{
 	public function getValueOf( $product_id, $key, $format = self::VALUES_FOR_FORMAT_COMMA_SEPARATED, Filter $parent_filter = null ) {
 		$terms = [];
 
-		if(in_array($product_id,[23,24])){
-			xdebug_break();
-		}
-
 		$post_type = get_post_type($product_id);
 
 		if($post_type == "product_variation"){
