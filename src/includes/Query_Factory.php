@@ -2,6 +2,7 @@
 
 namespace WBWPF\includes;
 
+use WBWPF\db_backends\Backend;
 use WBWPF\db_backends\MYSQL;
 use WBWPF\Plugin;
 
@@ -15,22 +16,42 @@ class Query_Factory{
 	 * @param array $filters (array of \WBWPF\filters\Filter)
 	 * @param string $orderby
 	 * @param string $order
+	 * @param int $limit
+	 * @param int $offset
+	 * @param string $query_class
+	 * @param string $backend_class
 	 *
-	 * @return Filter_Query|\WP_Error
+	 * @return Filter_Query_Interface|\WP_Error
 	 */
-	public static function build($filters = [], $orderby = self::DEFAULT_ORDERBY, $order = self::DEFAULT_ORDER, $limit = -1, $offset = -1){
+	public static function build($filters = [], $orderby = self::DEFAULT_ORDERBY, $order = self::DEFAULT_ORDER, $limit = -1, $offset = -1, $query_class = null, $backend_class = null){
 		try{
 			global $wpdb;
 
-			$query = new Filter_Query(new MYSQL()); //todo: allows multiple backend
+			if(!isset($backend_class)){
+				$backend_class = '\WBWPF\db_backends\MYSQL';
+			}
+
+			if(!isset($query_class)){
+				$query_class = '\WBWPF\includes\Filter_Query';
+			}
+
+			$Backend = new $backend_class();
+			if(!$Backend instanceof Backend){
+				return new \WP_Error('Invalid backend class');
+			}
+
+			$query = new $query_class($Backend);
+			if(!$query instanceof Filter_Query_Interface){
+				return new \WP_Error('Invalid query class');
+			}
 
 			//Here we might have the woocommerce ordering and orderby names, we must standardize them to our query system
 			$ordering = self::transform_wc_ordering_params($orderby,$order);
 
 			$query->set_ordering($ordering['orderby'],$ordering['order']);
 			$query->set_pagination($offset,$limit);
-			$query->set_select_statement("product_id");
-			$query->set_from_statement($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
+			$query->set_fields_to_retrieve("product_id");
+			$query->set_source($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
 
 			//Additional settings:
 			$plugin = Plugin::get_instance_from_global();

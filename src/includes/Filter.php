@@ -49,7 +49,7 @@ class Filter{
 	 */
 	function parse_query(Filter_Query &$query){
 		if(is_array($this->current_values) && !empty($this->current_values)){
-			$value_placeholder = Filter_Query::get_placeholder_for_value_of_type($this->dataType->value_type);
+			$value_placeholder = $query->get_placeholder_for_value_of_type($this->dataType->value_type);
 
 			//Replace all values with placeholders
 			$placeholder_values = array_map(function($el) use($value_placeholder){ return $value_placeholder; },$this->current_values);
@@ -59,12 +59,12 @@ class Filter{
 			$statement = "`$this->slug` = ".$statement;
 
 			//Prepare the statement with actual values
-			$statement = Filter_Query::prepare($statement,$this->current_values);
+			$statement = $query->prepare($statement,$this->current_values);
 
 			//Add the statement to the query
 			//$query->where_statements[] = $statement;
 			$new_query = Query_Factory::build();
-			$new_query->add_where_statement($statement);
+			$new_query->add_condition($statement);
 			$query->add_sub_query($new_query);
 		}
 	}

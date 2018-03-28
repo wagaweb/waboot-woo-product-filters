@@ -6,7 +6,7 @@ use WBWPF\datatypes\DataType;
 use WBWPF\db_backends\Backend;
 use WBWPF\Plugin;
 
-class Filter_Query{
+class Filter_Query implements Filter_Query_Interface {
 	const RESULT_FORMAT_IDS = 0;
 	const RESULT_FORMAT_OBJECTS = 1;
 	/**
@@ -192,7 +192,7 @@ class Filter_Query{
 	 *
 	 * @param Filter_Query $query
 	 */
-	public function add_sub_query(Filter_Query $query){
+	public function add_sub_query(Filter_Query_Interface $query){
 		$this->sub_queries[] = $query;
 	}
 
@@ -201,7 +201,7 @@ class Filter_Query{
 	 *
 	 * @param $statement
 	 */
-	public function set_select_statement($statement){
+	public function set_fields_to_retrieve($statement){
 		$statement = sanitize_text_field($statement);
 		$this->select_statement = $statement;
 	}
@@ -211,7 +211,7 @@ class Filter_Query{
 	 *
 	 * @param $statement
 	 */
-	public function set_from_statement($statement){
+	public function set_source($statement){
 		$statement = sanitize_text_field($statement);
 		$this->from_statement = $statement;
 	}
@@ -219,7 +219,7 @@ class Filter_Query{
 	/**
 	 * Add a new where statement
 	 */
-	public function add_where_statement($statement){
+	public function add_condition($statement){
 		$statement = sanitize_text_field($statement);
 		$this->where_statements[] = $statement;
 	}
@@ -232,7 +232,7 @@ class Filter_Query{
 	 *
 	 * @return string
 	 */
-	static function prepare($string,$args){
+	public function prepare($string,$args){
 		global $wpdb;
 		$string = $wpdb->prepare($string,$args);
 		return $string;
@@ -245,7 +245,7 @@ class Filter_Query{
 	 *
 	 * @return string
 	 */
-	static function get_placeholder_for_value_of_type($type){
+	public function get_placeholder_for_value_of_type($type){
 		switch ($type){
 			case DataType::VALUES_TYPE_INT:
 				return "%d";
