@@ -69,10 +69,17 @@ class Filter_Query implements Filter_Query_Interface {
 	/**
 	 * Filter_Query constructor.
 	 *
-	 * @param DB_Manager $backend
+	 * @param Backend $backend
 	 */
 	function __construct(Backend $backend){
 		$this->DB = $backend;
+
+		try{
+			$plugin = Plugin::get_instance_from_global();
+			$settings = $plugin->get_plugin_settings();
+			$this->query_variations = $settings['show_variations'];
+			$this->do_not_query_parent_product = $settings['hide_parent_products'];
+		}catch (\Exception $e){}
 	}
 
 	/**
@@ -95,6 +102,18 @@ class Filter_Query implements Filter_Query_Interface {
 	function set_pagination($offset,$limit){
 		$this->offset = $offset;
 		$this->limit = $limit;
+	}
+
+	/**
+	 * Allows developer to inject custom properties
+	 *
+	 * @param $properties
+	 */
+	function inject_properties($properties){
+		if(!is_array($properties) || count($properties) === 0) return;
+		foreach ($properties as $k => $v){
+			$this->$k = $v;
+		}
 	}
 
 	/**

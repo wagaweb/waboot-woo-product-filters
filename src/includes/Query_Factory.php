@@ -54,20 +54,9 @@ class Query_Factory{
 			$query->set_source($wpdb->prefix.Plugin::CUSTOM_PRODUCT_INDEX_TABLE);
 
 			//Additional settings:
-			$plugin = Plugin::get_instance_from_global();
-			if($plugin instanceof Plugin){
-				$settings = $plugin->get_plugin_settings();
-				$query_settings = [
-					'show_variations' => $settings['show_variations'],
-					'hide_parent_products' => $settings['hide_parent_products'],
-				];
-				$query_settings = apply_filters("wbwpf/query/settings",$query_settings);
-				$query->query_variations = $query_settings['show_variations'];
-				$query->do_not_query_parent_product = $query_settings['hide_parent_products'];
-			}else{
-				$query->query_variations = false;
-				$query->do_not_query_parent_product = false;
-			}
+			do_action('wbwpf/query/instance/after_initial_setup',$query);
+			$properties = apply_filters('wbwpf/query/instance/additional_properties',[]);
+			$query->inject_properties($properties);
 
 			if(!empty($filters)){
 				$query->parse_filters($filters);

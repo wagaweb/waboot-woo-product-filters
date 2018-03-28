@@ -12,6 +12,7 @@ interface Filter_Query_Interface{
 	public function set_source($source);
 	public function add_condition($condition);
 	public function add_sub_query(Filter_Query_Interface $query);
+	public function inject_properties($properties);
 	public function prepare($statement,$values);
 	public function perform($result_format);
 	public function parse_filters($filters);
