@@ -3,7 +3,7 @@ namespace WBWPF\includes;
 
 use WBWPF\Plugin;
 
-class Settings_Manager{
+class Settings_Manager implements Settings_Manager_Interface {
 	const SETTINGS_OPTION_NAME = "wbwpf_settings";
 
 	/**
@@ -11,9 +11,7 @@ class Settings_Manager{
 	 */
 	var $plugin;
 
-	public function __construct(Plugin &$plugin) {
-		$this->plugin = $plugin;
-	}
+	public function __construct() {}
 
 	/**
 	 * Get the default settings
@@ -88,6 +86,13 @@ class Settings_Manager{
 		$settings = get_option(self::SETTINGS_OPTION_NAME);
 		$settings = wp_parse_args($settings,$defaults);
 		return $settings;
+	}
+
+	/**
+	 * @param Plugin $plugin
+	 */
+	public function set_plugin(Plugin &$plugin){
+		$this->plugin = $plugin;
 	}
 
 	/**

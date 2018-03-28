@@ -3,13 +3,14 @@
 namespace WBWPF\includes;
 
 use WBWPF\datatypes\DataType;
+use WBWPF\db_backends\Backend;
 use WBWPF\Plugin;
 
 class Filter_Query{
 	const RESULT_FORMAT_IDS = 0;
 	const RESULT_FORMAT_OBJECTS = 1;
 	/**
-	 * @var DB_Manager
+	 * @var Backend
 	 */
 	var $DB;
 	/**
@@ -70,7 +71,7 @@ class Filter_Query{
 	 *
 	 * @param DB_Manager $backend
 	 */
-	function __construct(DB_Manager $backend){
+	function __construct(Backend $backend){
 		$this->DB = $backend;
 	}
 
@@ -314,7 +315,7 @@ class Filter_Query{
 		});
 
 		//Here we get the available values of the active filters for the current considered ids
-		$available_col_values = $this->DB->Backend->get_available_property_values_for_ids( $result, $cols );
+		$available_col_values = $this->DB->get_available_property_values_for_ids( $result, $cols );
 
 		$this->set_available_col_values($available_col_values);
 

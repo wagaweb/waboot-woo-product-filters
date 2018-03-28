@@ -17,7 +17,9 @@ namespace WBWPF;
  * Domain Path:       /languages
  */
 
-use WBWPF\Plugin;
+use WBWPF\db_backends\MYSQL;
+use WBWPF\includes\AjaxEndpoint;
+use WBWPF\includes\Settings_Manager;
 
 if ( ! defined( 'WPINC' ) ) {
 	die; //If this file is called directly, abort.
@@ -67,7 +69,11 @@ if( version_compare(phpversion(),"5.6.0","<") ){
 if(class_exists("\\WBF\\components\\pluginsframework\\BasePlugin")){
 	require_once 'src/includes/template-tags.php';
 	require_once 'src/Plugin.php';
-	$plugin = new Plugin();
+	$plugin = new Plugin(
+	    new MYSQL(),
+        new Settings_Manager(),
+        new AjaxEndpoint()
+    );
 	$plugin->run();
 }else{
 	if(is_admin()){

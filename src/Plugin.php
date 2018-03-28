@@ -5,16 +5,15 @@ use WBF\components\assets\AssetsManager;
 use WBF\components\mvc\HTMLView;
 use WBF\components\pluginsframework\BasePlugin;
 use WBF\components\pluginsframework\TemplatePlugin;
-use WBF\components\utils\DB;
 use WBWPF\datatypes\DataType;
-use WBWPF\db_backends\MYSQL;
-use WBWPF\filters\Filter;
+use WBWPF\db_backends\Backend;
 use WBWPF\includes\AjaxEndpoint;
-use WBWPF\includes\DB_Manager;
+use WBWPF\includes\AjaxEndpoint_Interface;
 use WBWPF\includes\Filter_Factory;
 use WBWPF\includes\Filter_Query;
 use WBWPF\includes\Query_Factory;
 use WBWPF\includes\Settings_Manager;
+use WBWPF\includes\Settings_Manager_Interface;
 
 /**
  * The core plugin class.
@@ -28,22 +27,33 @@ class Plugin extends TemplatePlugin {
 	 */
 	const CUSTOM_PRODUCT_INDEX_TABLE = "wbwpf_products_index";
 	/**
-	 * @var DB_Manager
+	 * @var Backend
 	 */
 	var $DB;
 	/**
-	 * @var Settings_Manager
+	 * @var Settings_Manager_Interface
 	 */
 	var $Settings;
 	/**
-	 * @var AjaxEndpoint
+	 * @var AjaxEndpoint_Interface
 	 */
 	var $AjaxEndpoint;
 
 	/**
 	 * Define the core functionality of the plugin.
+	 *
+	 * @param Backend $DB
+	 * @param Settings_Manager $Settings
+	 * @param AjaxEndpoint $AjaxEndpoint
 	 */
-	public function __construct() {
+	public function __construct(Backend $DB, Settings_Manager_Interface $Settings, AjaxEndpoint_Interface $AjaxEndpoint) {
+		//Deps injection
+		$this->DB = $DB;
+		$this->Settings = $Settings;
+		$this->AjaxEndpoint = $AjaxEndpoint;
+		$this->Settings->set_plugin($this);
+
+		//Parent constructor
 		parent::__construct( "waboot-woo-product-filters", plugin_dir_path( dirname(  __FILE__  ) ) );
 
 		//Setting the update server:
@@ -58,16 +68,6 @@ class Plugin extends TemplatePlugin {
 			}
 		}
 		$this->hooks();
-	}
-
-	/**
-	 * Loads plugin dependencies. Called by parent during __construct();
-	 */
-	public function load_dependencies() {
-		parent::load_dependencies();
-		$this->DB = new DB_Manager(new MYSQL()); //todo: allows multiple backend
-		$this->Settings = new Settings_Manager($this);
-		$this->AjaxEndpoint = new AjaxEndpoint();
 	}
 
 	/**
@@ -314,7 +314,7 @@ class Plugin extends TemplatePlugin {
 	 * @param $update
 	 */
 	public function reindex_product_on_save($post_ID,$post,$update){
-		$this->DB->Backend->erase_product_data( $post_ID );
+		$this->DB->erase_product_data( $post_ID );
 		$this->populate_products_index([$post_ID]);
 	}
 
@@ -328,7 +328,7 @@ class Plugin extends TemplatePlugin {
 	 * @param $update
 	 */
 	public function reindex_product_variation_on_save($post_ID,$post,$update){
-		$this->DB->Backend->erase_product_data( $post_ID );
+		$this->DB->erase_product_data( $post_ID );
 		$this->populate_products_index([$post_ID]);
 	}
 
@@ -341,7 +341,7 @@ class Plugin extends TemplatePlugin {
 		$product = wc_get_product($post_ID);
 
 		if($product instanceof \WC_Product){
-			$this->DB->Backend->erase_product_data( $post_ID );
+			$this->DB->erase_product_data( $post_ID );
 		}
 	}
 
@@ -489,7 +489,7 @@ class Plugin extends TemplatePlugin {
 
 		if($offset == 0){ //We just started, so create the table
 			$this->save_plugin_settings(['filters' => $table_params]);
-			$r = $this->DB->Backend->structure_db( $table_params );
+			$r = $this->DB->structure_db( $table_params );
 			if(!$r){
 				wp_send_json_error([
 					'status' => 'failed',
@@ -570,7 +570,7 @@ class Plugin extends TemplatePlugin {
 		 */
 		foreach ($ids as $product_id){
 			$new_row = [];
-			//$this->DB->Backend->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values. NOT USED AT THE MOMENT.
+			//$this->DB->fill_entry_with_default_data($new_row,$product_id); //In this way we have only a single row with complete values. NOT USED AT THE MOMENT.
 			foreach ($filters_settings as $datatype_slug => $properties){ //eg: $datatype_slug: taxonomies
 				foreach ($properties as $property){ //eg: $property: product_cat
 					$product_values = $datatypes[$datatype_slug]->getValueOf($product_id,$property,DataType::VALUES_FOR_VALUES_FORMAT_ARRAY); //get the value for that data type of the current product
@@ -607,7 +607,7 @@ class Plugin extends TemplatePlugin {
 
 		foreach ($rows as $new_row){
 			//Insert the value
-			$r = $this->DB->Backend->insert_product_data( $new_row['product_id'], $new_row );
+			$r = $this->DB->insert_product_data( $new_row['product_id'], $new_row );
 		}
 	}
 
@@ -708,7 +708,7 @@ class Plugin extends TemplatePlugin {
 	 * @return array
 	 */
 	public function get_products_by_col($col_name,$col_value){
-		return $this->DB->Backend->get_products_id_by_property( $col_name, $col_value );
+		return $this->DB->get_products_id_by_property( $col_name, $col_value );
 	}
 
 	/**

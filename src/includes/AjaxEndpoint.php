@@ -2,7 +2,7 @@
 
 namespace WBWPF\includes;
 
-class AjaxEndpoint{
+class AjaxEndpoint implements AjaxEndpoint_Interface {
 	public function __construct() {}
 
 	public function setup_endpoints(){

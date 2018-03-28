@@ -22,7 +22,7 @@ class Query_Factory{
 		try{
 			global $wpdb;
 
-			$query = new Filter_Query(new DB_Manager(new MYSQL())); //todo: allows multiple backend
+			$query = new Filter_Query(new MYSQL()); //todo: allows multiple backend
 
 			//Here we might have the woocommerce ordering and orderby names, we must standardize them to our query system
 			$ordering = self::transform_wc_ordering_params($orderby,$order);
@@ -205,7 +205,7 @@ class Query_Factory{
 		];
 
 		if($plugin instanceof Plugin){
-			$transformation = $plugin->DB->Backend->transform_wc_ordering_param($orderby,$order);
+			$transformation = $plugin->DB->transform_wc_ordering_param($orderby,$order);
 		}
 
 		return $transformation;
