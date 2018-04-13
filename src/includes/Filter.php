@@ -74,6 +74,7 @@ class Filter{
 	 * @param bool $async
 	 *
 	 * @return void
+	 * @throws \Exception
 	 */
 	function display($async = false){
 		//Setup name and label:
@@ -101,7 +102,7 @@ class Filter{
 
 		//Check if this filter should be seen:
 
-		$display_hidden = call_user_func(function(){
+		$display_hidden = \call_user_func(function(){
 			//Hide if the page displayed is the archive page of the current filter
  			$display_hidden = $this->is_current_filter() ? true : false;
 			if(!$display_hidden){
