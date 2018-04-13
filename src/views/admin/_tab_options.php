@@ -43,7 +43,8 @@
     <label class="option">
 		<?php $checked = isset($current_settings['widget_use_js']) && $current_settings['widget_use_js']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[widget_use_js]" <?php if($checked): ?>checked<?php endif; ?>>
-		<?php _e("Use Javascript",$textdomain); ?>
+		<?php _e("Use Javascript to reload the page",$textdomain); ?>
+        <p><?php _e('Enable this setting if you want to reload the page when a filter is selected', $textdomain) ?></p>
     </label>
     <label class="option">
 		<?php $checked = isset($current_settings['widget_display_apply_button']) && $current_settings['widget_display_apply_button']; ?>
