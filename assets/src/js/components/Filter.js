@@ -1,4 +1,9 @@
+import RangeSlider from './uitypes/RangeSlider.vue';
+
 export default {
+    components: {
+        RangeSlider
+    },
     data(){
         return {
             state: "updating",
