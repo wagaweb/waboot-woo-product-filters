@@ -19,17 +19,16 @@ export default {
     },
     computed: {
         hidden: function(){
-            let is_hidden =  this.items.length === this.hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
-            return is_hidden;
+            return this.items.length === this.hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
         }
     },
     watch: {
-        state: function(new_state){
+        /*state: function(new_state){
             if(new_state === "updated"){
                 let is_hidden =  this.items.length === this.hidden_items.length; //Toggle filter visibility accordingly to the actual visible items
                 this.hidden = is_hidden;
             }
-        }
+        }*/
     },
     mounted(){},
     methods: {
