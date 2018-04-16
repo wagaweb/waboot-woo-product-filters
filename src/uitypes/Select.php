@@ -36,4 +36,23 @@ class Select extends ItemsList {
 		]);
 		return $output;
 	}
+
+	/**
+	 * @return string
+	 * @throws \Exception
+	 */
+	public function generate_vue_template() {
+		parent::check_for_hidden_values();
+
+		//Sort alphabetically by label
+		uasort($this->values,function($a,$b){
+			return strcmp($a,$b);
+		});
+
+		$v = new HTMLView("src/views/uitypes/async-select.php","waboot-woo-product-filters");
+		$output = $v->get([
+			"input_name" => $this->input_name
+		]);
+		return $output;
+	}
 }
