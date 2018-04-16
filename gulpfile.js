@@ -76,9 +76,9 @@ gulp.task('compile_css',function(){
 gulp.task('browserify', function(){
     var dashboard = browserify(paths.admin_mainjs,{
         insertGlobals : true,
-        debug: true
+        debug: node_env === 'development'
     })
-        .transform("babelify", {presets: ["latest"]})
+        .transform("babelify", {presets: ["env"]})
         .bundle()
         .pipe(source('dashboard.pkg.js'))
         .pipe(buffer()) //This might be not required, it works even if commented
@@ -86,9 +86,9 @@ gulp.task('browserify', function(){
 
     var frontend = browserify(paths.front_mainjs,{
         insertGlobals : true,
-        debug: true
+        debug: node_env === 'development'
     })
-        .transform("babelify", {presets: ["latest"]})
+        .transform("babelify", {presets: ["env"]})
         .transform(vueify)
         .transform(
             // Required in order to process node_modules files
