@@ -30,7 +30,8 @@
 		<?php $checked = isset($current_settings['use_async_product_list']) && $current_settings['use_async_product_list']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[use_async_product_list]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Use async product list.",$textdomain); ?>
-        <p><?php _e('With this setting enabled, the <code>archive-product.php</code> template within the plugin will be used. If your theme already override this template, you will need to change your template to make it work.'); ?></p>
+        <p><?php _e('With this setting enabled, the products list will be loaded asynchronously, enhancing the site load speed.'); ?></p>
+        <p><?php _e('The <code>archive-product.php</code> template within the plugin will be used. If your theme already override this template, you will need to change your template to make it work.'); ?></p>
         <p><?php _e('To customize your template to support the async product list, you have to insert the function <code>wbwpf_show_products_async()</code> where do you want to display the products.') ?></p>
     </label>
     <label class="option">
@@ -43,13 +44,14 @@
     <label class="option">
 		<?php $checked = isset($current_settings['widget_use_js']) && $current_settings['widget_use_js']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[widget_use_js]" <?php if($checked): ?>checked<?php endif; ?>>
-		<?php _e("Use Javascript to reload the page",$textdomain); ?>
-        <p><?php _e('Enable this setting if you want to reload the page when a filter is selected', $textdomain) ?></p>
+		<?php _e("Use Javascript",$textdomain); ?>
+        <p><?php _e('Enable this setting if you want to load filters via ajax.', $textdomain) ?></p>
     </label>
     <label class="option">
 		<?php $checked = isset($current_settings['widget_display_apply_button']) && $current_settings['widget_display_apply_button']; ?>
         <input type="checkbox" value="1" name="wbwpf_options[widget_display_apply_button]" <?php if($checked): ?>checked<?php endif; ?>>
 		<?php _e("Display the apply button",$textdomain); ?>
+        <p><?php _e('Enable this setting if you want to load display the apply button, without the button, the page will reload when a filter is selected.', $textdomain) ?></p>
     </label>
     <button type="submit" class="button button-primary" name="wbwpf_save_settings" value="1"><?php _e("Save settings",$textdomain); ?></button>
 </form>
