@@ -60,6 +60,22 @@ class Range extends UIType {
 	}
 
 	/**
+	 * @return string
+	 * @throws \Exception
+	 */
+	public function generate_vue_template() {
+		$this->adjust_min_max_values();
+
+		$v = new HTMLView("src/views/uitypes/async-range.php","waboot-woo-product-filters");
+		$output = $v->get([
+			"range_current_min" => $this->min,
+			"range_current_max" => $this->max,
+			"input_name" => $this->input_name
+		]);
+		return $output;
+	}
+
+	/**
 	 * Adjust min and max values accordingly to current queried objects
 	 */
 	public function adjust_min_max_values(){
