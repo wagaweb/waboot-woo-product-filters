@@ -93,6 +93,7 @@
                     this.selectedMax = this.max;
                     this.selectedValues = [this.min,this.max];
                 }
+                this.$emit('update:values',false, {values: this.selectedValues, type: 'range-slider'});
             }
         }
     }

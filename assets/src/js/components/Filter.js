@@ -94,8 +94,13 @@ export default {
         /**
          * Callback for currentValues changes. This is binded via v-on on filter template (eg: async-checkbox.php)
          * @param {object} event
+         * @param {object} payload
          */
-        valueSelected(event){
+        valueSelected(event,payload){
+            if(!event && payload.values){
+                //We are testing this with the range:
+                //this.currentValues = payload.values; //If event is false, we have the values in the payload (meaning this was called after an .$emit(false,[...])
+            }
             this.$store.commit('updateFilter',{slug: this.slug, value: this.currentValues});
             this.$store.commit('appIsNotJustStarted');
             this.$emit("value-selected"); //This will trigger FiltersLists->onFilterSelected()
