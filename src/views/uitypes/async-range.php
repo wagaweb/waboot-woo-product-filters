@@ -1,1 +1,1 @@
-<rangeslider :min="" :max="" :values="[]"></rangeslider>
+<range-slider :min="<?php echo $range_current_min; ?>" :max="<?php echo $range_current_max; ?>" :values="[<?php echo implode(',',$current_range); ?>]"></range-slider>

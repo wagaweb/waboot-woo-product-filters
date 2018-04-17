@@ -2,7 +2,7 @@ import RangeSlider from './uitypes/RangeSlider.vue';
 
 export default {
     components: {
-        RangeSlider
+        'range-slider': RangeSlider
     },
     data(){
         return {

@@ -31,6 +31,9 @@ class Range extends UIType {
 			return is_numeric($item);
 		});
 
+		//Sort
+		sort($values);
+
 		$this->min = min($values);
 		$this->max = max($values);
 
@@ -46,7 +49,7 @@ class Range extends UIType {
 	 * @throws \Exception
 	 */
 	public function generate_output($input_name = false) {
-		$this->adjust_min_max_values();
+		$this->adjust_values();
 
 		$v = new HTMLView("src/views/uitypes/range.php","waboot-woo-product-filters");
 		$output = $v->get([
@@ -64,12 +67,13 @@ class Range extends UIType {
 	 * @throws \Exception
 	 */
 	public function generate_vue_template() {
-		$this->adjust_min_max_values();
+		$this->adjust_values();
 
 		$v = new HTMLView("src/views/uitypes/async-range.php","waboot-woo-product-filters");
 		$output = $v->get([
 			"range_current_min" => $this->min,
 			"range_current_max" => $this->max,
+			"current_range" => $this->values,
 			"input_name" => $this->input_name
 		]);
 		return $output;
@@ -78,19 +82,10 @@ class Range extends UIType {
 	/**
 	 * Adjust min and max values accordingly to current queried objects
 	 */
-	public function adjust_min_max_values(){
+	public function adjust_values(){
 		$wbwpf_query = Plugin::get_query_from_global();
-
 		if(!$wbwpf_query instanceof Filter_Query || !isset($wbwpf_query->available_col_values[$this->name])) return;
-
 		$current_values = $wbwpf_query->available_col_values[$this->name];
-
-		//Strip non-numeric values
-		$current_values = array_filter($current_values,function($item){
-			return is_numeric($item);
-		});
-
-		$this->min = min($current_values);
-		$this->max = max($current_values);
+		$this->set_values($current_values);
 	}
 }
