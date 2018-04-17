@@ -1,5 +1,8 @@
 <template>
-    <div :id="'slider-'+this.key" class="range-slider"></div>
+    <div class="slider-wrapper">
+        <div :id="'slider-'+this.key" class="range-slider"></div>
+        {{ this.selectedMin }} - {{ this.selectedMax }}
+    </div>
 </template>
 
 <script>
@@ -23,11 +26,30 @@
                 default: function(){
                     return []
                 }
-            }
+            },
         },
         data(){
             return {
-                key: ''
+                key: '',
+                sliderEl: undefined,
+                sliderInstance: undefined,
+                selectedMin: 0,
+                selectedMax: 0,
+                selectedValues: []
+            }
+        },
+        computed: {
+            range: function(){
+                let range = {};
+                range['min'] = this.min;
+                for(let i = 0; i < this.values.length; i++){
+                    let percentage = (this.values[i] / this.max) * 100;
+                    if(this.values[i] !== this.min && this.values[i] !== this.max){
+                        range[parseInt(percentage)+'%'] = this.values[i];
+                    }
+                }
+                range['max'] = this.max;
+                return range;
             }
         },
         created(){
@@ -35,15 +57,21 @@
         },
         mounted(){
             let slider = document.getElementById('slider-'+this.key);
-            noUiSlider.create(slider, {
-                range: {
-                    'min': this.min,
-                    'max': this.max
-                },
-                start: [this.min,this.max],
-                connect: true,
-                behavior: 'tap-drag',
-            });
+
+            if(typeof slider !== 'undefined'){
+                this.sliderEl = slider;
+                this.sliderInstance = noUiSlider.create(slider, {
+                    range: this.range,
+                    start: [this.min,this.max],
+                    snap: true,
+                    connect: true,
+                    behavior: 'tap-drag',
+                });
+                this.updateRangeValues();
+                this.sliderInstance.on('change', () => {
+                    this.updateRangeValues();
+                });
+            }
         },
         methods: {
             generateKey(){
@@ -53,6 +81,18 @@
                     text += possible.charAt(Math.floor(Math.random() * possible.length));
                 }
                 return text;
+            },
+            updateRangeValues(){
+                if(this.sliderInstance){
+                    let v = this.sliderInstance.get();
+                    this.selectedMin = v[0];
+                    this.selectedMax = v[1];
+                    this.selectedValues = v;
+                }else{
+                    this.selectedMin = this.min;
+                    this.selectedMax = this.max;
+                    this.selectedValues = [this.min,this.max];
+                }
             }
         }
     }
