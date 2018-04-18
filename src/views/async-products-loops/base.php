@@ -12,9 +12,9 @@
             <div class="products-loading" v-show="!updated"></div>
             <p class="woocommerce-result-count" v-html="result_count_label"></p>
 	        <?php woocommerce_catalog_ordering(); ?>
-	        <?php wc_get_template( 'loop/loop-start.php' ); ?>
+	        <?php woocommerce_product_loop_start(); ?>
             <wbwpf-product v-for="product in products" :key="product.ID" :data="product"></wbwpf-product>
-	        <?php wc_get_template( 'loop/loop-end.php' ); ?>
+	        <?php woocommerce_product_loop_end(); ?>
             <wbwpf-pagination :current_page="current_page" :total_pages="total_pages" :mid_size="3"></wbwpf-pagination>
         </div>
     </products-list>
